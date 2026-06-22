@@ -2,14 +2,16 @@ Project Application Proposal: FitLab
 Canvas group 3
 Alexander Cannuli, Edison Lu, Jiachen Sun, Rayan Maknojia, Ricky Tat
 
-The Problem
+# FitLab
+
+## The Problem
 
 Many fitness trainers currently manage client progress through scattered tools like spreadsheets, messaging apps, and notebooks. This makes it difficult to track a client’s full progress over time, especially when managing multiple clients online or in person. Regular users also often struggle to know what exercises to do, how to track their routine, or how to understand their progress without hiring a trainer.
 
 FitLab makes it easy for users to track their workouts since all information about their fitness routine is stored in one place. Furthermore, FitLab helps trainers make better decisions regarding their clients’ workout history and progress
 
 
-Target Audience 
+## Target Audience 
 The target audience for FitLab is personal trainers with several clients, people working out at the gym who want to keep a record of their fitness routine, and regular users who need general advice regarding workout and health. FitLab will be useful for those who like a visual representation of progress.
 
 
