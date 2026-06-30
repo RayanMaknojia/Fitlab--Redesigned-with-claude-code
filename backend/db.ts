@@ -34,6 +34,7 @@ const helpers = {
       db = client.db();
       usersCollection = db.collection("users");
 
+      // TODO: Replace with a unique index on username/email once that field exists for login.
       await usersCollection.createIndex({ id: 1 });
     } catch (e: unknown) {
       throw new Error(
