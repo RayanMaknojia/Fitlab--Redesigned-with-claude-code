@@ -1,5 +1,7 @@
 import express, { Request, Response, NextFunction } from "express";
 import { helpers } from "./db";
+import { NewUserInput } from "./types";
+import bcrypt from "bcrypt";
 
 const PORT = 3000;
 const app = express();
@@ -21,14 +23,20 @@ app.get("/users-api", async (_req: Request, res: Response) => {
 });
 
 app.post("/users-api", async (req: Request, res: Response) => {
-const { name, password, role }: NewUserInput = req.body;
+  const { name, password, role }: NewUserInput = req.body;
 
-if (!name || !password || !role) {
-  res.status(400).json({ error: "Name, password, and role are required" });
-}
-if (role !== "client" && role !== "trainer") {
-  res.status(400).json({ error: "Role must be 'client' or 'trainer'" });
-}
+  if (!name || !password || !role) {
+    return res
+      .status(400)
+      .json({ error: "Name, password, and role are required" });
+  }
+
+  if (role !== "client" && role !== "trainer") {
+    return res
+      .status(400)
+      .json({ error: "Role must be 'client' or 'trainer'" });
+  }
+
   const password_hash = await bcrypt.hash(password, 10);
   await helpers.addUser({ name, password_hash, role });
   res.status(201).json({ name, role });
