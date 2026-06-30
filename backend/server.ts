@@ -21,7 +21,14 @@ app.get("/users-api", async (_req: Request, res: Response) => {
 });
 
 app.post("/users-api", async (req: Request, res: Response) => {
-  const newUser = req.body;
+const { name, password, role }: NewUserInput = req.body;
+
+if (!name || !password || !role) {
+  res.status(400).json({ error: "Name, password, and role are required" });
+}
+if (role !== "client" && role !== "trainer") {
+  res.status(400).json({ error: "Role must be 'client' or 'trainer'" });
+}
   await helpers.addUser(newUser);
   res.status(201).json(newUser);
 });
