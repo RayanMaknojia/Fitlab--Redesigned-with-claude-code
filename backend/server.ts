@@ -29,8 +29,9 @@ if (!name || !password || !role) {
 if (role !== "client" && role !== "trainer") {
   res.status(400).json({ error: "Role must be 'client' or 'trainer'" });
 }
-  await helpers.addUser(newUser);
-  res.status(201).json(newUser);
+  const password_hash = await bcrypt.hash(password, 10);
+  await helpers.addUser({ name, password_hash, role });
+  res.status(201).json({ name, role });
 });
 
 app.use((_req: Request, res: Response) => {
