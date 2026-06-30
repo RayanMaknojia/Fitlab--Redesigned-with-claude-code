@@ -16,7 +16,8 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 });
 
 app.get("/users-api", async (_req: Request, res: Response) => {
-  res.json(await helpers.getAllUsers());
+  const users = await helpers.getAllUsers();
+  res.json(users.map(({ password_hash, ...rest }) => rest));
 });
 
 app.post("/users-api", async (req: Request, res: Response) => {
