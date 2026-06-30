@@ -6,3 +6,9 @@ export interface User {
   password_hash: string;
   role: "client" | "trainer";
 }
+
+export interface NewUserInput {
+  name: string;
+  password: string;
+  role: "client" | "trainer";
+}
