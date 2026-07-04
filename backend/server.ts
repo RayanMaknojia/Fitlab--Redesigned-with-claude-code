@@ -6,10 +6,6 @@ import bcrypt from "bcrypt";
 const PORT = 3000;
 const app = express();
 
-(async () => {
-  helpers.init();
-})();
-
 app.use(express.json());
 
 app.use((req: Request, _res: Response, next: NextFunction) => {
@@ -46,6 +42,16 @@ app.use((_req: Request, res: Response) => {
   res.status(404).json({ error: "Not found" });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+const startServer = async () => {
+  try {
+    await helpers.init();
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  } catch (err) {
+    console.error("Failed to start server:", err);
+    process.exit(1);
+  }
+};
+
+startServer();
