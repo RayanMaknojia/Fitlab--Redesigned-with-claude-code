@@ -23,6 +23,7 @@ const helpers = {
   addUser: async (user: Omit<User, "_id">): Promise<void> => {
     await usersCollection.insertOne({
       name: user.name,
+      email: user.email,
       password_hash: user.password_hash,
       role: user.role,
     });
