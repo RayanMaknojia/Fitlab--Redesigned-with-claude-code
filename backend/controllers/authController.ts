@@ -17,14 +17,14 @@ export const getAllUsers = async (_req: Request, res: Response) => {
 export const registerUser = async (req: Request, res: Response) => {
   let { name, email, password, role }: NewUserInput = req.body;
 
+  name = name?.trim();
+  email = email?.trim().toLowerCase();
+
   if (!name || !email || !password || !role) {
     return res.status(400).json({
       error: "A valid name, email, password, and role are required",
     });
   }
-
-  name = name?.trim();
-  email = email?.trim();
 
   if (!validator.isEmail(email)) {
      return res.status(400).json({ error: "Invalid email format" });
