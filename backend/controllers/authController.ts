@@ -90,3 +90,7 @@ export const logoutUser = (req: Request, res: Response) => {
     res.json({ ok: true });
   });
 };
+
+export const getCurrentUser = (req: Request, res: Response) => {
+  res.json({ user: req.session.user });
+};
