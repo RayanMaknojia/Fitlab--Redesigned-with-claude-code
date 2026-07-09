@@ -20,12 +20,20 @@ const helpers = {
     return await usersCollection.find({}).toArray();
   },
 
+  findUserByEmail: async (email: string): Promise<User | null> => {
+    // Check email before inserting a new account.
+    return await usersCollection.findOne({ email });
+  },
+
   addUser: async (user: Omit<User, "_id">): Promise<void> => {
-    await usersCollection.insertOne({
+    const document: Omit<User, "_id"> = {
       name: user.name,
+      email: user.email,
       password_hash: user.password_hash,
       role: user.role,
-    });
+    };
+
+    await usersCollection.insertOne(document);
   },
 
   init: async (): Promise<void> => {
@@ -34,8 +42,8 @@ const helpers = {
       db = client.db();
       usersCollection = db.collection("users");
 
-      // TODO: Replace with a unique index on username/email once that field exists for login.
-      await usersCollection.createIndex({ id: 1 });
+      // enforce uniqueness at the database so duplicate checks do not depend only on controller logic.
+      await usersCollection.createIndex({ email: 1 }, { unique: true });
     } catch (e: unknown) {
       throw new Error(
         e instanceof Error ? e.message : "MongoDB initialization failed.",
