@@ -1,8 +1,7 @@
 import express, { Request, Response, NextFunction } from "express";
 import { helpers } from "./db";
-import { NewUserInput } from "./types";
-import bcrypt from "bcrypt";
-import {authRouter} from "./routes/auth"
+import { authRouter } from "./routes/auth";
+import { chatRouter } from "./routes/chat";
 
 const PORT = 3000;
 const app = express();
@@ -15,7 +14,8 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 });
 
 
-app.use('/api', authRouter)
+app.use("/api", authRouter);
+app.use("/api/chat", chatRouter);
 
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ error: "Not found" });
