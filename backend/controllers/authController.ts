@@ -55,7 +55,7 @@ export const registerUser = async (req: Request, res: Response) => {
 };
 
 export const loginUser = async (req: Request, res: Response) => {
-  const { email, password }: LoginInput = req.body ?? {};
+  const { email, password, rememberMe }: LoginInput = req.body ?? {};
 
   if (!email || !password) {
     return res.status(400).json({ error: "Email and password are required" });
@@ -74,6 +74,10 @@ export const loginUser = async (req: Request, res: Response) => {
       email: user.email,
       role: user.role,
     };
+    // Set session cookie maxAge based on rememberMe option
+    if (rememberMe) {
+      req.session.cookie.maxAge = 7 * 24 * 60 * 60 * 1000; // 1 week
+    }
 
     res.json({ user: req.session.user });
   } catch (error) {

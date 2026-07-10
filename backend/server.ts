@@ -26,7 +26,7 @@ app.use(express.json());
 app.use(
   cors({
     origin: process.env.FRONTEND_ORIGIN ?? "http://localhost:5173",
-    credentials: true, // required so the browser sends/accepts the session cookie
+    credentials: true,
   })
 );
 
@@ -36,10 +36,11 @@ app.use(
     secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({ mongoUrl: CONNECTION_STRING }),
+    rolling: true,
+    store: MongoStore.create({ mongoUrl: CONNECTION_STRING }), // Use MongoDB to store session data
     cookie: {
       httpOnly: true,
-      maxAge: 30 * 60 * 1000, // 30 minutes
+      maxAge:  3 * 60 * 60 * 1000, // 3 hours
     },
   })
 );
