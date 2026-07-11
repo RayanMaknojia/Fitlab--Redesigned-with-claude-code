@@ -21,6 +21,9 @@ export const registerUser = async (req: Request, res: Response) => {
   name = name?.trim();
   email = email?.trim().toLowerCase();
 
+  name = name?.trim();
+  email = email?.trim().toLowerCase();
+
   if (!name || !email || !password || !role) {
     return res.status(400).json({
       error: "A valid name, email, password, and role are required",
