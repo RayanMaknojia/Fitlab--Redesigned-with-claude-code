@@ -4,6 +4,10 @@ import TrainerLayout from "@/components/trainer/TrainerLayout"
 import TrainerDashboard from "@/pages/trainer/TrainerDashboard"
 import TrainerClients from "@/pages/trainer/TrainerClients"
 import TrainerSchedule from "@/pages/trainer/TrainerSchedule"
+import ClientLayout from "@/components/client/ClientLayout"
+import ClientDashboard from "@/pages/client/ClientDashboard"
+import ClientProgress from "@/pages/client/ClientProgress"
+
 import {
   ClientPagePlaceholder,
   LoginPlaceholder,
@@ -13,6 +17,7 @@ import {
 // Route ownership:
 //   /trainer/*     → Jiachen Sun (trainer-client management) — implemented
 //   /login         → Alex (auth) — placeholder, swap in your page
+//   /client/*      → [your name] (client progress dashboard) — implemented
 //   /clients/:id   → client view team — placeholder, swap in your page
 // Assumes the user is already logged in as a trainer; auth guard comes later.
 
@@ -27,6 +32,12 @@ function App() {
           <Route index element={<TrainerDashboard />} />
           <Route path="clients" element={<TrainerClients />} />
           <Route path="schedule" element={<TrainerSchedule />} />
+        </Route>
+
+        {/* Client side */}
+        <Route path="/client" element={<ClientLayout />}>
+          <Route index element={<ClientDashboard />} />
+          <Route path="progress" element={<ClientProgress />} />
         </Route>
 
         {/* Teammates' pages — replace the placeholders */}
