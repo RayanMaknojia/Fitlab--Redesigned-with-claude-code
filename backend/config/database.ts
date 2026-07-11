@@ -31,4 +31,6 @@ const getDb = (): Db => {
   return db;
 };
 
-export { connect, getDb };
+const getClient = (): MongoClient => client;
+
+export { connect, getDb, getClient };

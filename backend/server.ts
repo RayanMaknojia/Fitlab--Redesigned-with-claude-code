@@ -4,8 +4,15 @@ import session from "express-session";
 import MongoStore from "connect-mongo";
 import { connect } from "./config/database";
 import * as userModel from "./models/User";
+import * as clientModel from "./models/Client";
+import * as workoutSessionModel from "./models/WorkoutSession";
+import * as sessionExerciseModel from "./models/SessionExercise";
+import * as exerciseTemplateModel from "./models/ExerciseTemplate";
+import * as scheduleModel from "./models/Schedule";
 import bcrypt from "bcrypt";
 import {authRouter} from "./routes/auth"
+import { workoutSessionRouter } from "./routes/workoutSessions";
+import { exerciseTemplateRouter } from "./routes/exerciseTemplates";
 
 const PORT = 3000;
 const app = express();
@@ -52,6 +59,8 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 
 
 app.use('/api', authRouter)
+app.use('/api', workoutSessionRouter)
+app.use('/api', exerciseTemplateRouter)
 
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ error: "Not found" });
@@ -60,7 +69,14 @@ app.use((_req: Request, res: Response) => {
 const startServer = async () => {
   try {
     await connect();
-    await userModel.init();
+    await Promise.all([
+      userModel.init(),
+      clientModel.init(),
+      workoutSessionModel.init(),
+      sessionExerciseModel.init(),
+      exerciseTemplateModel.init(),
+      scheduleModel.init(),
+    ]);
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
     });
