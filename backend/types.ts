@@ -1,16 +1,18 @@
-import { ObjectId } from "mongodb";
+export interface LoginInput {
+  email: string;
+  password: string;
+  rememberMe?: boolean;
+}
 
-export interface User {
-  _id?: ObjectId;
+export interface SessionUser {
+  id: string;
   name: string;
   email: string;
-  password_hash: string;
   role: "client" | "trainer";
 }
 
-export interface NewUserInput {
-  name: string;
-  email: string;
-  password: string;
-  role: "client" | "trainer";
+declare module "express-session" {
+  interface SessionData {
+    user?: SessionUser;
+  }
 }
