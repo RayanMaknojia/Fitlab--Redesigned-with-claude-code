@@ -6,12 +6,19 @@ export interface Schedule {
   client_id: ObjectId;
   trainer_id: ObjectId;
   start_time: Date;
-  duration: number;
+  duration_in_minutes: number;
 }
 
-export const collection = (): Collection<Schedule> => getDb().collection("schedules");
+export const collection = (): Collection<Schedule> =>
+  getDb().collection("schedules");
 
 export const init = async (): Promise<void> => {
   await collection().createIndex({ client_id: 1 });
   await collection().createIndex({ trainer_id: 1 });
+};
+
+export const getSchedules = async (
+  client_id: ObjectId,
+): Promise<Schedule[]> => {
+  return await collection().find({ client_id }).toArray();
 };
