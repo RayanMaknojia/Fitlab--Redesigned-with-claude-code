@@ -25,3 +25,13 @@ export const getSchedules = async (
 export const addSchedule = async (schedule: Schedule): Promise<void> => {
   await collection().insertOne(schedule);
 };
+
+export const getScheduleById = async (
+  schedule_id: ObjectId,
+): Promise<Schedule | null> => {
+  return await collection().findOne({ _id: schedule_id });
+};
+
+export const deleteSchedule = async (schedule_id: ObjectId): Promise<void> => {
+  await collection().deleteOne({ _id: schedule_id });
+};

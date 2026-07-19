@@ -56,3 +56,21 @@ export const addClientSchedule = async (req: Request, res: Response) => {
 
   res.status(201).json(schedule);
 };
+
+export const deleteClientSchedule = async (req: Request, res: Response) => {
+  const schedule_id = parseObjectId(req.params.scheduleId);
+
+  if (!schedule_id) {
+    return res.status(400).json({ error: "Invalid schedule id." });
+  }
+
+  const scheduleExists = await scheduleModel.getScheduleById(schedule_id);
+
+  if (!scheduleExists) {
+    return res.status(404).json({ error: "Cannot find schedule." });
+  }
+
+  await scheduleModel.deleteSchedule(schedule_id);
+
+  res.status(204).send();
+};
