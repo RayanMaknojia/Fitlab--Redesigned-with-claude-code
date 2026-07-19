@@ -4,7 +4,6 @@ import { getDb } from "../config/database";
 export interface Schedule {
   _id?: ObjectId;
   client_id: ObjectId;
-  trainer_id: ObjectId;
   start_time: Date;
   duration_in_minutes: number;
 }
@@ -21,4 +20,8 @@ export const getSchedules = async (
   client_id: ObjectId,
 ): Promise<Schedule[]> => {
   return await collection().find({ client_id }).toArray();
+};
+
+export const addSchedule = async (schedule: Schedule): Promise<void> => {
+  await collection().insertOne(schedule);
 };
