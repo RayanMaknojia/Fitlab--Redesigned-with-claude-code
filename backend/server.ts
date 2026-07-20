@@ -9,10 +9,10 @@ import * as workoutSessionModel from "./models/WorkoutSession";
 import * as sessionExerciseModel from "./models/SessionExercise";
 import * as exerciseTemplateModel from "./models/ExerciseTemplate";
 import * as scheduleModel from "./models/Schedule";
-import bcrypt from "bcrypt";
-import {authRouter} from "./routes/auth"
+import { authRouter } from "./routes/auth";
 import { workoutSessionRouter } from "./routes/workoutSessions";
 import { exerciseTemplateRouter } from "./routes/exerciseTemplates";
+import { scheduleRouter } from "./routes/schedules";
 
 const PORT = 3000;
 const app = express();
@@ -34,7 +34,7 @@ app.use(
   cors({
     origin: process.env.FRONTEND_ORIGIN ?? "http://localhost:5173",
     credentials: true,
-  })
+  }),
 );
 
 app.use(
@@ -47,9 +47,9 @@ app.use(
     store: MongoStore.create({ mongoUrl: CONNECTION_STRING }), // Use MongoDB to store session data
     cookie: {
       httpOnly: true,
-      maxAge:  3 * 60 * 60 * 1000, // 3 hours
+      maxAge: 3 * 60 * 60 * 1000, // 3 hours
     },
-  })
+  }),
 );
 
 app.use((req: Request, _res: Response, next: NextFunction) => {
@@ -57,10 +57,10 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next();
 });
 
-
-app.use('/api', authRouter)
-app.use('/api', workoutSessionRouter)
-app.use('/api', exerciseTemplateRouter)
+app.use("/api", authRouter);
+app.use("/api", workoutSessionRouter);
+app.use("/api", exerciseTemplateRouter);
+app.use("/api", scheduleRouter);
 
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ error: "Not found" });
