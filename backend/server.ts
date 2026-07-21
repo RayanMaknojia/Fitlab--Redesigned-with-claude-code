@@ -1,4 +1,5 @@
 import express, { Request, Response, NextFunction } from "express";
+import { helpers } from "./db";
 import cors from "cors";
 import session from "express-session";
 import MongoStore from "connect-mongo";
@@ -13,6 +14,7 @@ import { authRouter } from "./routes/auth";
 import { workoutSessionRouter } from "./routes/workoutSessions";
 import { exerciseTemplateRouter } from "./routes/exerciseTemplates";
 import { scheduleRouter } from "./routes/schedules";
+import { chatRouter } from "./routes/chat";
 
 const PORT = 3000;
 const app = express();
@@ -57,7 +59,9 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next();
 });
 
+
 app.use("/api", authRouter);
+app.use("/api/chat", chatRouter);
 app.use("/api", workoutSessionRouter);
 app.use("/api", exerciseTemplateRouter);
 app.use("/api", scheduleRouter);
