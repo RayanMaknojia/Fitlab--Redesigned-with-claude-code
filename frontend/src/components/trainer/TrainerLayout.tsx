@@ -7,6 +7,7 @@ import { Dumbbell, LayoutDashboard, Users, Calendar, Settings, LogOut } from "lu
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import AuthenticatedChatbot from "@/components/chatbot/AuthenticatedChatbot"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
 
@@ -99,6 +100,8 @@ export default function TrainerLayout() {
           <Outlet />
         </main>
       </div>
+
+      <AuthenticatedChatbot />
     </div>
   )
 }

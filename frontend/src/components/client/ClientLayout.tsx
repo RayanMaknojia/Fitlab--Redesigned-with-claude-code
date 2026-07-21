@@ -7,6 +7,7 @@ import { Dumbbell, LayoutDashboard, LineChart, Calendar, Settings, LogOut } from
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import AuthenticatedChatbot from "@/components/chatbot/AuthenticatedChatbot"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
 
@@ -22,7 +23,7 @@ export default function ClientLayout() {
 
   return (
     <div className="dark min-h-screen bg-background text-foreground">
-      {/* ambient background glow — identical treatment to TrainerLayout */}
+      {}
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_60%_40%_at_15%_-10%,oklch(0.85_0.21_128/0.13),transparent),radial-gradient(ellipse_50%_35%_at_90%_110%,oklch(0.7_0.15_200/0.1),transparent)]"
@@ -99,6 +100,8 @@ export default function ClientLayout() {
           <Outlet />
         </main>
       </div>
+
+      <AuthenticatedChatbot />
     </div>
   )
 }
