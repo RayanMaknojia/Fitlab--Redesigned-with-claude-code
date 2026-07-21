@@ -3,7 +3,7 @@ import { Bot, Sparkles, X } from "lucide-react"
 
 import ChatInput from "@/components/chatbot/ChatInput"
 import ChatMessage from "@/components/chatbot/ChatMessage"
-import type { ChatMessageData } from "@/components/chatbot/types"
+import type { ChatMessageData } from "@/types/chatbot"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,

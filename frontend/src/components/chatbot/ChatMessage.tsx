@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils"
-import type { ChatMessageData } from "@/components/chatbot/types"
+import type { ChatMessageData } from "@/types/chatbot"
 
 type ChatMessageProps = {
   message: ChatMessageData

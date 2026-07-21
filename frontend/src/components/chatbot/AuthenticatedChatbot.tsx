@@ -2,7 +2,7 @@ import { useState } from "react"
 
 import ChatbotButton from "@/components/chatbot/ChatbotButton"
 import ChatbotModal from "@/components/chatbot/ChatbotModal"
-import type { ChatMessageData } from "@/components/chatbot/types"
+import type { ChatMessageData } from "@/types/chatbot"
 
 const WELCOME_MESSAGE: ChatMessageData = {
   id: "welcome",

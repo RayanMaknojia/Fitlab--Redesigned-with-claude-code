@@ -13,6 +13,7 @@ import bcrypt from "bcrypt";
 import {authRouter} from "./routes/auth"
 import { workoutSessionRouter } from "./routes/workoutSessions";
 import { exerciseTemplateRouter } from "./routes/exerciseTemplates";
+import { chatRouter } from "./routes/chat"
 
 const PORT = 3000;
 const app = express();
@@ -61,6 +62,7 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 app.use('/api', authRouter)
 app.use('/api', workoutSessionRouter)
 app.use('/api', exerciseTemplateRouter)
+app.use('/api', chatRouter)
 
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ error: "Not found" });
