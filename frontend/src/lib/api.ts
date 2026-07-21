@@ -1,3 +1,5 @@
+import type { WorkoutSession } from "@/types";
+
 const API_BASE = "http://localhost:3000/api";
 
 export interface ApiUser {
@@ -39,4 +41,6 @@ export const api = {
   logout: () => request<{ ok: boolean }>("/auth/logout", { method: "POST" }),
 
   me: () => request<{ user: ApiUser }>("/auth/me"),
+
+  getMyWorkoutSessions: () => request<WorkoutSession[]>("/me/workout-sessions"),
 };

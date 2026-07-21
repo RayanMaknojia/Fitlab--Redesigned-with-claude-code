@@ -11,6 +11,31 @@ const SessionInput = z.object({
   session_date: z.coerce.date(),
 });
 
+export const getMyWorkoutSessions = async (req: Request, res: Response) => {
+  const client_id = new ObjectId(req.session.user!.id);
+
+  const sessions = await workoutSessionModel.getClientSessions(client_id);
+
+  const withExercises = await Promise.all(
+    sessions.map(async (session) => {
+      const exercises = await sessionExerciseModel.getSessionExercises(session._id!);
+      return {
+        session_id: session._id!.toString(),
+        client_id: session.client_id.toString(),
+        session_date: session.session_date.toISOString(),
+        exercises: exercises.map((e) => ({
+          name: e.template_name,
+          sets: e.sets,
+          reps: e.reps,
+          weight_in_kg: e.weight_in_kg,
+        })),
+      };
+    }),
+  );
+
+  res.json(withExercises);
+};
+
 export const getClientWorkoutSessions = async (req: Request, res: Response) => {
   const client_id = parseObjectId(req.params.clientId);
 
