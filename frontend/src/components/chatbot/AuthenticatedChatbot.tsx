@@ -1,8 +1,9 @@
 import { useState } from "react"
+import { chatApi } from "@/lib/chatApi"
 
 import ChatbotButton from "@/components/chatbot/ChatbotButton"
 import ChatbotModal from "@/components/chatbot/ChatbotModal"
-import type { ChatMessageData } from "@/types/chatbot"
+import type { ChatMessageData, ChatRequestMessage } from "@/types/chatbot"
 
 const WELCOME_MESSAGE: ChatMessageData = {
   id: "welcome",
@@ -11,26 +12,7 @@ const WELCOME_MESSAGE: ChatMessageData = {
     "Hi, I'm FitLab AI. Ask me about your workouts, progress, recovery, or fitness goals.",
 }
 
-const MOCK_RESPONSES = [
-  "A solid next step is to pair strength work with a recovery day so your weekly volume stays sustainable.",
-  "If energy is dropping mid-week, reduce intensity for one session and prioritize sleep, hydration, and protein.",
-  "For steady progress, track how hard the session felt along with reps or distance so you can spot plateaus early.",
-  "If your goal is muscle gain, aim for progressive overload and keep recovery habits consistent between workouts.",
-]
 
-function buildMockReply(prompt: string) {
-  const normalized = prompt.trim().toLowerCase()
-
-  if (normalized.includes("recovery")) {
-    return "Recovery improves when you keep easy days easy, sleep 7 to 9 hours, and avoid stacking max-effort sessions back to back."
-  }
-
-  if (normalized.includes("goal") || normalized.includes("progress")) {
-    return "Pick one measurable target for the next two weeks, then review volume, consistency, and recovery before changing the full plan."
-  }
-
-  return MOCK_RESPONSES[prompt.length % MOCK_RESPONSES.length]
-}
 
 export default function AuthenticatedChatbot() {
   const [open, setOpen] = useState(false)
@@ -41,29 +23,42 @@ export default function AuthenticatedChatbot() {
   async function handleSend() {
     const content = draft.trim()
 
-    if (!content || loading) return
+    if (!content || loading) return // Prevents double sending or blank messages
 
     const userMessage: ChatMessageData = {
       id: `user-${Date.now()}`,
       role: "user",
       content,
     }
-
-    setMessages((current) => [...current, userMessage])
+    const nextMessages = [...messages, userMessage]; // Current chat history + new message
+    const requestMessages: ChatRequestMessage[] = nextMessages.map(
+      ({role, content}) =>({role, content})
+    );
+    setMessages(nextMessages)
     setDraft("")
     setLoading(true)
 
     try {
-      // Placeholder async boundary so the UI can be tested before a real AI API exists.
-      await new Promise((resolve) => window.setTimeout(resolve, 900))
+      const {message} = await chatApi.chat({messages: requestMessages})
 
-      const assistantMessage: ChatMessageData = {
+      const aiReply: ChatMessageData = {
         id: `assistant-${Date.now()}`,
         role: "assistant",
-        content: buildMockReply(content),
+        content: message.content,
       }
 
-      setMessages((current) => [...current, assistantMessage])
+      setMessages((current) => [...current, aiReply])
+    } catch (error) {
+      const errorReply: ChatMessageData = {
+        id: `assistant-error-${Date.now()}`,
+        role: "assistant",
+        content:
+          error instanceof Error
+            ? `Sorry, I couldn't get a response right now: ${error.message}`
+            : "Sorry, I couldn't get a response right now.",
+      }
+
+      setMessages((current) => [...current, errorReply])
     } finally {
       setLoading(false)
     }
