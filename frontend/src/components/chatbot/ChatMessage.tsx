@@ -15,7 +15,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
           "max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm",
           isUser
             ? "rounded-br-md bg-lime-400 text-black"
-            : "rounded-bl-md border border-white/10 bg-white/6 text-foreground backdrop-blur-sm"
+            : "rounded-bl-md border border-white/10 bg-white/6 text-white backdrop-blur-sm"
         )}
       >
         {message.content}

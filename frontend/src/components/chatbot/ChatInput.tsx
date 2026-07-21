@@ -47,7 +47,7 @@ export default function ChatInput({
             }
           }}
           placeholder="Ask about workouts, recovery, or goals..."
-          className="max-h-35 min-h-10 flex-1 resize-none bg-transparent py-2 text-sm leading-6 text-foreground outline-none placeholder:text-muted-foreground"
+          className="max-h-35 min-h-10 flex-1 resize-none bg-transparent py-2 text-sm leading-6 text-white outline-none placeholder:text-white/55"
         />
 
         <Button

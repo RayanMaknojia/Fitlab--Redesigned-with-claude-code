@@ -54,7 +54,7 @@ export default function ChatbotModal({
                 <Bot className="size-5" />
               </div>
               <div className="min-w-0">
-                <DialogTitle className="truncate text-base font-semibold text-foreground">
+                <DialogTitle className="truncate text-base font-semibold text-white">
                   FitLab AI
                 </DialogTitle>
                 <DialogDescription
@@ -89,7 +89,7 @@ export default function ChatbotModal({
 
             {loading && (
               <div className="flex justify-start">
-                <div className="flex items-center gap-2 rounded-2xl rounded-bl-md border border-white/10 bg-white/6 px-4 py-3 text-sm text-muted-foreground backdrop-blur-sm">
+                <div className="flex items-center gap-2 rounded-2xl rounded-bl-md border border-white/10 bg-white/6 px-4 py-3 text-sm text-white backdrop-blur-sm">
                   <Sparkles className="size-4 animate-pulse text-lime-300" />
                   FitLab AI is thinking...
                 </div>
