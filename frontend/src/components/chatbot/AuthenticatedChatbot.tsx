@@ -5,6 +5,8 @@ import ChatbotButton from "@/components/chatbot/ChatbotButton"
 import ChatbotModal from "@/components/chatbot/ChatbotModal"
 import type { ChatMessageData, ChatRequestMessage } from "@/types/chatbot"
 
+const MAX_MESSAGE_LENGTH = 2000
+
 const WELCOME_MESSAGE: ChatMessageData = {
   id: "welcome",
   role: "assistant",
@@ -24,6 +26,17 @@ export default function AuthenticatedChatbot() {
     const content = draft.trim()
 
     if (!content || loading) return // Prevents double sending or blank messages
+
+    if (content.length > MAX_MESSAGE_LENGTH) {
+      const errorReply: ChatMessageData = {
+        id: `assistant-error-${Date.now()}`,
+        role: "assistant",
+        content: `Please keep each message under ${MAX_MESSAGE_LENGTH} characters.`,
+      }
+
+      setMessages((current) => [...current, errorReply])
+      return
+    }
 
     const userMessage: ChatMessageData = {
       id: `user-${Date.now()}`,
@@ -78,6 +91,7 @@ export default function AuthenticatedChatbot() {
         open={open}
         loading={loading}
         draft={draft}
+        maxLength={MAX_MESSAGE_LENGTH}
         messages={messages}
         onOpenChange={handleOpenChange}
         onDraftChange={setDraft}

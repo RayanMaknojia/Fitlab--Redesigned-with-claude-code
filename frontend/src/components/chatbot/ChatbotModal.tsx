@@ -17,6 +17,7 @@ type ChatbotModalProps = {
   open: boolean
   loading: boolean
   draft: string
+  maxLength: number
   messages: ChatMessageData[]
   onOpenChange: (open: boolean) => void
   onDraftChange: (value: string) => void
@@ -27,6 +28,7 @@ export default function ChatbotModal({
   open,
   loading,
   draft,
+  maxLength,
   messages,
   onOpenChange,
   onDraftChange,
@@ -45,7 +47,7 @@ export default function ChatbotModal({
       <DialogContent
         aria-describedby="fitlab-ai-description"
         showCloseButton={false}
-        className="top-auto left-auto flex h-[100dvh] w-screen translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-white/10 bg-[linear-gradient(180deg,rgba(22,22,22,0.98),rgba(15,15,15,0.98))] p-0 shadow-[0_28px_80px_-32px_rgba(0,0,0,0.9)] sm:right-6 sm:bottom-24 sm:left-auto sm:top-auto sm:h-[min(650px,calc(100dvh-7rem))] sm:w-[min(420px,calc(100vw-3rem))] sm:rounded-[28px]"
+        className="top-auto left-auto flex h-[100dvh] w-screen translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-white/10 bg-[linear-gradient(180deg,rgba(22,22,22,0.98),rgba(15,15,15,0.98))] p-0 shadow-[0_28px_80px_-32px_rgba(0,0,0,0.9)] sm:right-6 sm:bottom-24 sm:left-auto sm:top-auto sm:h-[min(700px,calc(100dvh-6rem))] sm:w-[min(460px,calc(100vw-3rem))] sm:rounded-[28px]"
       >
         <div className="flex items-start justify-between border-b border-white/10 bg-black/20 px-4 py-4 sm:px-5">
           <div className="min-w-0">
@@ -103,6 +105,7 @@ export default function ChatbotModal({
         <ChatInput
           value={draft}
           disabled={loading}
+          maxLength={maxLength}
           onChange={onDraftChange}
           onSend={onSend}
         />
