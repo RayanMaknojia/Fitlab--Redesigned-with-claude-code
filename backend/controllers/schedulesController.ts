@@ -52,9 +52,9 @@ export const addClientSchedule = async (req: Request, res: Response) => {
     duration_in_minutes: result.data.duration_in_minutes,
   };
 
-  await scheduleModel.addSchedule(schedule);
+  const resultId = await scheduleModel.addSchedule(schedule);
 
-  res.status(201).json(schedule);
+  res.status(201).json({ _id: resultId, ...schedule });
 };
 
 export const deleteClientSchedule = async (req: Request, res: Response) => {

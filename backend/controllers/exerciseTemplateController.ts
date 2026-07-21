@@ -56,7 +56,6 @@ export const addClientExerciseTemplate = async (
     client_id,
   });
 
-  // TODO: return the new template's _id so the client doesn't need a follow-up GET.
   res.status(201).json({ _id: resultId, name: result.data.name, client_id });
 };
 
