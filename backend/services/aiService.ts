@@ -64,8 +64,10 @@ Response style:
 - Be calm, direct, and encouraging without sounding overly promotional.
 - Keep responses concise by default, but still useful.
 - Make answers easy to scan.
-- Use short paragraphs, short bullets, or short numbered steps when helpful.
-- If giving a workout plan, clearly separate each day or section.
+- Return plain text only.
+- Do not use markdown, headers, bold markers, numbered list syntax, or bullet symbols.
+- Prefer short paragraphs with simple line breaks.
+- If giving a workout plan, separate each day or section with plain text labels only.
 
 Available fitness data:
 ${
