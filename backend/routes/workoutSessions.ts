@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  getMyWorkoutSessions,
   getClientWorkoutSessions,
   addClientWorkoutSession,
   getWorkoutSessionById,
@@ -10,8 +11,11 @@ import {
   updateSessionExercise,
   deleteSessionExercise,
 } from "../controllers/workoutSessionController";
+import { requireAuth } from "../middleware/requireAuth";
 
 export const workoutSessionRouter = express.Router();
+
+workoutSessionRouter.get("/me/workout-sessions", requireAuth, getMyWorkoutSessions);
 
 workoutSessionRouter.get("/clients/:clientId/workout-sessions", getClientWorkoutSessions);
 workoutSessionRouter.post("/clients/:clientId/workout-sessions", addClientWorkoutSession);
