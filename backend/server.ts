@@ -1,5 +1,4 @@
 import express, { Request, Response, NextFunction } from "express";
-import { helpers } from "./db";
 import cors from "cors";
 import session from "express-session";
 import MongoStore from "connect-mongo";
@@ -58,7 +57,6 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   console.log(`${req.method} ${req.url}`);
   next();
 });
-
 
 app.use("/api", authRouter);
 app.use("/api/chat", chatRouter);
