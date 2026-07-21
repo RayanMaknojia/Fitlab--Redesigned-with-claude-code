@@ -44,8 +44,10 @@ export const getSessionExercises = async (session_id: ObjectId) => {
     .toArray();
 };
 
-export const addSessionExercise = async (exercise: SessionExercise): Promise<void> => {
-  await collection().insertOne(exercise);
+export const addSessionExercise = async (
+  exercise: SessionExercise,
+): Promise<ObjectId> => {
+  return (await collection().insertOne(exercise)).insertedId;
 };
 
 export const getSessionExerciseById = async (
@@ -56,7 +58,10 @@ export const getSessionExerciseById = async (
 
 export const updateExerciseById = async (
   exerciseId: ObjectId,
-  newExercise: Omit<SessionExercise, "_id" | "session_id" | "exercise_template_id">,
+  newExercise: Omit<
+    SessionExercise,
+    "_id" | "session_id" | "exercise_template_id"
+  >,
 ) => {
   await collection().updateOne(
     { _id: exerciseId },
@@ -78,7 +83,10 @@ export const deleteBySessionId = async (
   sessionId: ObjectId,
   session?: ClientSession,
 ): Promise<void> => {
-  await collection().deleteMany({ session_id: sessionId }, session ? { session } : {});
+  await collection().deleteMany(
+    { session_id: sessionId },
+    session ? { session } : {},
+  );
 };
 
 export const deleteByTemplateId = async (

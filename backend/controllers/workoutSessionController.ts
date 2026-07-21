@@ -18,7 +18,9 @@ export const getMyWorkoutSessions = async (req: Request, res: Response) => {
 
   const withExercises = await Promise.all(
     sessions.map(async (session) => {
-      const exercises = await sessionExerciseModel.getSessionExercises(session._id!);
+      const exercises = await sessionExerciseModel.getSessionExercises(
+        session._id!,
+      );
       return {
         session_id: session._id!.toString(),
         client_id: session.client_id.toString(),
@@ -73,9 +75,12 @@ export const addClientWorkoutSession = async (req: Request, res: Response) => {
 
   const { session_date } = result.data;
 
-  await workoutSessionModel.addWorkoutSession({ client_id, session_date });
-  // TODO: return the new session's _id so the client doesn't need a follow-up GET.
-  res.status(201).json({ client_id, session_date });
+  const resultId = await workoutSessionModel.addWorkoutSession({
+    client_id,
+    session_date,
+  });
+
+  res.status(201).json({ _id: resultId, client_id, session_date });
 };
 
 export const getWorkoutSessionById = async (req: Request, res: Response) => {
@@ -113,7 +118,10 @@ export const updateWorkoutSession = async (req: Request, res: Response) => {
     return res.status(404).json({ error: "Cannot find session." });
   }
 
-  await workoutSessionModel.updateSessionById(sessionId, result.data.session_date);
+  await workoutSessionModel.updateSessionById(
+    sessionId,
+    result.data.session_date,
+  );
 
   res.json({ _id: sessionId, session_date: result.data.session_date });
 };
@@ -136,7 +144,10 @@ export const deleteWorkoutSession = async (req: Request, res: Response) => {
   res.status(204).send();
 };
 
-export const getWorkoutSessionExercises = async (req: Request, res: Response) => {
+export const getWorkoutSessionExercises = async (
+  req: Request,
+  res: Response,
+) => {
   const session_id = parseObjectId(req.params.sessionId);
 
   if (!session_id) {
@@ -197,9 +208,10 @@ export const addSessionExercise = async (req: Request, res: Response) => {
     weight_in_kg: result.data.weight_in_kg,
   };
 
-  await sessionExerciseModel.addSessionExercise(exercise);
+  const exerciseResultId =
+    await sessionExerciseModel.addSessionExercise(exercise);
 
-  res.status(201).json(exercise);
+  res.status(201).json({ _id: exerciseResultId, ...exercise });
 };
 
 const SessionExerciseChangeInput = z.object({
@@ -224,7 +236,8 @@ export const updateSessionExercise = async (req: Request, res: Response) => {
     return res.status(400).json({ error: "Invalid exercise id." });
   }
 
-  const exercise = await sessionExerciseModel.getSessionExerciseById(exercise_id);
+  const exercise =
+    await sessionExerciseModel.getSessionExerciseById(exercise_id);
   if (!exercise) {
     return res.status(404).json({ error: "Cannot find exercise." });
   }
@@ -261,7 +274,8 @@ export const deleteSessionExercise = async (req: Request, res: Response) => {
     return res.status(400).json({ error: "Invalid exercise id." });
   }
 
-  const exercise = await sessionExerciseModel.getSessionExerciseById(exercise_id);
+  const exercise =
+    await sessionExerciseModel.getSessionExerciseById(exercise_id);
   if (!exercise) {
     return res.status(404).json({ error: "Cannot find exercise." });
   }
