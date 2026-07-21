@@ -27,11 +27,15 @@ export const getExerciseTemplate = async (
   return await collection().findOne({ _id: templateId });
 };
 
-export const addExerciseTemplate = async (template: ExerciseTemplate): Promise<void> => {
-  await collection().insertOne({
-    name: template.name,
-    client_id: template.client_id,
-  });
+export const addExerciseTemplate = async (
+  template: ExerciseTemplate,
+): Promise<ObjectId> => {
+  return (
+    await collection().insertOne({
+      name: template.name,
+      client_id: template.client_id,
+    })
+  ).insertedId;
 };
 
 export const updateTemplateById = async (
@@ -41,11 +45,17 @@ export const updateTemplateById = async (
   await collection().updateOne({ _id: templateId }, { $set: { name } });
 };
 
-export const templateExists = async (templateId: ObjectId): Promise<boolean> => {
-  return (await collection().countDocuments({ _id: templateId }, { limit: 1 })) === 1;
+export const templateExists = async (
+  templateId: ObjectId,
+): Promise<boolean> => {
+  return (
+    (await collection().countDocuments({ _id: templateId }, { limit: 1 })) === 1
+  );
 };
 
-export const deleteTemplateAndAssociatedExercises = async (templateId: ObjectId) => {
+export const deleteTemplateAndAssociatedExercises = async (
+  templateId: ObjectId,
+) => {
   const session = getClient().startSession();
 
   try {

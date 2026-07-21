@@ -8,7 +8,10 @@ const TemplateInput = z.object({
   name: z.string(),
 });
 
-export const getClientExerciseTemplates = async (req: Request, res: Response) => {
+export const getClientExerciseTemplates = async (
+  req: Request,
+  res: Response,
+) => {
   const client_id = parseObjectId(req.params.clientId);
 
   if (!client_id) {
@@ -26,7 +29,10 @@ export const getClientExerciseTemplates = async (req: Request, res: Response) =>
   res.json(templates);
 };
 
-export const addClientExerciseTemplate = async (req: Request, res: Response) => {
+export const addClientExerciseTemplate = async (
+  req: Request,
+  res: Response,
+) => {
   const result = TemplateInput.safeParse(req.body);
 
   if (!result.success) {
@@ -45,13 +51,13 @@ export const addClientExerciseTemplate = async (req: Request, res: Response) => 
     return res.status(404).json({ error: "Cannot find client." });
   }
 
-  await exerciseTemplateModel.addExerciseTemplate({
+  const resultId = await exerciseTemplateModel.addExerciseTemplate({
     name: result.data.name,
     client_id,
   });
 
   // TODO: return the new template's _id so the client doesn't need a follow-up GET.
-  res.status(201).json({ name: result.data.name, client_id });
+  res.status(201).json({ _id: resultId, name: result.data.name, client_id });
 };
 
 const TemplateNameInput = z.object({
