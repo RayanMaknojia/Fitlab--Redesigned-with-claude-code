@@ -15,7 +15,7 @@ export const init = async (): Promise<void> => {
   await collection().createIndex({ name: 1 });
 };
 
-export const getExerciseTemplates = async (
+export const getAllExerciseTemplatesForClient = async (
   client_id: ObjectId,
 ): Promise<ExerciseTemplate[]> => {
   return await collection().find({ client_id }).toArray();

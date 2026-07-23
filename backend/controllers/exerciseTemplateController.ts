@@ -24,7 +24,8 @@ export const getClientExerciseTemplates = async (
     return res.status(404).json({ error: "Cannot find client." });
   }
 
-  const templates = await exerciseTemplateModel.getExerciseTemplates(client_id);
+  const templates =
+    await exerciseTemplateModel.getAllExerciseTemplatesForClient(client_id);
 
   res.json(templates);
 };
