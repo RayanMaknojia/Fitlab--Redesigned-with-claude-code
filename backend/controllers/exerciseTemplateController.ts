@@ -27,7 +27,7 @@ export const getClientExerciseTemplates = async (
   const templates =
     await exerciseTemplateModel.getAllExerciseTemplatesForClient(client_id);
 
-  res.json(templates);
+  res.status(200).json(templates);
 };
 
 export const addClientExerciseTemplate = async (

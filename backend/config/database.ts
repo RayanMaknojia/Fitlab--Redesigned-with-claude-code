@@ -24,6 +24,16 @@ const connect = async (): Promise<void> => {
   }
 };
 
+const close = async (): Promise<void> => {
+  try {
+    await client.close();
+  } catch (e: unknown) {
+    throw new Error(
+      e instanceof Error ? e.message : "Failed to close MongoDB connection.",
+    );
+  }
+};
+
 const getDb = (): Db => {
   if (!db) {
     throw new Error("Database not connected. Call connect() first.");
@@ -33,4 +43,4 @@ const getDb = (): Db => {
 
 const getClient = (): MongoClient => client;
 
-export { connect, getDb, getClient };
+export { connect, close, getDb, getClient };
