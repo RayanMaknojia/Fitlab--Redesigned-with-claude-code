@@ -1,22 +1,50 @@
-import { MongoClient } from "mongodb";
 import { getClientExerciseTemplates } from "../../controllers/exerciseTemplateController";
 import { createMockReq } from "../utils/createMockReq";
 import { createMockRes } from "../utils/createMockRes";
-import { close, connect } from "../../config/database";
-
-const CONNECTION_STRING = process.env.CONNECTION_STRING;
-
-if (!CONNECTION_STRING) {
-  throw new Error("CONNECTION_STRING is not defined.");
-}
+import { close, connect, getDb } from "../../config/database";
+import * as userModel from "../../models/User";
+import { ObjectId } from "mongodb";
+import {
+  addExerciseTemplate,
+  deleteTemplateAndAssociatedExercises,
+  ExerciseTemplate,
+} from "../../models/ExerciseTemplate";
 
 describe("getClientExerciseTemplates", () => {
+  let testClientId: ObjectId;
+
   beforeAll(async () => {
     await connect();
+    await Promise.all([
+      userModel.init(),
+      //   clientModel.init(),
+      //   workoutSessionModel.init(),
+      //   sessionExerciseModel.init(),
+      //   exerciseTemplateModel.init(),
+      //   scheduleModel.init(),
+    ]);
   });
 
   afterAll(async () => {
     await close();
+  });
+
+  beforeEach(async () => {
+    testClientId = (
+      await getDb().collection("users").insertOne({
+        name: "test user",
+        email: "test@gmail.com",
+        password_hash: "testpasswordhash",
+        role: "client",
+      })
+    ).insertedId;
+
+    await getDb().collection("clients").insertOne({ _id: testClientId });
+  });
+
+  afterEach(async () => {
+    await getDb().collection("clients").deleteOne({ _id: testClientId });
+    await getDb().collection("users").deleteOne({ _id: testClientId });
   });
 
   it("returns 400 for invalid IDs", async () => {
@@ -45,14 +73,28 @@ describe("getClientExerciseTemplates", () => {
 
   it("returns 200 and a client's templates for an existing client", async () => {
     const req = createMockReq({
-      params: { clientId: "6a4dc814e52356712f6c98e5" },
+      params: { clientId: testClientId.toString() },
+    });
+
+    const sampleTemplates: ExerciseTemplate[] = [
+      { client_id: testClientId, name: "pushups" },
+      { client_id: testClientId, name: "test situps" },
+    ];
+
+    sampleTemplates.forEach(async (t) => {
+      t._id = await addExerciseTemplate(t);
     });
 
     const { res, statusMock, jsonMock } = createMockRes();
 
     await getClientExerciseTemplates(req, res);
 
+    sampleTemplates.forEach(
+      async (t) =>
+        await deleteTemplateAndAssociatedExercises(t._id as ObjectId),
+    );
+
     expect(statusMock).toHaveBeenCalledWith(200);
-    expect(jsonMock).toHaveBeenCalledWith(expect.any(Array));
+    expect(jsonMock).toHaveBeenCalledWith(sampleTemplates);
   });
 });
