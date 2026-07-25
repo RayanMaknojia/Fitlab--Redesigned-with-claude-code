@@ -81,20 +81,29 @@ describe("getClientExerciseTemplates", () => {
       { client_id: testClientId, name: "test situps" },
     ];
 
-    sampleTemplates.forEach(async (t) => {
+    for (const t of sampleTemplates) {
       t._id = await addExerciseTemplate(t);
-    });
+    }
 
     const { res, statusMock, jsonMock } = createMockRes();
 
     await getClientExerciseTemplates(req, res);
 
-    sampleTemplates.forEach(
-      async (t) =>
-        await deleteTemplateAndAssociatedExercises(t._id as ObjectId),
-    );
+    for (const t of sampleTemplates) {
+      await deleteTemplateAndAssociatedExercises(t._id as ObjectId);
+    }
 
     expect(statusMock).toHaveBeenCalledWith(200);
     expect(jsonMock).toHaveBeenCalledWith(sampleTemplates);
+
+    const {
+      res: res2,
+      statusMock: statusMock2,
+      jsonMock: jsonMock2,
+    } = createMockRes();
+    await getClientExerciseTemplates(req, res2);
+
+    expect(statusMock2).toHaveBeenCalledWith(200);
+    expect(jsonMock2).toHaveBeenCalledWith([]);
   });
 });
