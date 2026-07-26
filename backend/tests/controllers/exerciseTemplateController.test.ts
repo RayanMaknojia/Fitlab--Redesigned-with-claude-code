@@ -1,5 +1,6 @@
 import {
   addClientExerciseTemplate,
+  deleteExerciseTemplate,
   getClientExerciseTemplates,
   updateExerciseTemplate,
 } from "../../controllers/exerciseTemplateController";
@@ -279,5 +280,58 @@ describe("updateExerciseTemplate", () => {
       template_id: templateId,
       name: newTemplate.name,
     });
+  });
+});
+
+describe("deleteExerciseTemplate", () => {
+  let testClientId: ObjectId;
+
+  beforeAll(async () => {
+    await connect();
+    await userModel.init();
+  });
+
+  afterAll(async () => {
+    await close();
+  });
+
+  beforeEach(async () => {
+    testClientId = await insertTestUser();
+
+    await getDb().collection("clients").insertOne({ _id: testClientId });
+  });
+
+  afterEach(async () => {
+    await getDb()
+      .collection("exercise_templates")
+      .deleteOne({ client_id: testClientId });
+    await getDb().collection("clients").deleteOne({ _id: testClientId });
+    await getDb().collection("users").deleteOne({ _id: testClientId });
+  });
+
+  it("returns 204 and deletes the template and returns 404 when trying to delete it again", async () => {
+    const sampleTemplate = { name: "really hard pushups" };
+
+    const templateId = await addExerciseTemplate({
+      client_id: testClientId,
+      ...sampleTemplate,
+    });
+
+    const req = createMockReq({
+      body: sampleTemplate,
+      params: { templateId: templateId.toString() },
+    });
+
+    const { res, statusMock } = createMockRes();
+
+    await deleteExerciseTemplate(req, res);
+
+    expect(statusMock).toHaveBeenCalledWith(204);
+
+    const { res: res2, jsonMock, statusMock: statusMock2 } = createMockRes();
+
+    await deleteExerciseTemplate(req, res2);
+    expect(statusMock2).toHaveBeenCalledWith(404);
+    expect(jsonMock).toHaveBeenCalledWith({ error: "Cannot find template." });
   });
 });
