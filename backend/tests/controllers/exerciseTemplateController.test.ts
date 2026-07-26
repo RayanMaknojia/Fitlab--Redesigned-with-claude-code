@@ -1,6 +1,7 @@
 import {
   addClientExerciseTemplate,
   getClientExerciseTemplates,
+  updateExerciseTemplate,
 } from "../../controllers/exerciseTemplateController";
 import { createMockReq } from "../utils/createMockReq";
 import { createMockRes } from "../utils/createMockRes";
@@ -29,7 +30,7 @@ describe("getClientExerciseTemplates", () => {
 
   beforeAll(async () => {
     await connect();
-    await Promise.all([userModel.init()]);
+    await userModel.init();
   });
 
   afterAll(async () => {
@@ -124,7 +125,7 @@ describe("addClientExerciseTemplate", () => {
 
   beforeAll(async () => {
     await connect();
-    await Promise.all([userModel.init()]);
+    await userModel.init();
   });
 
   afterAll(async () => {
@@ -209,4 +210,74 @@ describe("addClientExerciseTemplate", () => {
   });
 });
 
-describe("updateExerciseTemplate", async () => {});
+describe("updateExerciseTemplate", () => {
+  let testClientId: ObjectId;
+
+  beforeAll(async () => {
+    await connect();
+    await userModel.init();
+  });
+
+  afterAll(async () => {
+    await close();
+  });
+
+  beforeEach(async () => {
+    testClientId = await insertTestUser();
+
+    await getDb().collection("clients").insertOne({ _id: testClientId });
+  });
+
+  afterEach(async () => {
+    await getDb()
+      .collection("exercise_templates")
+      .deleteOne({ client_id: testClientId });
+    await getDb().collection("clients").deleteOne({ _id: testClientId });
+    await getDb().collection("users").deleteOne({ _id: testClientId });
+  });
+
+  it("returns 200 and modifies the exercise template", async () => {
+    const sampleTemplate = { name: "really hard pushups" };
+
+    const templateId = await addExerciseTemplate({
+      client_id: testClientId,
+      ...sampleTemplate,
+    });
+
+    const req = createMockReq({
+      body: sampleTemplate,
+      params: { templateId: templateId.toString() },
+    });
+
+    const { res, statusMock, jsonMock } = createMockRes();
+
+    await updateExerciseTemplate(req, res);
+
+    expect(statusMock).toHaveBeenCalledWith(200);
+    expect(jsonMock).toHaveBeenCalledWith({
+      template_id: templateId,
+      name: sampleTemplate.name,
+    });
+
+    const newTemplate = { name: "easy pushups" };
+
+    const req2 = createMockReq({
+      body: newTemplate,
+      params: { templateId: templateId.toString() },
+    });
+
+    const {
+      res: res2,
+      statusMock: statusMock2,
+      jsonMock: jsonMock2,
+    } = createMockRes();
+
+    await updateExerciseTemplate(req2, res2);
+
+    expect(statusMock2).toHaveBeenCalledWith(200);
+    expect(jsonMock2).toHaveBeenCalledWith({
+      template_id: templateId,
+      name: newTemplate.name,
+    });
+  });
+});
