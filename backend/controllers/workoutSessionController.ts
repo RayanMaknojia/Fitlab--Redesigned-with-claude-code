@@ -124,13 +124,11 @@ export const updateWorkoutSession = async (req: Request, res: Response) => {
     result.data.session_date,
   );
 
-  res
-    .status(200)
-    .json({
-      _id: sessionId,
-      client_id: session.client_id,
-      session_date: result.data.session_date,
-    });
+  res.status(200).json({
+    _id: sessionId,
+    client_id: session.client_id,
+    session_date: result.data.session_date,
+  });
 };
 
 export const deleteWorkoutSession = async (req: Request, res: Response) => {
@@ -169,7 +167,7 @@ export const getWorkoutSessionExercises = async (
 
   const exercises =
     await sessionExerciseModel.getSessionExercisesAndTemplateNames(session._id);
-  res.json(exercises);
+  res.status(200).json(exercises);
 };
 
 const SessionExerciseInput = z.object({
