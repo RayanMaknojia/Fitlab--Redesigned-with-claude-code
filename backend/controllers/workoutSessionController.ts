@@ -18,9 +18,10 @@ export const getMyWorkoutSessions = async (req: Request, res: Response) => {
 
   const withExercises = await Promise.all(
     sessions.map(async (session) => {
-      const exercises = await sessionExerciseModel.getSessionExercises(
-        session._id!,
-      );
+      const exercises =
+        await sessionExerciseModel.getSessionExercisesAndTemplateNames(
+          session._id!,
+        );
       return {
         session_id: session._id!.toString(),
         client_id: session.client_id.toString(),
@@ -52,7 +53,7 @@ export const getClientWorkoutSessions = async (req: Request, res: Response) => {
   }
 
   const sessions = await workoutSessionModel.getClientSessions(client_id);
-  res.json(sessions);
+  res.status(200).json(sessions);
 };
 
 export const addClientWorkoutSession = async (req: Request, res: Response) => {
@@ -160,7 +161,8 @@ export const getWorkoutSessionExercises = async (
     return res.status(404).json({ error: "Cannot find session." });
   }
 
-  const exercises = await sessionExerciseModel.getSessionExercises(session._id);
+  const exercises =
+    await sessionExerciseModel.getSessionExercisesAndTemplateNames(session._id);
   res.json(exercises);
 };
 

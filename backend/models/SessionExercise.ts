@@ -17,7 +17,9 @@ export const init = async (): Promise<void> => {
   await collection().createIndex({ session_id: 1 });
 };
 
-export const getSessionExercises = async (session_id: ObjectId) => {
+export const getSessionExercisesAndTemplateNames = async (
+  session_id: ObjectId,
+) => {
   return await collection()
     .aggregate([
       { $match: { session_id } },
@@ -42,6 +44,12 @@ export const getSessionExercises = async (session_id: ObjectId) => {
       },
     ])
     .toArray();
+};
+
+export const getSessionExercises = async (
+  session_id: ObjectId,
+): Promise<SessionExercise[]> => {
+  return (await collection().find({ session_id })).toArray();
 };
 
 export const addSessionExercise = async (

@@ -261,6 +261,8 @@ describe("deleteClientSchedule", () => {
       s._id = resultId;
     }
 
+    expect(await getSchedules(testClientId)).toEqual(sampleSchedules);
+
     const scheduleToDeleteId = sampleSchedules[1]?._id as ObjectId;
 
     const req = createMockReq({
