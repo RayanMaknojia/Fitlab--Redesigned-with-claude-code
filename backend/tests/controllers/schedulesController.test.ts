@@ -4,8 +4,16 @@ import { close, connect, getDb } from "../../config/database";
 import * as userModel from "../../models/User";
 import { ObjectId } from "mongodb";
 import { insertTestUser } from "../utils/insertTestUser";
-import { addSchedule, deleteSchedule, Schedule } from "../../models/Schedule";
-import { getClientSchedules } from "../../controllers/schedulesController";
+import {
+  addSchedule,
+  deleteSchedule,
+  getSchedules,
+  Schedule,
+} from "../../models/Schedule";
+import {
+  addClientSchedule,
+  getClientSchedules,
+} from "../../controllers/schedulesController";
 
 describe("getClientSchedules", () => {
   let testClientId: ObjectId;
@@ -89,6 +97,117 @@ describe("getClientSchedules", () => {
   });
 });
 
-describe("addClientSchedule", () => {});
+describe("addClientSchedule", () => {
+  let testClientId: ObjectId;
 
-describe("deleteClientSchedule", () => {});
+  beforeAll(async () => {
+    await connect();
+    await userModel.init();
+  });
+
+  afterAll(async () => {
+    await close();
+  });
+
+  beforeEach(async () => {
+    testClientId = await insertTestUser();
+
+    await getDb().collection("clients").insertOne({ _id: testClientId });
+  });
+
+  afterEach(async () => {
+    await getDb()
+      .collection("schedules")
+      .deleteMany({ client_id: testClientId });
+    await getDb().collection("clients").deleteOne({ _id: testClientId });
+    await getDb().collection("users").deleteOne({ _id: testClientId });
+  });
+
+  it("returns 201 and adds a new schedule for the client", async () => {
+    const sampleSchedule: Schedule = {
+      client_id: testClientId,
+      start_time: new Date(),
+      duration_in_minutes: 50,
+    };
+
+    const req = createMockReq({
+      params: { clientId: testClientId.toString() },
+      body: sampleSchedule,
+    });
+
+    const { res, statusMock, jsonMock } = createMockRes();
+
+    await addClientSchedule(req, res);
+
+    expect(statusMock).toHaveBeenCalledWith(201);
+    expect(jsonMock).toHaveBeenCalledWith({
+      _id: expect.any(ObjectId),
+      ...sampleSchedule,
+    });
+
+    expect(await getSchedules(testClientId)).toEqual([
+      {
+        _id: expect.any(ObjectId),
+        ...sampleSchedule,
+      },
+    ]);
+  });
+
+  it("returns 400 on bad schedule data", async () => {
+    const expectedError = { error: "Invalid schedule data." };
+    const req = createMockReq({
+      params: { clientId: testClientId.toString() },
+    });
+
+    const { res, statusMock, jsonMock } = createMockRes();
+
+    await addClientSchedule(req, res);
+
+    expect(statusMock).toHaveBeenCalledWith(400);
+    expect(jsonMock).toHaveBeenCalledWith(expectedError);
+
+    const sampleSchedule: Omit<Schedule, "client_id"> = {
+      start_time: new Date("hello"),
+      duration_in_minutes: 20,
+    };
+
+    const req2 = createMockReq({
+      params: { clientId: testClientId.toString() },
+      body: sampleSchedule,
+    });
+
+    const {
+      res: res2,
+      statusMock: statusMock2,
+      jsonMock: jsonMock2,
+    } = createMockRes();
+
+    await addClientSchedule(req2, res2);
+
+    expect(statusMock2).toHaveBeenCalledWith(400);
+    expect(jsonMock2).toHaveBeenCalledWith(expectedError);
+
+    const sampleSchedule2: Omit<Schedule, "client_id"> = {
+      start_time: new Date(),
+      duration_in_minutes: 0.25,
+    };
+
+    const req3 = createMockReq({
+      params: { clientId: testClientId.toString() },
+      body: sampleSchedule2,
+    });
+
+    const {
+      res: res3,
+      statusMock: statusMock3,
+      jsonMock: jsonMock3,
+    } = createMockRes();
+
+    await addClientSchedule(req3, res3);
+
+    expect(statusMock3).toHaveBeenCalledWith(400);
+    expect(jsonMock3).toHaveBeenCalledWith(expectedError);
+  });
+});
+
+describe("deleteClientSchedule", async () => {});

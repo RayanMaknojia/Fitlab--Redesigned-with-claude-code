@@ -13,6 +13,8 @@ import {
   addExerciseTemplate,
   deleteTemplateAndAssociatedExercises,
   ExerciseTemplate,
+  getAllExerciseTemplatesForClient,
+  getExerciseTemplate,
 } from "../../models/ExerciseTemplate";
 import { insertTestUser } from "../utils/insertTestUser";
 
@@ -182,7 +184,10 @@ describe("addClientExerciseTemplate", () => {
   });
 
   it("returns 201 and adds a new template for the user", async () => {
-    const sampleTemplate = { name: "really hard pushups" };
+    const sampleTemplate = {
+      client_id: testClientId,
+      name: "really hard pushups",
+    };
     const req = createMockReq({
       body: sampleTemplate,
       params: { clientId: testClientId.toString() },
@@ -198,6 +203,13 @@ describe("addClientExerciseTemplate", () => {
       name: sampleTemplate.name,
       client_id: testClientId,
     });
+
+    expect(await getAllExerciseTemplatesForClient(testClientId)).toEqual([
+      {
+        _id: expect.any(ObjectId),
+        ...sampleTemplate,
+      },
+    ]);
   });
 });
 
