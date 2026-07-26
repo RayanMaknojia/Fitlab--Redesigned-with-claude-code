@@ -14,17 +14,7 @@ import {
   deleteTemplateAndAssociatedExercises,
   ExerciseTemplate,
 } from "../../models/ExerciseTemplate";
-
-const insertTestUser = async () => {
-  return (
-    await getDb().collection("users").insertOne({
-      name: "test user",
-      email: "test@gmail.com",
-      password_hash: "testpasswordhash",
-      role: "client",
-    })
-  ).insertedId;
-};
+import { insertTestUser } from "../utils/insertTestUser";
 
 describe("getClientExerciseTemplates", () => {
   let testClientId: ObjectId;

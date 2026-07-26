@@ -19,7 +19,7 @@ export const getClientSchedules = async (req: Request, res: Response) => {
 
   const schedules = await scheduleModel.getSchedules(client_id);
 
-  res.json(schedules);
+  res.status(200).json(schedules);
 };
 
 const ScheduleInput = z.object({
