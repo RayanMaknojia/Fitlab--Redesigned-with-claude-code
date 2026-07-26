@@ -24,6 +24,7 @@ import {
   addClientWorkoutSession,
   getClientWorkoutSessions,
   getWorkoutSessionById,
+  updateWorkoutSession,
 } from "../../controllers/workoutSessionController";
 
 // Returns a random integer in the interval [0, max).
@@ -325,7 +326,123 @@ describe("getWorkoutSessionById", () => {
   });
 });
 
-describe("updateWorkoutSession", () => {});
+describe("updateWorkoutSession", () => {
+  let sampleSession: WorkoutSession;
+
+  beforeAll(async () => {
+    await connect();
+    await userModel.init();
+  });
+
+  afterAll(async () => {
+    await close();
+  });
+
+  beforeEach(async () => {
+    testClientId = await insertTestUser();
+    sampleSession = {
+      client_id: testClientId,
+      session_date: new Date(),
+    };
+
+    await getDb().collection("clients").insertOne({ _id: testClientId });
+  });
+
+  afterEach(async () => {
+    const sessions = await getClientSessions(testClientId);
+
+    for (const s of sessions) {
+      await deleteSessionById(s._id as ObjectId);
+    }
+
+    await getDb().collection("clients").deleteOne({ _id: testClientId });
+    await getDb().collection("users").deleteOne({ _id: testClientId });
+  });
+
+  it("returns 400 for invalid session data", async () => {
+    sampleSession._id = await addWorkoutSession(sampleSession);
+    expect(await getClientSessions(testClientId)).toEqual([sampleSession]);
+
+    const newSession = {
+      client_id: testClientId,
+    };
+
+    const req = createMockReq({
+      params: { sessionId: sampleSession._id.toString() },
+      body: newSession,
+    });
+
+    const { res, jsonMock, statusMock } = createMockRes();
+
+    await updateWorkoutSession(req, res);
+
+    // Check to make sure that the session has not actually been updated.
+    expect(await getClientSessions(testClientId)).toEqual([sampleSession]);
+
+    const expectedError = { error: "Invalid date." };
+
+    expect(statusMock).toHaveBeenCalledWith(400);
+
+    expect(jsonMock).toHaveBeenCalledWith(expectedError);
+
+    const newSession2: WorkoutSession = {
+      client_id: testClientId,
+      session_date: new Date("abc"),
+    };
+
+    const req2 = createMockReq({
+      params: { sessionId: sampleSession._id.toString() },
+      body: newSession2,
+    });
+
+    const {
+      res: res2,
+      jsonMock: jsonMock2,
+      statusMock: statusMock2,
+    } = createMockRes();
+
+    await updateWorkoutSession(req2, res2);
+
+    expect(await getClientSessions(testClientId)).toEqual([sampleSession]);
+
+    expect(statusMock2).toHaveBeenCalledWith(400);
+
+    expect(jsonMock2).toHaveBeenCalledWith(expectedError);
+  });
+
+  it("returns 200 and updates the session", async () => {
+    sampleSession._id = await addWorkoutSession(sampleSession);
+    expect(await getClientSessions(testClientId)).toEqual([sampleSession]);
+
+    const newSession: WorkoutSession = {
+      client_id: testClientId,
+      session_date: new Date("2015-10-10T14:48:00"),
+    };
+
+    const req = createMockReq({
+      params: { sessionId: sampleSession._id.toString() },
+      body: newSession,
+    });
+
+    const { res, jsonMock, statusMock } = createMockRes();
+
+    await updateWorkoutSession(req, res);
+
+    expect(await getClientSessions(testClientId)).toEqual([
+      {
+        _id: expect.any(ObjectId),
+        ...newSession,
+      },
+    ]);
+
+    expect(statusMock).toHaveBeenCalledWith(200);
+
+    expect(jsonMock).toHaveBeenCalledWith({
+      _id: expect.any(ObjectId),
+      ...newSession,
+    });
+  });
+});
 
 describe("deleteWorkoutSession", () => {});
 
