@@ -22,6 +22,7 @@ import {
 } from "../../models/ExerciseTemplate";
 import {
   addClientWorkoutSession,
+  deleteWorkoutSession,
   getClientWorkoutSessions,
   getWorkoutSessionById,
   updateWorkoutSession,
@@ -444,7 +445,63 @@ describe("updateWorkoutSession", () => {
   });
 });
 
-describe("deleteWorkoutSession", () => {});
+describe("deleteWorkoutSession", () => {
+  let sampleSession: WorkoutSession;
+
+  beforeAll(async () => {
+    await connect();
+    await userModel.init();
+  });
+
+  afterAll(async () => {
+    await close();
+  });
+
+  beforeEach(async () => {
+    testClientId = await insertTestUser();
+    sampleSession = {
+      client_id: testClientId,
+      session_date: new Date(),
+    };
+
+    await getDb().collection("clients").insertOne({ _id: testClientId });
+  });
+
+  afterEach(async () => {
+    const sessions = await getClientSessions(testClientId);
+
+    for (const s of sessions) {
+      await deleteSessionById(s._id as ObjectId);
+    }
+
+    await getDb().collection("clients").deleteOne({ _id: testClientId });
+    await getDb().collection("users").deleteOne({ _id: testClientId });
+  });
+
+  it("returns 204 and deletes the session and 404 if trying to delete it again", async () => {
+    sampleSession._id = await addWorkoutSession(sampleSession);
+    const req = createMockReq({
+      params: { sessionId: sampleSession._id.toString() },
+    });
+
+    const { res, statusMock } = createMockRes();
+
+    await deleteWorkoutSession(req, res);
+
+    expect(statusMock).toHaveBeenCalledWith(204);
+
+    expect(await getClientSessions(testClientId)).toEqual([]);
+
+    const { res: res2, statusMock: statusMock2, jsonMock } = createMockRes();
+
+    await deleteWorkoutSession(req, res2);
+
+    expect(statusMock2).toHaveBeenCalledWith(404);
+    expect(jsonMock).toHaveBeenCalledWith({ error: "Cannot find session." });
+
+    expect(await getClientSessions(testClientId)).toEqual([]);
+  });
+});
 
 describe("getWorkoutSessionExercises", () => {});
 
