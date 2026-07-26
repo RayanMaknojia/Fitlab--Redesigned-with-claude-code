@@ -12,6 +12,7 @@ import {
 } from "../../models/Schedule";
 import {
   addClientSchedule,
+  deleteClientSchedule,
   getClientSchedules,
 } from "../../controllers/schedulesController";
 
@@ -210,4 +211,76 @@ describe("addClientSchedule", () => {
   });
 });
 
-describe("deleteClientSchedule", async () => {});
+describe("deleteClientSchedule", () => {
+  let testClientId: ObjectId;
+
+  beforeAll(async () => {
+    await connect();
+    await userModel.init();
+  });
+
+  afterAll(async () => {
+    await close();
+  });
+
+  beforeEach(async () => {
+    testClientId = await insertTestUser();
+
+    await getDb().collection("clients").insertOne({ _id: testClientId });
+  });
+
+  afterEach(async () => {
+    await getDb()
+      .collection("schedules")
+      .deleteMany({ client_id: testClientId });
+    await getDb().collection("clients").deleteOne({ _id: testClientId });
+    await getDb().collection("users").deleteOne({ _id: testClientId });
+  });
+
+  it("returns 204 and deletes the schedule and returns 404 when trying to delete it again", async () => {
+    const sampleSchedules: Schedule[] = [
+      {
+        client_id: testClientId,
+        start_time: new Date(),
+        duration_in_minutes: 20,
+      },
+      {
+        client_id: testClientId,
+        start_time: new Date("2026-05-02"),
+        duration_in_minutes: 40,
+      },
+      {
+        client_id: testClientId,
+        start_time: new Date("2011-10-10T14:48:00"),
+        duration_in_minutes: 10,
+      },
+    ];
+
+    for (const s of sampleSchedules) {
+      const resultId = await addSchedule(s);
+      s._id = resultId;
+    }
+
+    const scheduleToDeleteId = sampleSchedules[1]?._id as ObjectId;
+
+    const req = createMockReq({
+      params: { scheduleId: scheduleToDeleteId.toString() },
+    });
+
+    const { res, statusMock } = createMockRes();
+
+    await deleteClientSchedule(req, res);
+
+    expect(statusMock).toHaveBeenCalledWith(204);
+    expect(await getSchedules(testClientId)).toEqual([
+      sampleSchedules[0],
+      sampleSchedules[2],
+    ]);
+
+    const { res: res2, jsonMock, statusMock: statusMock2 } = createMockRes();
+
+    await deleteClientSchedule(req, res2);
+    expect(statusMock2).toHaveBeenCalledWith(404);
+    expect(jsonMock).toHaveBeenCalledWith({ error: "Cannot find schedule." });
+  });
+});
