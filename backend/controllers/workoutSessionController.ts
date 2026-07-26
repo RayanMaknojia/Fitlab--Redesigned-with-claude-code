@@ -97,7 +97,7 @@ export const getWorkoutSessionById = async (req: Request, res: Response) => {
     return res.status(404).json({ error: "Cannot find session." });
   }
 
-  res.json(session);
+  res.status(200).json(session);
 };
 
 export const updateWorkoutSession = async (req: Request, res: Response) => {

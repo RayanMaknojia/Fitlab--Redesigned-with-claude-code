@@ -4,10 +4,6 @@ import * as userModel from "../models/User";
 import * as exerciseTemplateModel from "../models/ExerciseTemplate";
 import { parseObjectId } from "../utils/parseObjectId";
 
-const TemplateInput = z.object({
-  name: z.string(),
-});
-
 export const getClientExerciseTemplates = async (
   req: Request,
   res: Response,
@@ -29,6 +25,10 @@ export const getClientExerciseTemplates = async (
 
   res.status(200).json(templates);
 };
+
+const TemplateInput = z.object({
+  name: z.string(),
+});
 
 export const addClientExerciseTemplate = async (
   req: Request,
