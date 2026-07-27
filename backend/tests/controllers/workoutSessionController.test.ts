@@ -740,6 +740,242 @@ describe("addSessionExercise", () => {
   });
 });
 
-describe("updateSessionExercise", () => {});
+describe("updateSessionExercise", () => {
+  let sampleSession: WorkoutSession;
+  let sampleExerciseTemplates: ExerciseTemplate[];
 
-describe("deleteSessionExercise", () => {});
+  beforeAll(async () => {
+    await connect();
+    await userModel.init();
+  });
+
+  afterAll(async () => {
+    await close();
+  });
+
+  beforeEach(async () => {
+    testClientId = await insertTestUser();
+    sampleSession = {
+      client_id: testClientId,
+      session_date: new Date(),
+    };
+    sampleSession._id = await addWorkoutSession(sampleSession);
+
+    sampleExerciseTemplates = [
+      { client_id: testClientId, name: "pushups" },
+      { client_id: testClientId, name: "situps" },
+      { client_id: testClientId, name: "planks" },
+      { client_id: testClientId, name: "Barbell curl" },
+    ];
+
+    for (const et of sampleExerciseTemplates) {
+      et._id = await addExerciseTemplate(et);
+    }
+
+    await getDb().collection("clients").insertOne({ _id: testClientId });
+  });
+
+  afterEach(async () => {
+    const sessions = await getClientSessions(testClientId);
+
+    for (const s of sessions) {
+      await deleteSessionById(s._id as ObjectId);
+    }
+
+    await getDb()
+      .collection("exercise_templates")
+      .deleteMany({ client_id: testClientId });
+    await getDb().collection("clients").deleteOne({ _id: testClientId });
+    await getDb().collection("users").deleteOne({ _id: testClientId });
+  });
+
+  it("returns 400 on bad exercise data", async () => {
+    const sampleExercise: SessionExercise = {
+      session_id: sampleSession._id!,
+      exercise_template_id:
+        sampleExerciseTemplates[getRandomInt(sampleExerciseTemplates.length)]!
+          ._id!,
+      sets: 3,
+      reps: 12,
+      weight_in_kg: 30,
+    };
+
+    sampleExercise._id = await addSessionExercise(sampleExercise);
+
+    expect(await getSessionExercises(sampleSession._id!)).toEqual([
+      sampleExercise,
+    ]);
+
+    const newExerciseInput = {
+      sets: 5,
+      reps: 12,
+      weight_in_kg: 3.001,
+    };
+
+    const req = createMockReq({
+      params: {
+        sessionId: sampleSession._id!.toString(),
+        exerciseId: sampleExercise._id.toString(),
+      },
+      body: newExerciseInput,
+    });
+
+    const { res, statusMock, jsonMock } = createMockRes();
+
+    await workoutSessionController.updateSessionExercise(req, res);
+
+    expect(statusMock).toHaveBeenCalledWith(400);
+    expect(jsonMock).toHaveBeenCalledWith({ error: "Invalid exercise data." });
+
+    expect(await getSessionExercises(sampleSession._id!)).toEqual([
+      sampleExercise,
+    ]);
+  });
+
+  it("returns 200 and updates the exercise", async () => {
+    const sampleExercise: SessionExercise = {
+      session_id: sampleSession._id!,
+      exercise_template_id:
+        sampleExerciseTemplates[getRandomInt(sampleExerciseTemplates.length)]!
+          ._id!,
+      sets: 3,
+      reps: 12,
+      weight_in_kg: 30,
+    };
+
+    sampleExercise._id = await addSessionExercise(sampleExercise);
+
+    expect(await getSessionExercises(sampleSession._id!)).toEqual([
+      sampleExercise,
+    ]);
+
+    const newExerciseInput = {
+      sets: 5,
+      reps: 5,
+      weight_in_kg: 15,
+    };
+
+    const req = createMockReq({
+      params: {
+        sessionId: sampleSession._id!.toString(),
+        exerciseId: sampleExercise._id.toString(),
+      },
+      body: newExerciseInput,
+    });
+
+    const { res, statusMock, jsonMock } = createMockRes();
+
+    await workoutSessionController.updateSessionExercise(req, res);
+
+    expect(statusMock).toHaveBeenCalledWith(200);
+    expect(jsonMock).toHaveBeenCalledWith(newExerciseInput);
+
+    expect(await getSessionExercises(sampleSession._id!)).toEqual([
+      { ...sampleExercise, ...newExerciseInput },
+    ]);
+  });
+});
+
+describe("deleteSessionExercise", () => {
+  let sampleSession: WorkoutSession;
+  let sampleExerciseTemplates: ExerciseTemplate[];
+
+  beforeAll(async () => {
+    await connect();
+    await userModel.init();
+  });
+
+  afterAll(async () => {
+    await close();
+  });
+
+  beforeEach(async () => {
+    testClientId = await insertTestUser();
+    sampleSession = {
+      client_id: testClientId,
+      session_date: new Date(),
+    };
+    sampleSession._id = await addWorkoutSession(sampleSession);
+
+    sampleExerciseTemplates = [
+      { client_id: testClientId, name: "pushups" },
+      { client_id: testClientId, name: "situps" },
+      { client_id: testClientId, name: "planks" },
+      { client_id: testClientId, name: "Barbell curl" },
+    ];
+
+    for (const et of sampleExerciseTemplates) {
+      et._id = await addExerciseTemplate(et);
+    }
+
+    await getDb().collection("clients").insertOne({ _id: testClientId });
+  });
+
+  afterEach(async () => {
+    const sessions = await getClientSessions(testClientId);
+
+    for (const s of sessions) {
+      await deleteSessionById(s._id as ObjectId);
+    }
+
+    await getDb()
+      .collection("exercise_templates")
+      .deleteMany({ client_id: testClientId });
+    await getDb().collection("clients").deleteOne({ _id: testClientId });
+    await getDb().collection("users").deleteOne({ _id: testClientId });
+  });
+
+  it("returns 204 and deletes the exercise and 404 when trying to delete it again", async () => {
+    const sampleExercise: SessionExercise = {
+      session_id: sampleSession._id!,
+      exercise_template_id:
+        sampleExerciseTemplates[getRandomInt(sampleExerciseTemplates.length)]!
+          ._id!,
+      sets: 3,
+      reps: 12,
+      weight_in_kg: 30,
+    };
+
+    const sampleExercise2: SessionExercise = {
+      session_id: sampleSession._id!,
+      exercise_template_id:
+        sampleExerciseTemplates[getRandomInt(sampleExerciseTemplates.length)]!
+          ._id!,
+      sets: 643,
+      reps: 321,
+      weight_in_kg: 0,
+    };
+
+    sampleExercise._id = await addSessionExercise(sampleExercise);
+    sampleExercise2._id = await addSessionExercise(sampleExercise2);
+
+    expect(await getSessionExercises(sampleSession._id!)).toEqual([
+      sampleExercise,
+      sampleExercise2,
+    ]);
+
+    const req = createMockReq({
+      params: {
+        sessionId: sampleSession._id!.toString(),
+        exerciseId: sampleExercise._id.toString(),
+      },
+    });
+
+    const { res, statusMock } = createMockRes();
+
+    await workoutSessionController.deleteSessionExercise(req, res);
+
+    expect(statusMock).toHaveBeenCalledWith(204);
+
+    expect(await getSessionExercises(sampleSession._id!)).toEqual([
+      sampleExercise2,
+    ]);
+
+    const { res: res2, jsonMock, statusMock: statusMock2 } = createMockRes();
+
+    await workoutSessionController.deleteSessionExercise(req, res2);
+
+    expect(statusMock2).toHaveBeenCalledWith(404);
+    expect(jsonMock).toHaveBeenCalledWith({ error: "Cannot find exercise." });
+  });
+});
