@@ -4,11 +4,10 @@ import * as userModel from "../models/User";
 import * as exerciseTemplateModel from "../models/ExerciseTemplate";
 import { parseObjectId } from "../utils/parseObjectId";
 
-const TemplateInput = z.object({
-  name: z.string(),
-});
-
-export const getClientExerciseTemplates = async (req: Request, res: Response) => {
+export const getClientExerciseTemplates = async (
+  req: Request,
+  res: Response,
+) => {
   const client_id = parseObjectId(req.params.clientId);
 
   if (!client_id) {
@@ -21,12 +20,20 @@ export const getClientExerciseTemplates = async (req: Request, res: Response) =>
     return res.status(404).json({ error: "Cannot find client." });
   }
 
-  const templates = await exerciseTemplateModel.getExerciseTemplates(client_id);
+  const templates =
+    await exerciseTemplateModel.getAllExerciseTemplatesForClient(client_id);
 
-  res.json(templates);
+  res.status(200).json(templates);
 };
 
-export const addClientExerciseTemplate = async (req: Request, res: Response) => {
+const TemplateInput = z.object({
+  name: z.string(),
+});
+
+export const addClientExerciseTemplate = async (
+  req: Request,
+  res: Response,
+) => {
   const result = TemplateInput.safeParse(req.body);
 
   if (!result.success) {
@@ -45,13 +52,12 @@ export const addClientExerciseTemplate = async (req: Request, res: Response) => 
     return res.status(404).json({ error: "Cannot find client." });
   }
 
-  await exerciseTemplateModel.addExerciseTemplate({
+  const resultId = await exerciseTemplateModel.addExerciseTemplate({
     name: result.data.name,
     client_id,
   });
 
-  // TODO: return the new template's _id so the client doesn't need a follow-up GET.
-  res.status(201).json({ name: result.data.name, client_id });
+  res.status(201).json({ _id: resultId, name: result.data.name, client_id });
 };
 
 const TemplateNameInput = z.object({

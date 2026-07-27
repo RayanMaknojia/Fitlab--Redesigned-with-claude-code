@@ -19,7 +19,7 @@ export const getClientSchedules = async (req: Request, res: Response) => {
 
   const schedules = await scheduleModel.getSchedules(client_id);
 
-  res.json(schedules);
+  res.status(200).json(schedules);
 };
 
 const ScheduleInput = z.object({
@@ -52,9 +52,9 @@ export const addClientSchedule = async (req: Request, res: Response) => {
     duration_in_minutes: result.data.duration_in_minutes,
   };
 
-  await scheduleModel.addSchedule(schedule);
+  const resultId = await scheduleModel.addSchedule(schedule);
 
-  res.status(201).json(schedule);
+  res.status(201).json({ _id: resultId, ...schedule });
 };
 
 export const deleteClientSchedule = async (req: Request, res: Response) => {

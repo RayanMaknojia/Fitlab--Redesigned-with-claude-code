@@ -1,5 +1,4 @@
 import express, { Request, Response, NextFunction } from "express";
-import { helpers } from "./db";
 import cors from "cors";
 import session from "express-session";
 import MongoStore from "connect-mongo";
@@ -15,6 +14,8 @@ import { workoutSessionRouter } from "./routes/workoutSessions";
 import { exerciseTemplateRouter } from "./routes/exerciseTemplates";
 import { scheduleRouter } from "./routes/schedules";
 import { chatRouter } from "./routes/chat";
+import swaggerJSDoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
 
 const PORT = 3000;
 const app = express();
@@ -59,7 +60,20 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next();
 });
 
+const swaggerDefinition = {
+  openapi: "3.0.0",
+  info: {
+    title: "Express API",
+    version: "1.0.0",
+  },
+};
 
+const spec = swaggerJSDoc({
+  definition: swaggerDefinition,
+  apis: ["./routes/*.ts", "./server.ts"],
+});
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(spec));
 app.use("/api", authRouter);
 app.use("/api/chat", chatRouter);
 app.use("/api", workoutSessionRouter);

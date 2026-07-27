@@ -22,8 +22,8 @@ export const getSchedules = async (
   return await collection().find({ client_id }).toArray();
 };
 
-export const addSchedule = async (schedule: Schedule): Promise<void> => {
-  await collection().insertOne(schedule);
+export const addSchedule = async (schedule: Schedule): Promise<ObjectId> => {
+  return (await collection().insertOne(schedule)).insertedId;
 };
 
 export const getScheduleById = async (
