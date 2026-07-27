@@ -698,7 +698,46 @@ describe("addSessionExercise", () => {
     });
   });
 
-  it("returns 201 and creates a new exercise", async () => {});
+  it("returns 201 and creates a new exercise", async () => {
+    const exercise_template_id =
+      sampleExerciseTemplates[getRandomInt(sampleExerciseTemplates.length)]!
+        ._id;
+
+    const sampleExercise = {
+      session_id: sampleSession._id,
+      sets: 5,
+      reps: 2,
+    };
+
+    const req = createMockReq({
+      params: { sessionId: sampleSession._id!.toString() },
+      body: {
+        ...sampleExercise,
+        exercise_template_id: exercise_template_id?.toString(),
+      },
+    });
+
+    const { res, statusMock, jsonMock } = createMockRes();
+
+    await workoutSessionController.addSessionExercise(req, res);
+
+    expect(statusMock).toHaveBeenCalledWith(201);
+    expect(jsonMock).toHaveBeenCalledWith({
+      _id: expect.any(ObjectId),
+      exercise_template_id,
+      ...sampleExercise,
+      weight_in_kg: expect.anything(),
+    });
+
+    expect(await getSessionExercises(sampleSession._id as ObjectId)).toEqual([
+      {
+        _id: expect.any(ObjectId),
+        exercise_template_id,
+        ...sampleExercise,
+        weight_in_kg: expect.anything(),
+      },
+    ]);
+  });
 });
 
 describe("updateSessionExercise", () => {});
