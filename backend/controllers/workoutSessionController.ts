@@ -201,9 +201,15 @@ export const addSessionExercise = async (req: Request, res: Response) => {
     result.data.exercise_template_id,
   );
 
+  if (!template) {
+    return res.status(404).json({ error: "Cannot find template." });
+  }
+
   // Prevents a client from using a template that belongs to another client.
-  if (!template || !template.client_id.equals(session.client_id)) {
-    return res.status(400).json({ error: "Invalid template." });
+  if (!template.client_id.equals(session.client_id)) {
+    return res
+      .status(400)
+      .json({ error: "Template does not belong to this client." });
   }
 
   const exercise = {

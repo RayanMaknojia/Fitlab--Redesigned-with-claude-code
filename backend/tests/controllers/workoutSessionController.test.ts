@@ -29,6 +29,7 @@ import {
   getWorkoutSessionExercises,
   updateWorkoutSession,
 } from "../../controllers/workoutSessionController";
+import * as workoutSessionController from "../../controllers/workoutSessionController";
 
 // Returns a random integer in the interval [0, max).
 // Function from
@@ -548,7 +549,157 @@ describe("getWorkoutSessionExercises", () => {
   });
 });
 
-describe("addSessionExercise", () => {});
+describe("addSessionExercise", () => {
+  let sampleSession: WorkoutSession;
+  let sampleExerciseTemplates: ExerciseTemplate[];
+
+  beforeAll(async () => {
+    await connect();
+    await userModel.init();
+  });
+
+  afterAll(async () => {
+    await close();
+  });
+
+  beforeEach(async () => {
+    testClientId = await insertTestUser();
+    sampleSession = {
+      client_id: testClientId,
+      session_date: new Date(),
+    };
+    sampleSession._id = await addWorkoutSession(sampleSession);
+
+    sampleExerciseTemplates = [
+      { client_id: testClientId, name: "pushups" },
+      { client_id: testClientId, name: "situps" },
+      { client_id: testClientId, name: "planks" },
+      { client_id: testClientId, name: "Barbell curl" },
+    ];
+
+    for (const et of sampleExerciseTemplates) {
+      et._id = await addExerciseTemplate(et);
+    }
+
+    await getDb().collection("clients").insertOne({ _id: testClientId });
+  });
+
+  afterEach(async () => {
+    const sessions = await getClientSessions(testClientId);
+
+    for (const s of sessions) {
+      await deleteSessionById(s._id as ObjectId);
+    }
+
+    await getDb()
+      .collection("exercise_templates")
+      .deleteMany({ client_id: testClientId });
+    await getDb().collection("clients").deleteOne({ _id: testClientId });
+    await getDb().collection("users").deleteOne({ _id: testClientId });
+  });
+
+  it("returns 400 on bad exercise data", async () => {
+    const sampleExercise = {
+      session_id: sampleSession._id,
+      sets: 5,
+      weight_in_kg: 15,
+    };
+
+    const req = createMockReq({
+      params: { sessionId: sampleSession._id!.toString() },
+      body: sampleExercise,
+    });
+
+    const { res, statusMock, jsonMock } = createMockRes();
+
+    const expectedError = { error: "Invalid exercise data." };
+
+    await workoutSessionController.addSessionExercise(req, res);
+
+    expect(statusMock).toHaveBeenCalledWith(400);
+    expect(jsonMock).toHaveBeenCalledWith(expectedError);
+
+    expect(await getAllExerciseTemplatesForClient(testClientId)).toEqual(
+      sampleExerciseTemplates,
+    );
+
+    const sampleExercise2 = {
+      session_id: sampleSession._id,
+      exercise_template_id: (
+        sampleExerciseTemplates[getRandomInt(sampleExerciseTemplates.length)]
+          ?._id as ObjectId
+      ).toString(),
+      sets: 5,
+      reps: 2,
+      weight_in_kg: -2.4,
+    };
+
+    const req2 = createMockReq({
+      params: { sessionId: sampleSession._id!.toString() },
+      body: sampleExercise2,
+    });
+
+    const {
+      res: res2,
+      statusMock: statusMock2,
+      jsonMock: jsonMock2,
+    } = createMockRes();
+
+    await workoutSessionController.addSessionExercise(req2, res2);
+
+    expect(statusMock2).toHaveBeenCalledWith(400);
+    expect(jsonMock2).toHaveBeenCalledWith(expectedError);
+  });
+
+  it("returns 400 if trying to use a template that belongs to another client", async () => {
+    const testClient2Id = (
+      await getDb().collection("users").insertOne({
+        name: "test2",
+        password_hash: "test2passwordhash",
+        email: "test2@gmail.com",
+        role: "client",
+      })
+    ).insertedId;
+    await getDb().collection("clients").insertOne({ _id: testClient2Id });
+
+    const sampleSession2: WorkoutSession = {
+      client_id: testClient2Id,
+      session_date: new Date(),
+    };
+
+    sampleSession2._id = await addWorkoutSession(sampleSession2);
+
+    const sampleExercise = {
+      session_id: sampleSession2._id,
+      exercise_template_id: (
+        sampleExerciseTemplates[getRandomInt(sampleExerciseTemplates.length)]
+          ?._id as ObjectId
+      ).toString(),
+      sets: 5,
+      reps: 2,
+    };
+
+    const req = createMockReq({
+      params: { sessionId: sampleSession2._id!.toString() },
+      body: sampleExercise,
+    });
+
+    const { res, statusMock, jsonMock } = createMockRes();
+
+    await workoutSessionController.addSessionExercise(req, res);
+
+    await deleteSessionById(sampleSession2._id);
+    await getDb().collection("clients").deleteOne({ _id: testClient2Id });
+    await getDb().collection("users").deleteOne({ _id: testClient2Id });
+
+    expect(statusMock).toHaveBeenCalledWith(400);
+    expect(jsonMock).toHaveBeenCalledWith({
+      error: "Template does not belong to this client.",
+    });
+  });
+
+  it("returns 201 and creates a new exercise", async () => {});
+});
 
 describe("updateSessionExercise", () => {});
 
