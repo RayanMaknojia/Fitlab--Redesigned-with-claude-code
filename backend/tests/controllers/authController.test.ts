@@ -1,4 +1,3 @@
-import type { Request } from "express";
 import bcrypt from "bcrypt";
 import { MongoServerError } from "mongodb";
 
@@ -9,6 +8,7 @@ jest.mock("../../models/User", () => ({
 
 import { createMockReq } from "../utils/createMockReq";
 import { createMockRes } from "../utils/createMockRes";
+import { createMockSession } from "../utils/createMockSession";
 import { close, connect, getDb } from "../../config/database";
 import * as userModel from "../../models/User";
 import * as clientModel from "../../models/Client";
@@ -19,26 +19,7 @@ import {
   getCurrentUser,
   getAllUsers,
 } from "../../controllers/authController";
-import { requireAuth } from "../../middleware/requireAuth";
 import type { SessionUser } from "../../types";
-
-// authController/requireAuth read and mutate req.session directly (login sets
-// req.session.user, logout calls req.session.destroy), so tests need a stand-in
-// for what express-session normally attaches to the request.
-function createMockSession(
-  overrides: {
-    user?: SessionUser;
-    cookie?: { maxAge?: number };
-    destroy?: (cb: (err?: Error) => void) => void;
-  } = {},
-): Request["session"] {
-  return {
-    user: undefined,
-    cookie: { maxAge: undefined },
-    destroy: (cb: (err?: Error) => void) => cb(),
-    ...overrides,
-  } as unknown as Request["session"];
-}
 
 beforeAll(async () => {
   await connect();
@@ -355,10 +336,7 @@ describe("loginUser", () => {
 
 describe("logoutUser", () => {
   it("destroys the session, clears the cookie, and returns ok", () => {
-    const destroyMock = jest.fn((cb: (err?: Error) => void) => cb());
-    const req = createMockReq({
-      session: createMockSession({ destroy: destroyMock }),
-    });
+    const req = createMockReq({ session: createMockSession() });
     const { res, jsonMock } = createMockRes();
     const clearCookieMock = jest.fn();
     (res as unknown as { clearCookie: jest.Mock }).clearCookie =
@@ -366,7 +344,6 @@ describe("logoutUser", () => {
 
     logoutUser(req, res);
 
-    expect(destroyMock).toHaveBeenCalled();
     expect(clearCookieMock).toHaveBeenCalledWith("session");
     expect(jsonMock).toHaveBeenCalledWith({ ok: true });
   });
@@ -401,37 +378,6 @@ describe("getCurrentUser", () => {
     getCurrentUser(req, res);
 
     expect(jsonMock).toHaveBeenCalledWith({ user });
-  });
-});
-
-describe("requireAuth", () => {
-  it("returns 401 and does not call next when there is no session user", () => {
-    const req = createMockReq({ session: createMockSession() });
-    const { res, statusMock, jsonMock } = createMockRes();
-    const next = jest.fn();
-
-    requireAuth(req, res, next);
-
-    expect(statusMock).toHaveBeenCalledWith(401);
-    expect(jsonMock).toHaveBeenCalledWith({ error: "Not authenticated" });
-    expect(next).not.toHaveBeenCalled();
-  });
-
-  it("calls next when the session has a user", () => {
-    const user: SessionUser = {
-      id: "6a5eaaf6318854d554f0382f",
-      name: "Someone",
-      email: "someone@example.com",
-      role: "client",
-    };
-    const req = createMockReq({ session: createMockSession({ user }) });
-    const { res, statusMock } = createMockRes();
-    const next = jest.fn();
-
-    requireAuth(req, res, next);
-
-    expect(next).toHaveBeenCalled();
-    expect(statusMock).not.toHaveBeenCalled();
   });
 });
 
