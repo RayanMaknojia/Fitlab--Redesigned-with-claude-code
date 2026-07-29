@@ -18,3 +18,28 @@ export const addClient = async (
 ): Promise<void> => {
   await collection().insertOne(client, session ? { session } : {});
 };
+
+export const getClientById = async (
+  clientId: ObjectId,
+): Promise<Client | null> => {
+  return await collection().findOne({ _id: clientId });
+};
+
+export const getClientsByTrainerId = async (
+  trainerId: ObjectId,
+): Promise<Client[]> => {
+  return await collection().find({ trainer_id: trainerId }).toArray();
+};
+
+// True only when the client exists AND is linked to this trainer.
+export const isLinkedToTrainer = async (
+  clientId: ObjectId,
+  trainerId: ObjectId,
+): Promise<boolean> => {
+  return (
+    (await collection().countDocuments(
+      { _id: clientId, trainer_id: trainerId },
+      { limit: 1 },
+    )) === 1
+  );
+};

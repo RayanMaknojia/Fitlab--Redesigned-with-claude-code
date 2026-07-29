@@ -14,6 +14,7 @@ import { workoutSessionRouter } from "./routes/workoutSessions";
 import { exerciseTemplateRouter } from "./routes/exerciseTemplates";
 import { scheduleRouter } from "./routes/schedules";
 import { chatRouter } from "./routes/chat";
+import { dataSyncRouter } from "./routes/dataSync";
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 
@@ -79,6 +80,7 @@ app.use("/api/chat", chatRouter);
 app.use("/api", workoutSessionRouter);
 app.use("/api", exerciseTemplateRouter);
 app.use("/api", scheduleRouter);
+app.use("/api", dataSyncRouter);
 
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ error: "Not found" });
