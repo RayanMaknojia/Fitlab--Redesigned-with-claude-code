@@ -3,6 +3,10 @@ import { getDb } from "../config/database";
 
 export interface Client {
   _id: ObjectId;
+  // @Jason: nothing sets this yet outside the linking flow you're building.
+  // Trainer access to a client's data (workout sessions, schedules, exercise
+  // templates) is gated on this field, so trainer access won't actually work
+  // end-to-end until the link request/accept flow writes it.
   trainer_id?: ObjectId;
 }
 

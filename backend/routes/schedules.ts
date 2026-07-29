@@ -4,6 +4,9 @@ import {
   deleteClientSchedule,
   getClientSchedules,
 } from "../controllers/schedulesController";
+import { requireAuth } from "../middleware/requireAuth";
+import { requireClientAccess } from "../middleware/requireClientAccess";
+import { requireScheduleAccess } from "../middleware/requireScheduleAccess";
 
 export const scheduleRouter = express.Router();
 
@@ -27,7 +30,12 @@ export const scheduleRouter = express.Router();
  *       404:
  *         description: Cannot find client
  */
-scheduleRouter.get("/clients/:clientId/schedules", getClientSchedules);
+scheduleRouter.get(
+  "/clients/:clientId/schedules",
+  requireAuth,
+  requireClientAccess,
+  getClientSchedules,
+);
 
 /**
  * @swagger
@@ -63,7 +71,12 @@ scheduleRouter.get("/clients/:clientId/schedules", getClientSchedules);
  *       404:
  *         description: Cannot find client
  */
-scheduleRouter.post("/clients/:clientId/schedules", addClientSchedule);
+scheduleRouter.post(
+  "/clients/:clientId/schedules",
+  requireAuth,
+  requireClientAccess,
+  addClientSchedule,
+);
 
 /**
  * @swagger
@@ -85,4 +98,9 @@ scheduleRouter.post("/clients/:clientId/schedules", addClientSchedule);
  *       404:
  *         description: Cannot find schedule
  */
-scheduleRouter.delete("/schedules/:scheduleId", deleteClientSchedule);
+scheduleRouter.delete(
+  "/schedules/:scheduleId",
+  requireAuth,
+  requireScheduleAccess,
+  deleteClientSchedule,
+);
