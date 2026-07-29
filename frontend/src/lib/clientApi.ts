@@ -173,3 +173,35 @@ export async function addExerciseTemplate(
 
   return data;
 }
+
+export async function updateExerciseTemplate(
+  templateId: string,
+  name: string,
+): Promise<ExerciseTemplate> {
+  const res = await fetch(`${API_BASE}/exercise-templates/${templateId}`, {
+    method: "PUT",
+    body: JSON.stringify({ name }),
+    headers: { "Content-Type": "application/json" },
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error);
+  }
+
+  return data;
+}
+
+export async function deleteExerciseTemplate(
+  templateId: string,
+): Promise<void> {
+  const res = await fetch(`${API_BASE}/exercise-templates/${templateId}`, {
+    method: "DELETE",
+  });
+
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.error);
+  }
+}
