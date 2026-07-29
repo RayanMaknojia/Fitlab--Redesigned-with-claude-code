@@ -41,4 +41,4 @@ export interface ExerciseTemplate {
   name: string;
 }
 
-export type { Exercise, WorkoutSession, ExerciseTemplate };
+export type { Exercise, WorkoutSession };
