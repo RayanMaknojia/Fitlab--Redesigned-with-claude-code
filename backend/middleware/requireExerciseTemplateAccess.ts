@@ -1,5 +1,5 @@
 import * as exerciseTemplateModel from "../models/ExerciseTemplate";
-import { requireResourceOwnerAccess } from "../utils/clientAccess";
+import { requireResourceOwnerAccess } from "./requireResourceOwnerAccess";
 
 export const requireExerciseTemplateAccess = requireResourceOwnerAccess(
   "templateId",

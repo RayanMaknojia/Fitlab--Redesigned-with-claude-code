@@ -1,5 +1,5 @@
 import * as scheduleModel from "../models/Schedule";
-import { requireResourceOwnerAccess } from "../utils/clientAccess";
+import { requireResourceOwnerAccess } from "./requireResourceOwnerAccess";
 
 export const requireScheduleAccess = requireResourceOwnerAccess(
   "scheduleId",
