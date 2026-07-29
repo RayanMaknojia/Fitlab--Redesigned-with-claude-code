@@ -54,6 +54,7 @@ export interface SessionExercise {
   sets: number;
   reps: number;
   weight_in_kg: number;
+  template_name: string;
 }
 
 export type { Exercise };

@@ -16,6 +16,7 @@ export default function DialogFormButton({
   children,
   submitButtonText,
   closeButtonText,
+  modal = true,
   handleSubmit,
 }: {
   dialogTriggerButton: ReactNode;
@@ -23,10 +24,11 @@ export default function DialogFormButton({
   children: ReactNode;
   submitButtonText: string;
   closeButtonText: string;
+  modal?: boolean;
   handleSubmit: (e: React.SubmitEvent) => Promise<void>;
 }) {
   return (
-    <Dialog>
+    <Dialog modal={modal}>
       <DialogTrigger asChild>{dialogTriggerButton}</DialogTrigger>
       <DialogContent className="sm:max-w-sm dark">
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">

@@ -14,6 +14,7 @@ import type {
   ExerciseTemplate,
   PersonalBest,
   ProgressPoint,
+  SessionExercise,
   WeeklyVolume,
 } from "@/types/client";
 
@@ -290,6 +291,88 @@ export async function deleteSessionById(sessionId: string) {
   const res = await fetch(`${API_BASE}/workout-sessions/${sessionId}`, {
     method: "DELETE",
   });
+
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.error);
+  }
+}
+
+export async function getSessionExercisesById(sessionId: string) {
+  const res = await fetch(
+    `${API_BASE}/workout-sessions/${sessionId}/exercises`,
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error);
+  }
+
+  return data;
+}
+
+export async function addExerciseToSession(
+  sessionId: string,
+  exercise: Omit<SessionExercise, "session_id" | "template_name">,
+): Promise<SessionExercise> {
+  if (exercise.sets < 0 || exercise.reps < 0 || exercise.weight_in_kg < 0) {
+    throw new Error(
+      "Invalid exercise data. Sets and reps must be greater than 0, and weight in kg must be either omitted, or nonnegative",
+    );
+  }
+
+  const res = await fetch(
+    `${API_BASE}/workout-sessions/${sessionId}/exercises`,
+    {
+      method: "POST",
+      body: JSON.stringify({ ...exercise }),
+      headers: { "Content-Type": "application/json" },
+    },
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error);
+  }
+
+  return data;
+}
+
+export async function updateExerciseById(
+  sessionId: string,
+  exerciseId: string,
+  exercise: Omit<SessionExercise, "session_id">,
+) {
+  const res = await fetch(
+    `${API_BASE}/workout-sessions/${sessionId}/exercises/${exerciseId}`,
+    {
+      method: "PUT",
+      body: JSON.stringify({ exercise }),
+      headers: { "Content-Type": "application/json" },
+    },
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error);
+  }
+
+  return data;
+}
+
+export async function deleteExerciseById(
+  sessionId: string,
+  exerciseId: string,
+) {
+  const res = await fetch(
+    `${API_BASE}/workout-sessions/${sessionId}/exercises/${exerciseId}`,
+    {
+      method: "DELETE",
+    },
+  );
 
   if (!res.ok) {
     const data = await res.json();

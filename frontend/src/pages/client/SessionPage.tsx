@@ -1,16 +1,31 @@
 import DialogFormButton from "@/components/client/DialogFormButton";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   Item,
   ItemActions,
   ItemContent,
+  ItemDescription,
   ItemTitle,
 } from "@/components/ui/item";
 import { Label } from "@/components/ui/label";
-import { getSessionById } from "@/lib/clientApi";
+import { useAuth } from "@/context/AuthContext";
+import {
+  addExerciseToSession,
+  getExerciseTemplates,
+  getSessionById,
+  getSessionExercisesById,
+} from "@/lib/clientApi";
 import displayError from "@/lib/displayError";
 import {
   type ExerciseTemplate,
@@ -25,6 +40,7 @@ export default function SessionPage() {
   const [session, setSession] = useState<WorkoutSession | null>(null);
   const [exercises, setExercises] = useState<SessionExercise[]>([]);
   const [templates, setTemplates] = useState<ExerciseTemplate[]>([]);
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const params = useParams();
 
@@ -36,7 +52,8 @@ export default function SessionPage() {
         }
 
         setSession(await getSessionById(params.sessionId));
-        setExercises([]);
+        setExercises(await getSessionExercisesById(params.sessionId));
+        setTemplates(await getExerciseTemplates(user!.id));
       } catch (e: unknown) {
         displayError(
           e instanceof Error ? e.message : "Could not fetch session data",
@@ -46,7 +63,54 @@ export default function SessionPage() {
       }
     }
     fetchData();
-  }, []);
+  }, [params.sessionId, user]);
+
+  const handleSubmit = async (e: React.SubmitEvent<Element>) => {
+    e.preventDefault();
+
+    if (!session) {
+      displayError("Session is invalid.");
+      return;
+    }
+
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+
+    if (!formData.get("exercise-template-combobox")) {
+      displayError("Must choose a template");
+      return;
+    }
+
+    const exercise_template_id = formData.get(
+      "exercise-template-combobox",
+    )! as string;
+
+    if (!formData.get("sets") || !formData.get("reps")) {
+      displayError("Must enter in sets and reps");
+      return;
+    }
+
+    const sets = Number(formData.get("sets") as string);
+    const reps = Number(formData.get("reps") as string);
+
+    const weight_in_kg = formData.get("weight_in_kg")
+      ? Number(formData.get("weight_in_kg") as string)
+      : 0;
+
+    console.log(exercise_template_id, sets, reps, weight_in_kg);
+
+    try {
+      const newExercise = await addExerciseToSession(session._id as string, {
+        exercise_template_id,
+        sets,
+        reps,
+        weight_in_kg,
+      });
+
+      setExercises([...exercises, newExercise]);
+    } catch (e: unknown) {
+      displayError(e instanceof Error ? e.message : "Could not add exercise.");
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -81,18 +145,74 @@ export default function SessionPage() {
                 dialogHeaderText="Add a exercise"
                 submitButtonText="Add exercise"
                 closeButtonText="Cancel"
-                handleSubmit={async () => {}}
+                handleSubmit={handleSubmit}
+                modal={false}
               >
                 <FieldGroup>
                   <Field>
-                    <Label htmlFor="date" className="text-white">
-                      Name
+                    <Label
+                      htmlFor="exercise-template-combobox"
+                      className="text-white"
+                    >
+                      Exercise name
+                    </Label>
+                    <Combobox
+                      name="exercise-template-combobox"
+                      items={templates}
+                      itemToStringValue={(t: ExerciseTemplate) => t._id}
+                      itemToStringLabel={(t: ExerciseTemplate) => t.name}
+                    >
+                      <ComboboxInput
+                        placeholder="Select an exercise template"
+                        className="text-white"
+                        id="exercise-template-combobox"
+                      />
+                      <ComboboxContent className="dark">
+                        <ComboboxEmpty>No templates found.</ComboboxEmpty>
+                        <ComboboxList>
+                          {(t) => (
+                            <ComboboxItem key={t._id} value={t}>
+                              {t.name}
+                            </ComboboxItem>
+                          )}
+                        </ComboboxList>
+                      </ComboboxContent>
+                    </Combobox>
+                  </Field>
+                  <Field>
+                    <Label htmlFor="sets" className="text-white">
+                      Sets
                     </Label>
                     <Input
-                      id="date"
-                      name="date"
+                      id="sets"
+                      name="sets"
+                      type="number"
                       className="text-white"
-                      type="datetime-local"
+                      min={1}
+                    />
+                  </Field>
+                  <Field>
+                    <Label htmlFor="reps" className="text-white">
+                      Reps
+                    </Label>
+                    <Input
+                      id="reps"
+                      name="reps"
+                      type="number"
+                      className="text-white"
+                      min={1}
+                    />
+                  </Field>
+                  <Field>
+                    <Label htmlFor="weight_in_kg" className="text-white">
+                      Weight in kg (optional)
+                    </Label>
+                    <Input
+                      id="weight_in_kg"
+                      name="weight_in_kg"
+                      type="number"
+                      className="text-white"
+                      min={0}
                     />
                   </Field>
                 </FieldGroup>
@@ -107,7 +227,11 @@ export default function SessionPage() {
                 return (
                   <Item variant="outline" key={e._id}>
                     <ItemContent>
-                      <ItemTitle></ItemTitle>
+                      <ItemTitle>{e.template_name}</ItemTitle>
+                      <ItemDescription>
+                        {e.sets} sets, {e.reps} reps
+                        {e.weight_in_kg > 0 && `, ${e.weight_in_kg} sets`}
+                      </ItemDescription>
                     </ItemContent>
                     <ItemActions></ItemActions>
                   </Item>
