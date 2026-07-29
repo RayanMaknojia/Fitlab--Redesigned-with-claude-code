@@ -156,6 +156,10 @@ export async function addExerciseTemplate(
   clientId: string,
   name: string,
 ): Promise<ExerciseTemplate> {
+  if (name.trim().length === 0) {
+    throw new Error("Cannot have empty name");
+  }
+
   const res = await fetch(
     `${API_BASE}/clients/${clientId}/exercise-templates`,
     {
@@ -178,6 +182,10 @@ export async function updateExerciseTemplate(
   templateId: string,
   name: string,
 ): Promise<ExerciseTemplate> {
+  if (name.trim().length === 0) {
+    throw new Error("Cannot update with empty name");
+  }
+
   const res = await fetch(`${API_BASE}/exercise-templates/${templateId}`, {
     method: "PUT",
     body: JSON.stringify({ name }),

@@ -1,4 +1,4 @@
-import type { ReactNode, ReactPortal } from "react";
+import type { ReactNode } from "react";
 import {
   Dialog,
   DialogClose,

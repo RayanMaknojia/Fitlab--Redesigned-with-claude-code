@@ -1,15 +1,6 @@
 import DialogFormButton from "@/components/client/DialogFormButton";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,6 +10,7 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import { Label } from "@/components/ui/label";
+import { Toaster } from "@/components/ui/sonner";
 import { useAuth } from "@/context/AuthContext";
 import {
   addExerciseTemplate,
@@ -26,6 +18,7 @@ import {
   getExerciseTemplates,
   updateExerciseTemplate,
 } from "@/lib/clientApi";
+import displayError from "@/lib/displayError";
 import type { ExerciseTemplate } from "@/types/client";
 import { useEffect, useState } from "react";
 
@@ -33,7 +26,6 @@ export default function ClientExerciseTemplates() {
   const [templates, setTemplates] = useState<ExerciseTemplate[]>([]);
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [newTemplateName, setNewTemplateName] = useState("");
 
   useEffect(() => {
@@ -41,7 +33,9 @@ export default function ClientExerciseTemplates() {
       try {
         setTemplates(await getExerciseTemplates(user?.id as string));
       } catch (e: unknown) {
-        setError(e instanceof Error ? e.message : "Could not fetch templates.");
+        displayError(
+          e instanceof Error ? e.message : "Could not fetch templates.",
+        );
       } finally {
         setLoading(false);
       }
@@ -60,7 +54,7 @@ export default function ClientExerciseTemplates() {
       );
       setTemplates([...templates, newTemplate]);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Could not add template.");
+      displayError(e instanceof Error ? e.message : "Could not add template.");
     } finally {
       setNewTemplateName("");
     }
@@ -78,7 +72,7 @@ export default function ClientExerciseTemplates() {
       newTemplate._id = _id;
       setTemplates(templates.map((t) => (t._id === _id ? newTemplate : t)));
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Could not edit template.");
+      displayError(e instanceof Error ? e.message : "Could not edit template.");
     }
   };
 
@@ -87,7 +81,9 @@ export default function ClientExerciseTemplates() {
       await deleteExerciseTemplate(_id);
       setTemplates(templates.filter((t) => t._id !== _id));
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Could not delete template.");
+      displayError(
+        e instanceof Error ? e.message : "Could not delete template.",
+      );
     }
   };
 
@@ -129,9 +125,7 @@ export default function ClientExerciseTemplates() {
           </FieldGroup>
         </DialogFormButton>
         <Card className="border-border/60 bg-card/60 py-5 backdrop-blur p-6 flex">
-          {error ? (
-            error
-          ) : loading ? (
+          {loading ? (
             <div className="h-64 animate-pulse rounded-lg bg-muted/40" />
           ) : templates.length > 0 ? (
             templates.map((t) => (
@@ -180,6 +174,7 @@ export default function ClientExerciseTemplates() {
             <p>No templates yet.</p>
           )}
         </Card>
+        <Toaster />
       </div>
     </>
   );
