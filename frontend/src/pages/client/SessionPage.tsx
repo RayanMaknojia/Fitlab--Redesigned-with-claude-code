@@ -22,9 +22,11 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import {
   addExerciseToSession,
+  deleteExerciseById,
   getExerciseTemplates,
   getSessionById,
   getSessionExercisesById,
+  updateExerciseById,
 } from "@/lib/clientApi";
 import displayError from "@/lib/displayError";
 import {
@@ -68,11 +70,6 @@ export default function SessionPage() {
   const handleSubmit = async (e: React.SubmitEvent<Element>) => {
     e.preventDefault();
 
-    if (!session) {
-      displayError("Session is invalid.");
-      return;
-    }
-
     const formData = new FormData(e.currentTarget as HTMLFormElement);
 
     if (!formData.get("exercise-template-combobox")) {
@@ -96,10 +93,8 @@ export default function SessionPage() {
       ? Number(formData.get("weight_in_kg") as string)
       : 0;
 
-    console.log(exercise_template_id, sets, reps, weight_in_kg);
-
     try {
-      const newExercise = await addExerciseToSession(session._id as string, {
+      const newExercise = await addExerciseToSession(session!._id as string, {
         exercise_template_id,
         sets,
         reps,
@@ -109,6 +104,58 @@ export default function SessionPage() {
       setExercises([...exercises, newExercise]);
     } catch (e: unknown) {
       displayError(e instanceof Error ? e.message : "Could not add exercise.");
+    }
+  };
+
+  const handleUpdate = async (
+    e: React.SubmitEvent<Element>,
+    exerciseId: string,
+  ) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+
+    if (!formData.get("sets") || !formData.get("reps")) {
+      displayError("Must enter in sets and reps");
+      return;
+    }
+
+    const sets = Number(formData.get("sets") as string);
+    const reps = Number(formData.get("reps") as string);
+
+    const weight_in_kg = formData.get("weight_in_kg")
+      ? Number(formData.get("weight_in_kg") as string)
+      : 0;
+
+    try {
+      const newExerciseData: SessionExercise = await updateExerciseById(
+        session!._id as string,
+        exerciseId,
+        {
+          sets,
+          reps,
+          weight_in_kg,
+        },
+      );
+
+      setExercises(
+        exercises.map((e) =>
+          e._id === exerciseId ? { ...e, ...newExerciseData } : e,
+        ),
+      );
+    } catch (e: unknown) {
+      displayError(e instanceof Error ? e.message : "Could not add exercise.");
+    }
+  };
+
+  const handleDelete = async (exerciseId: string) => {
+    try {
+      await deleteExerciseById(session!._id as string, exerciseId);
+      setExercises(exercises.filter((e) => e._id !== exerciseId));
+    } catch (e: unknown) {
+      displayError(
+        e instanceof Error ? e.message : "Could not delete exercise.",
+      );
     }
   };
 
@@ -233,7 +280,73 @@ export default function SessionPage() {
                         {e.weight_in_kg > 0 && `, ${e.weight_in_kg} sets`}
                       </ItemDescription>
                     </ItemContent>
-                    <ItemActions></ItemActions>
+                    <ItemActions>
+                      <DialogFormButton
+                        dialogTriggerButton={
+                          <Button size="sm" variant="outline">
+                            Update
+                          </Button>
+                        }
+                        dialogHeaderText="Update this exercise"
+                        submitButtonText="Update exercise"
+                        closeButtonText="Cancel"
+                        handleSubmit={async (event) => {
+                          await handleUpdate(event, e._id as string);
+                        }}
+                        modal={false}
+                      >
+                        <FieldGroup>
+                          <Field>
+                            <Label htmlFor="sets" className="text-white">
+                              Sets
+                            </Label>
+                            <Input
+                              id="sets"
+                              name="sets"
+                              type="number"
+                              className="text-white"
+                              min={1}
+                            />
+                          </Field>
+                          <Field>
+                            <Label htmlFor="reps" className="text-white">
+                              Reps
+                            </Label>
+                            <Input
+                              id="reps"
+                              name="reps"
+                              type="number"
+                              className="text-white"
+                              min={1}
+                            />
+                          </Field>
+                          <Field>
+                            <Label
+                              htmlFor="weight_in_kg"
+                              className="text-white"
+                            >
+                              Weight in kg (optional)
+                            </Label>
+                            <Input
+                              id="weight_in_kg"
+                              name="weight_in_kg"
+                              type="number"
+                              className="text-white"
+                              min={0}
+                            />
+                          </Field>
+                        </FieldGroup>
+                      </DialogFormButton>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={async () =>
+                          await handleDelete(e._id as string)
+                        }
+                      >
+                        Delete
+                      </Button>
+                    </ItemActions>
                   </Item>
                 );
               })

@@ -215,6 +215,7 @@ export const addSessionExercise = async (req: Request, res: Response) => {
   const exercise = {
     session_id,
     exercise_template_id: result.data.exercise_template_id,
+    template_name: template.name,
     sets: result.data.sets,
     reps: result.data.reps,
     weight_in_kg: result.data.weight_in_kg,

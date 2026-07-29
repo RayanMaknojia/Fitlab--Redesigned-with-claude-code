@@ -343,13 +343,16 @@ export async function addExerciseToSession(
 export async function updateExerciseById(
   sessionId: string,
   exerciseId: string,
-  exercise: Omit<SessionExercise, "session_id">,
+  exercise: Omit<
+    SessionExercise,
+    "session_id" | "template_name" | "exercise_template_id"
+  >,
 ) {
   const res = await fetch(
     `${API_BASE}/workout-sessions/${sessionId}/exercises/${exerciseId}`,
     {
       method: "PUT",
-      body: JSON.stringify({ exercise }),
+      body: JSON.stringify(exercise),
       headers: { "Content-Type": "application/json" },
     },
   );
