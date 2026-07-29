@@ -16,6 +16,7 @@ import ClientProgress from "@/pages/client/ClientProgress";
 import { ClientPagePlaceholder, NotFound } from "@/pages/placeholders";
 import ClientExerciseTemplates from "./pages/client/ClientExerciseTemplates";
 import ClientSessions from "./pages/client/ClientSessions";
+import SessionPage from "./pages/client/SessionPage";
 
 // Route ownership:
 //   /trainer/*     → Jiachen Sun (trainer-client management) — implemented
@@ -73,6 +74,10 @@ function App() {
               element={<ClientExerciseTemplates />}
             />
             <Route path="workout-sessions" element={<ClientSessions />} />
+            <Route
+              path="workout-sessions/:sessionId"
+              element={<SessionPage />}
+            />
           </Route>
 
           {/* Teammates' pages — replace the placeholder */}

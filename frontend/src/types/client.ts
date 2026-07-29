@@ -47,4 +47,13 @@ export interface WorkoutSession {
   session_date: string;
 }
 
+export interface SessionExercise {
+  _id?: string;
+  session_id: string;
+  exercise_template_id: string;
+  sets: number;
+  reps: number;
+  weight_in_kg: number;
+}
+
 export type { Exercise };

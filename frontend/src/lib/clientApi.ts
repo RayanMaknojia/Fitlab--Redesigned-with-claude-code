@@ -248,3 +248,51 @@ export async function addClientSession(clientId: string, session_date: string) {
 
   return data;
 }
+
+export async function getSessionById(
+  sessionId: string,
+): Promise<WorkoutSession> {
+  const res = await fetch(`${API_BASE}/workout-sessions/${sessionId}`);
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error);
+  }
+
+  return data;
+}
+
+export async function updateSessionById(
+  sessionId: string,
+  session_date: string,
+) {
+  if (!session_date) {
+    throw new Error("Must enter in date");
+  }
+
+  const res = await fetch(`${API_BASE}/workout-sessions/${sessionId}`, {
+    method: "PUT",
+    body: JSON.stringify({ session_date }),
+    headers: { "Content-Type": "application/json" },
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error);
+  }
+
+  return data;
+}
+
+export async function deleteSessionById(sessionId: string) {
+  const res = await fetch(`${API_BASE}/workout-sessions/${sessionId}`, {
+    method: "DELETE",
+  });
+
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.error);
+  }
+}
