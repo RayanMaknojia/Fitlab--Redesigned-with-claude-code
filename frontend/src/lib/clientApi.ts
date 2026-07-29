@@ -151,3 +151,25 @@ export async function getExerciseTemplates(
 
   return data;
 }
+
+export async function addExerciseTemplate(
+  clientId: string,
+  name: string,
+): Promise<ExerciseTemplate> {
+  const res = await fetch(
+    `${API_BASE}/clients/${clientId}/exercise-templates`,
+    {
+      method: "POST",
+      body: JSON.stringify({ name }),
+      headers: { "Content-Type": "application/json" },
+    },
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error);
+  }
+
+  return data;
+}
