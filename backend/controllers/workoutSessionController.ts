@@ -223,7 +223,9 @@ export const addSessionExercise = async (req: Request, res: Response) => {
   const exerciseResultId =
     await sessionExerciseModel.addSessionExercise(exercise);
 
-  res.status(201).json({ _id: exerciseResultId, ...exercise });
+  res
+    .status(201)
+    .json({ _id: exerciseResultId, template_name: template.name, ...exercise });
 };
 
 const SessionExerciseChangeInput = z.object({

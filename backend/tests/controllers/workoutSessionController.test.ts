@@ -30,6 +30,7 @@ import {
   updateWorkoutSession,
 } from "../../controllers/workoutSessionController";
 import * as workoutSessionController from "../../controllers/workoutSessionController";
+import { number } from "zod";
 
 // Returns a random integer in the interval [0, max).
 // Function from
@@ -725,6 +726,7 @@ describe("addSessionExercise", () => {
     expect(jsonMock).toHaveBeenCalledWith({
       _id: expect.any(ObjectId),
       exercise_template_id,
+      template_name: expect.any(String),
       ...sampleExercise,
       weight_in_kg: expect.anything(),
     });
