@@ -2,7 +2,7 @@
 // Owned by: [your name] (progress dashboard / client view).
 // Does not modify Jiachen's index.ts — imports and extends it instead.
 
-import type { Exercise, WorkoutSession } from "@/types";
+import type { Exercise } from "@/types";
 
 /** One point on a "weight over time" line chart for a single exercise. */
 export interface ProgressPoint {
@@ -41,4 +41,10 @@ export interface ExerciseTemplate {
   name: string;
 }
 
-export type { Exercise, WorkoutSession };
+export interface WorkoutSession {
+  _id?: string;
+  client_id: string;
+  session_date: string;
+}
+
+export type { Exercise };

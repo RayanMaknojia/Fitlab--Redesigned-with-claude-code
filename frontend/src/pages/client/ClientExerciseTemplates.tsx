@@ -1,14 +1,9 @@
 import DialogFormButton from "@/components/client/DialogFormButton";
+import ExerciseTemplateCard from "@/components/client/ExerciseTemplateCard";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemTitle,
-} from "@/components/ui/item";
 import { Label } from "@/components/ui/label";
 import { Toaster } from "@/components/ui/sonner";
 import { useAuth } from "@/context/AuthContext";
@@ -129,46 +124,12 @@ export default function ClientExerciseTemplates() {
             <div className="h-64 animate-pulse rounded-lg bg-muted/40" />
           ) : templates.length > 0 ? (
             templates.map((t) => (
-              <Item variant="outline" key={t._id}>
-                <ItemContent>
-                  <ItemTitle>{t.name}</ItemTitle>
-                </ItemContent>
-                <ItemActions>
-                  <DialogFormButton
-                    dialogTriggerButton={
-                      <Button size="sm" variant="outline">
-                        Edit
-                      </Button>
-                    }
-                    dialogHeaderText="Edit this template"
-                    submitButtonText="Finish editing"
-                    closeButtonText="Cancel"
-                    handleSubmit={async (e) =>
-                      await handleEditTemplate(e, t._id)
-                    }
-                  >
-                    <FieldGroup>
-                      <Field>
-                        <Label htmlFor="new-name" className="text-white">
-                          Name
-                        </Label>
-                        <Input
-                          id="new-name"
-                          name="new-name"
-                          className="text-white"
-                        />
-                      </Field>
-                    </FieldGroup>
-                  </DialogFormButton>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={async () => handleDeleteTemplate(t._id)}
-                  >
-                    Delete
-                  </Button>
-                </ItemActions>
-              </Item>
+              <ExerciseTemplateCard
+                t={t}
+                key={t._id}
+                handleDeleteTemplate={handleDeleteTemplate}
+                handleEditTemplate={handleEditTemplate}
+              />
             ))
           ) : (
             <p>No templates yet.</p>

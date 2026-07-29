@@ -213,3 +213,38 @@ export async function deleteExerciseTemplate(
     throw new Error(data.error);
   }
 }
+
+export async function getClientSessions(clientId: string) {
+  const res = await fetch(
+    `${API_BASE}/clients/${clientId}/workout-sessions`,
+    {},
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error);
+  }
+
+  return data;
+}
+
+export async function addClientSession(clientId: string, session_date: string) {
+  if (!session_date) {
+    throw new Error("Must enter in date");
+  }
+
+  const res = await fetch(`${API_BASE}/clients/${clientId}/workout-sessions`, {
+    method: "POST",
+    body: JSON.stringify({ session_date }),
+    headers: { "Content-Type": "application/json" },
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error);
+  }
+
+  return data;
+}

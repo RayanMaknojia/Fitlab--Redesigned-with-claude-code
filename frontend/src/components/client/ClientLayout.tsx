@@ -11,6 +11,7 @@ import {
   Settings,
   LogOut,
   ClipboardClock,
+  CalendarClock,
 } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -26,6 +27,12 @@ const NAV = [
     to: "/client/exercise-templates",
     label: "Exercise Templates",
     icon: ClipboardClock,
+    end: false,
+  },
+  {
+    to: "/client/workout-sessions",
+    label: "Workout Sessions",
+    icon: CalendarClock,
     end: false,
   },
   {
