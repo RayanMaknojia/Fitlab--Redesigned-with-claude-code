@@ -4,6 +4,8 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 import RequireAuth from "@/components/RequireAuth";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
+import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
+import ResetPasswordPage from "@/pages/ResetPasswordPage";
 
 import TrainerLayout from "@/components/trainer/TrainerLayout";
 import TrainerDashboard from "@/pages/trainer/TrainerDashboard";
@@ -19,10 +21,11 @@ import ClientSessions from "./pages/client/ClientSessions";
 import SessionPage from "./pages/client/SessionPage";
 
 // Route ownership:
-//   /trainer/*     → Jiachen Sun (trainer-client management) — implemented
-//   /login         → Alex (auth) — implemented
-//   /client/*      → progress dashboard team — implemented
-//   /clients/:id   → client view team — placeholder, swap in your page
+//   /trainer/*                          → Jiachen Sun (trainer-client management) — implemented
+//   /login, /register                   → Alex (auth) — implemented
+//   /forgot-password, /reset-password   → Alex (auth) — implemented
+//   /client/*                           → progress dashboard team — implemented
+//   /clients/:id                        → client view team — placeholder, swap in your page
 
 function Home() {
   const { user, loading } = useAuth();
@@ -43,6 +46,8 @@ function App() {
 
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* Trainer side */}
           <Route
