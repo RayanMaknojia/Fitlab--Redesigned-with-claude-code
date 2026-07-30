@@ -34,6 +34,15 @@ const findUserByEmail = async (email: string): Promise<User | null> => {
   return await collection().findOne({ email });
 };
 
+const findUserById = async (
+  userId: ObjectId,
+): Promise<Omit<User, "password_hash"> | null> => {
+  return await collection().findOne(
+    { _id: userId },
+    { projection: { password_hash: 0 } },
+  );
+};
+
 const userExists = async (userId: ObjectId): Promise<boolean> => {
   return (await collection().countDocuments({ _id: userId }, { limit: 1 })) === 1;
 };
@@ -64,4 +73,4 @@ const addUser = async (user: Omit<User, "_id">): Promise<void> => {
   }
 };
 
-export { init, getAllUsers, findUserByEmail, userExists, addUser };
+export { init, getAllUsers, findUserByEmail, findUserById, userExists, addUser };
