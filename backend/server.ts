@@ -2,6 +2,9 @@ import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import session from "express-session";
 import MongoStore from "connect-mongo";
+import swaggerJSDoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
+
 import { connect } from "./config/database";
 import * as userModel from "./models/User";
 import * as clientModel from "./models/Client";
@@ -10,6 +13,7 @@ import * as sessionExerciseModel from "./models/SessionExercise";
 import * as exerciseTemplateModel from "./models/ExerciseTemplate";
 import * as scheduleModel from "./models/Schedule";
 import * as linkRequestModel from "./models/LinkRequest";
+import * as passwordResetTokenModel from "./models/PasswordResetToken";
 import { authRouter } from "./routes/auth";
 import { workoutSessionRouter } from "./routes/workoutSessions";
 import { exerciseTemplateRouter } from "./routes/exerciseTemplates";
@@ -50,10 +54,10 @@ app.use(
     resave: false,
     saveUninitialized: false,
     rolling: true,
-    store: MongoStore.create({ mongoUrl: CONNECTION_STRING }), // Use MongoDB to store session data
+    store: MongoStore.create({ mongoUrl: CONNECTION_STRING }),
     cookie: {
       httpOnly: true,
-      maxAge: 3 * 60 * 60 * 1000, // 3 hours
+      maxAge: 3 * 60 * 60 * 1000,
     },
   }),
 );
@@ -100,6 +104,7 @@ const startServer = async () => {
       exerciseTemplateModel.init(),
       scheduleModel.init(),
       linkRequestModel.init(),
+      passwordResetTokenModel.init(),
     ]);
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);

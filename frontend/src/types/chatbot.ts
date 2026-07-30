@@ -5,3 +5,8 @@ export type ChatMessageData = {
   role: ChatRole
   content: string
 }
+
+export type ChatRequestMessage = {
+  role: ChatRole
+  content: string
+}
