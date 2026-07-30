@@ -42,5 +42,17 @@ export const api = {
 
   me: () => request<{ user: ApiUser }>("/auth/me"),
 
+  forgotPassword: (input: { email: string }) =>
+    request<{ ok: boolean }>("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
+
+  resetPassword: (input: { token: string; password: string }) =>
+    request<{ ok: boolean }>("/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
+
   getMyWorkoutSessions: () => request<WorkoutSession[]>("/me/workout-sessions"),
 };

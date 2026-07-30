@@ -9,6 +9,7 @@ import * as workoutSessionModel from "./models/WorkoutSession";
 import * as sessionExerciseModel from "./models/SessionExercise";
 import * as exerciseTemplateModel from "./models/ExerciseTemplate";
 import * as scheduleModel from "./models/Schedule";
+import * as passwordResetTokenModel from "./models/PasswordResetToken";
 import { authRouter } from "./routes/auth";
 import { workoutSessionRouter } from "./routes/workoutSessions";
 import { exerciseTemplateRouter } from "./routes/exerciseTemplates";
@@ -96,6 +97,7 @@ const startServer = async () => {
       sessionExerciseModel.init(),
       exerciseTemplateModel.init(),
       scheduleModel.init(),
+      passwordResetTokenModel.init(),
     ]);
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
