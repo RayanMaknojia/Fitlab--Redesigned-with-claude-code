@@ -1,5 +1,6 @@
 import express from 'express'
-import { getAllUsers, registerUser, loginUser, logoutUser, getCurrentUser, forgotPassword, resetPassword } from '../controllers/authController'
+import { getAllUsers, registerUser, loginUser, logoutUser, getCurrentUser } from '../controllers/authController'
+import { forgotPassword, resetPassword } from '../controllers/passwordResetController'
 import { requireAuth } from '../middleware/requireAuth'
 import { requireAdmin } from '../middleware/requireAdmin'
 import { forgotPasswordRateLimit, resetPasswordRateLimit } from '../middleware/passwordResetRateLimit'
