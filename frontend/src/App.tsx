@@ -20,6 +20,12 @@ import { ClientPagePlaceholder, NotFound } from "@/pages/placeholders";
 import ClientExerciseTemplates from "./pages/client/ClientExerciseTemplates";
 import ClientSessions from "./pages/client/ClientSessions";
 import SessionPage from "./pages/client/SessionPage";
+import BrowseTrainers from "@/pages/client/BrowseTrainers";
+import BrowseClients from "@/pages/trainer/BrowseClients";
+import ListingDetail from "@/pages/marketplace/ListingDetail";
+import MyListing from "@/pages/marketplace/MyListing";
+import Notifications from "@/pages/marketplace/Notifications";
+import RequestDetail from "@/pages/marketplace/RequestDetail";
 
 // Route ownership:
 //   /trainer/*                          → Jiachen Sun (trainer-client management) — implemented
@@ -62,6 +68,11 @@ function App() {
             <Route index element={<TrainerDashboard />} />
             <Route path="clients" element={<TrainerClients />} />
             <Route path="clients/:clientId" element={<TrainerClientDetail />} />
+            <Route path="browse" element={<BrowseClients />} />
+            <Route path="browse/:listingId" element={<ListingDetail />} />
+            <Route path="my-listing" element={<MyListing />} />
+            <Route path="notifications" element={<Notifications />} />
+            <Route path="requests/:requestId" element={<RequestDetail />} />
             <Route path="schedule" element={<TrainerSchedule />} />
           </Route>
 
@@ -85,6 +96,11 @@ function App() {
               path="workout-sessions/:sessionId"
               element={<SessionPage />}
             />
+            <Route path="browse" element={<BrowseTrainers />} />
+            <Route path="browse/:listingId" element={<ListingDetail />} />
+            <Route path="my-listing" element={<MyListing />} />
+            <Route path="notifications" element={<Notifications />} />
+            <Route path="requests/:requestId" element={<RequestDetail />} />
           </Route>
 
           {/* Teammates' pages — replace the placeholder */}

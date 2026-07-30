@@ -2,24 +2,41 @@
 // other pages (login, client view) keep their own styling.
 // Owned by: Jiachen Sun (trainer-client management).
 
+import { useEffect, useState } from "react"
 import { NavLink, Outlet } from "react-router-dom"
-import { Dumbbell, LayoutDashboard, Users, Calendar, Settings, LogOut } from "lucide-react"
+import { Bell, Dumbbell, LayoutDashboard, Search, Settings, UserSquare2, Users, Calendar, LogOut } from "lucide-react"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import AuthenticatedChatbot from "@/components/chatbot/AuthenticatedChatbot"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
+import { getMyNotifications } from "@/lib/notificationsApi"
 
 const NAV = [
   { to: "/trainer", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/trainer/clients", label: "Clients", icon: Users, end: false },
+  { to: "/trainer/browse", label: "Find clients", icon: Search, end: false },
+  { to: "/trainer/my-listing", label: "My listing", icon: UserSquare2, end: false },
+  { to: "/trainer/notifications", label: "Notifications", icon: Bell, end: false },
   { to: "/trainer/schedule", label: "Schedule", icon: Calendar, end: false },
   { to: "/trainer/settings", label: "Settings", icon: Settings, end: false, soon: true },
 ]
 
 export default function TrainerLayout() {
   const { user, logout } = useAuth()
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  useEffect(() => {
+    const refresh = () =>
+      getMyNotifications().then((n) => setUnreadCount(n.filter((x) => !x.read).length))
+    const first = setTimeout(refresh, 0)
+    const id = setInterval(refresh, 10_000)
+    return () => {
+      clearTimeout(first)
+      clearInterval(id)
+    }
+  }, [])
 
   return (
     <div className="dark min-h-screen bg-background text-foreground">
@@ -67,6 +84,11 @@ export default function TrainerLayout() {
                 {soon && (
                   <Badge variant="secondary" className="ml-auto text-[10px]">
                     soon
+                  </Badge>
+                )}
+                {to === "/trainer/notifications" && unreadCount > 0 && (
+                  <Badge className="ml-auto bg-lime-400 text-[10px] text-black">
+                    {unreadCount}
                   </Badge>
                 )}
               </NavLink>
