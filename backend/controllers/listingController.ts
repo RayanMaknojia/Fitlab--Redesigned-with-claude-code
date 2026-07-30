@@ -114,6 +114,23 @@ export const getListing = async (req: Request, res: Response) => {
   res.status(200).json(toPublicListing(listing));
 };
 
+// GET /api/listings/by-user/:userId
+export const getListingByUser = async (req: Request, res: Response) => {
+  const userId = parseObjectId(req.params.userId);
+
+  if (!userId) {
+    return res.status(400).json({ error: "Invalid user id." });
+  }
+
+  const listing = await listingModel.getListingByUserId(userId);
+
+  if (!listing || listing.status !== "active") {
+    return res.status(404).json({ error: "Cannot find listing." });
+  }
+
+  res.status(200).json(toPublicListing(listing));
+};
+
 // POST /api/listings/:listingId/connect
 export const connectToListing = async (req: Request, res: Response) => {
   const role = sessionRole(req);

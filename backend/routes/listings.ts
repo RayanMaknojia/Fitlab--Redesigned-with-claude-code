@@ -5,6 +5,7 @@ import {
   deleteMyListing,
   browseListings,
   getListing,
+  getListingByUser,
   connectToListing,
 } from "../controllers/listingController";
 import { requireAuth } from "../middleware/requireAuth";
@@ -102,6 +103,28 @@ listingRouter.get("/listings/browse", browseListings);
  *         description: Cannot find listing
  */
 listingRouter.get("/listings/:listingId", getListing);
+
+/**
+ * @swagger
+ * /api/listings/by-user/{userId}:
+ *   get:
+ *     summary: Get the listing belonging to a given user id
+ *     tags: [Listings]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: The listing
+ *       400:
+ *         description: User id is invalid
+ *       404:
+ *         description: That user has no active listing
+ */
+listingRouter.get("/listings/by-user/:userId", getListingByUser);
 
 /**
  * @swagger
