@@ -16,7 +16,7 @@ import ClientLayout from "@/components/client/ClientLayout";
 import ClientDashboard from "@/pages/client/ClientDashboard";
 import ClientProgress from "@/pages/client/ClientProgress";
 
-import { ClientPagePlaceholder, NotFound } from "@/pages/placeholders";
+import { NotFound } from "@/pages/placeholders";
 import ClientExerciseTemplates from "./pages/client/ClientExerciseTemplates";
 import ClientSessions from "./pages/client/ClientSessions";
 import SessionPage from "./pages/client/SessionPage";
@@ -32,7 +32,8 @@ import RequestDetail from "@/pages/marketplace/RequestDetail";
 //   /login, /register                   → Alex (auth) — implemented
 //   /forgot-password, /reset-password   → Alex (auth) — implemented
 //   /client/*                           → progress dashboard team — implemented
-//   /clients/:id                        → client view team — placeholder, swap in your page
+//   /*/browse, /*/my-listing,
+//   /*/notifications, /*/requests/*     - Alex (marketplace) - implemented
 
 function Home() {
   const { user, loading } = useAuth();
@@ -102,12 +103,6 @@ function App() {
             <Route path="notifications" element={<Notifications />} />
             <Route path="requests/:requestId" element={<RequestDetail />} />
           </Route>
-
-          {/* Teammates' pages — replace the placeholder */}
-          <Route
-            path="/clients/:clientId"
-            element={<ClientPagePlaceholder />}
-          />
 
           <Route path="*" element={<NotFound />} />
         </Routes>
