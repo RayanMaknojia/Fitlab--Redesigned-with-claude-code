@@ -1,10 +1,8 @@
 import rateLimit from "express-rate-limit";
 
-// TODO: bump windowMs back up before pushing (currently 1 min for easier testing).
-
 // Slows down inbox-spam abuse of the forgot-password endpoint.
 export const forgotPasswordRateLimit = rateLimit({
-  windowMs: 1 * 60 * 1000,
+  windowMs: 60 * 60 * 1000, // 1 hour
   limit: 5,
   standardHeaders: true,
   legacyHeaders: false,
@@ -13,7 +11,7 @@ export const forgotPasswordRateLimit = rateLimit({
 
 // Slows down brute-forcing the reset token itself.
 export const resetPasswordRateLimit = rateLimit({
-  windowMs: 1 * 60 * 1000,
+  windowMs: 60 * 60 * 1000, // 1 hour
   limit: 10,
   standardHeaders: true,
   legacyHeaders: false,
