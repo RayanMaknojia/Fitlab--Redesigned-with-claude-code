@@ -14,6 +14,5 @@ export const canAccessClient = async (
     return false;
   }
 
-  const client = await clientModel.getClient(clientId);
-  return client?.trainer_id?.toString() === user.id;
+  return await clientModel.isLinkedToTrainer(clientId, new ObjectId(user.id));
 };
