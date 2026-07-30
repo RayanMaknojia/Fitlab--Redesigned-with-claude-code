@@ -108,7 +108,6 @@ const addUser = async (user: Omit<User, "_id">): Promise<void> => {
     await session.endSession();
   }
 };
-
 export {
   init,
   getAllUsers,
@@ -121,3 +120,4 @@ export {
   addUser,
   updatePasswordHash,
 };
+
