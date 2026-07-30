@@ -76,6 +76,13 @@ const userExists = async (userId: ObjectId): Promise<boolean> => {
   return (await collection().countDocuments({ _id: userId }, { limit: 1 })) === 1;
 };
 
+const updatePasswordHash = async (
+  userId: ObjectId,
+  password_hash: string,
+): Promise<void> => {
+  await collection().updateOne({ _id: userId }, { $set: { password_hash } });
+};
+
 // Registering a client also creates a shell record in clients, in the same
 // transaction so a crash can't leave one without the other. Requires mongod
 // replication enabled (replSetName set in mongod.cfg).
@@ -112,4 +119,5 @@ export {
   findUserById,
   userExists,
   addUser,
+  updatePasswordHash,
 };
