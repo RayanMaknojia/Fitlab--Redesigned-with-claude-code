@@ -34,9 +34,9 @@ export const registerUser = async (req: Request, res: Response) => {
      return res.status(400).json({ error: "Invalid email format" });
   }
 
-  // if (role !== "client" && role !== "trainer") {                          // This will be a radio button so I dont think we need this
-  //   return res.status(400).json({ error: "Role must be 'client' or 'trainer'" });
-  // }
+  if (role !== "client" && role !== "trainer") {
+    return res.status(400).json({ error: "Role must be 'client' or 'trainer'" });
+  }
 
   try {
     const existingUser = await userModel.findUserByEmail(email);

@@ -1,4 +1,4 @@
-import { request } from "@/lib/request"
+import { request } from "@/lib/request";
 
 export interface ApiUser {
   id: string;
@@ -7,25 +7,32 @@ export interface ApiUser {
   role: "client" | "trainer";
 }
 
-// Named actions the rest of the frontend can call.
 export const api = {
-  // Create a new account.
   register: (input: { name: string; email: string; password: string; role: "client" | "trainer" }) =>
     request<{ name: string; email: string; role: string }>("/auth/register", {
       method: "POST",
       body: JSON.stringify(input),
     }),
 
-  // Log in and receive the current user.
   login: (input: { email: string; password: string; rememberMe?: boolean }) =>
     request<{ user: ApiUser }>("/auth/login", {
       method: "POST",
       body: JSON.stringify(input),
     }),
 
-  // Log out and clear the current session.
   logout: () => request<{ ok: boolean }>("/auth/logout", { method: "POST" }),
 
-  // Ask the backend who is currently logged in.
   me: () => request<{ user: ApiUser }>("/auth/me"),
+
+  forgotPassword: (input: { email: string }) =>
+    request<{ ok: boolean }>("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
+
+  resetPassword: (input: { token: string; password: string }) =>
+    request<{ ok: boolean }>("/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
 };

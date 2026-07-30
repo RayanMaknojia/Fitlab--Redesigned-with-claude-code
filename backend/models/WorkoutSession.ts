@@ -15,7 +15,9 @@ export const init = async (): Promise<void> => {
   await collection().createIndex({ client_id: 1 });
 };
 
-export const getClientSessions = async (client_id: ObjectId): Promise<WorkoutSession[]> => {
+export const getClientSessions = async (
+  client_id: ObjectId,
+): Promise<WorkoutSession[]> => {
   return await collection()
     .find({ client_id })
     .sort({ session_date: -1 })
@@ -30,15 +32,23 @@ export const getWorkoutSession = async (
 
 export const addWorkoutSession = async (
   session: Omit<WorkoutSession, "_id">,
-): Promise<void> => {
-  await collection().insertOne({
-    client_id: session.client_id,
-    session_date: session.session_date,
-  });
+): Promise<ObjectId> => {
+  return (
+    await collection().insertOne({
+      client_id: session.client_id,
+      session_date: session.session_date,
+    })
+  ).insertedId;
 };
 
-export const updateSessionById = async (sessionId: ObjectId, date: Date): Promise<void> => {
-  await collection().updateOne({ _id: sessionId }, { $set: { session_date: date } });
+export const updateSessionById = async (
+  sessionId: ObjectId,
+  date: Date,
+): Promise<void> => {
+  await collection().updateOne(
+    { _id: sessionId },
+    { $set: { session_date: date } },
+  );
 };
 
 export const deleteSessionById = async (sessionId: ObjectId): Promise<void> => {

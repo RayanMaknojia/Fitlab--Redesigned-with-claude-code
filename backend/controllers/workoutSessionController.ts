@@ -11,6 +11,34 @@ const SessionInput = z.object({
   session_date: z.coerce.date(),
 });
 
+export const getMyWorkoutSessions = async (req: Request, res: Response) => {
+  const client_id = new ObjectId(req.session.user!.id);
+
+  const sessions = await workoutSessionModel.getClientSessions(client_id);
+
+  const withExercises = await Promise.all(
+    sessions.map(async (session) => {
+      const exercises =
+        await sessionExerciseModel.getSessionExercisesAndTemplateNames(
+          session._id!,
+        );
+      return {
+        session_id: session._id!.toString(),
+        client_id: session.client_id.toString(),
+        session_date: session.session_date.toISOString(),
+        exercises: exercises.map((e) => ({
+          name: e.template_name,
+          sets: e.sets,
+          reps: e.reps,
+          weight_in_kg: e.weight_in_kg,
+        })),
+      };
+    }),
+  );
+
+  res.json(withExercises);
+};
+
 export const getClientWorkoutSessions = async (req: Request, res: Response) => {
   const client_id = parseObjectId(req.params.clientId);
 
@@ -25,7 +53,7 @@ export const getClientWorkoutSessions = async (req: Request, res: Response) => {
   }
 
   const sessions = await workoutSessionModel.getClientSessions(client_id);
-  res.json(sessions);
+  res.status(200).json(sessions);
 };
 
 export const addClientWorkoutSession = async (req: Request, res: Response) => {
@@ -48,9 +76,12 @@ export const addClientWorkoutSession = async (req: Request, res: Response) => {
 
   const { session_date } = result.data;
 
-  await workoutSessionModel.addWorkoutSession({ client_id, session_date });
-  // TODO: return the new session's _id so the client doesn't need a follow-up GET.
-  res.status(201).json({ client_id, session_date });
+  const resultId = await workoutSessionModel.addWorkoutSession({
+    client_id,
+    session_date,
+  });
+
+  res.status(201).json({ _id: resultId, client_id, session_date });
 };
 
 export const getWorkoutSessionById = async (req: Request, res: Response) => {
@@ -66,7 +97,7 @@ export const getWorkoutSessionById = async (req: Request, res: Response) => {
     return res.status(404).json({ error: "Cannot find session." });
   }
 
-  res.json(session);
+  res.status(200).json(session);
 };
 
 export const updateWorkoutSession = async (req: Request, res: Response) => {
@@ -88,9 +119,16 @@ export const updateWorkoutSession = async (req: Request, res: Response) => {
     return res.status(404).json({ error: "Cannot find session." });
   }
 
-  await workoutSessionModel.updateSessionById(sessionId, result.data.session_date);
+  await workoutSessionModel.updateSessionById(
+    sessionId,
+    result.data.session_date,
+  );
 
-  res.json({ _id: sessionId, session_date: result.data.session_date });
+  res.status(200).json({
+    _id: sessionId,
+    client_id: session.client_id,
+    session_date: result.data.session_date,
+  });
 };
 
 export const deleteWorkoutSession = async (req: Request, res: Response) => {
@@ -111,7 +149,10 @@ export const deleteWorkoutSession = async (req: Request, res: Response) => {
   res.status(204).send();
 };
 
-export const getWorkoutSessionExercises = async (req: Request, res: Response) => {
+export const getWorkoutSessionExercises = async (
+  req: Request,
+  res: Response,
+) => {
   const session_id = parseObjectId(req.params.sessionId);
 
   if (!session_id) {
@@ -124,8 +165,9 @@ export const getWorkoutSessionExercises = async (req: Request, res: Response) =>
     return res.status(404).json({ error: "Cannot find session." });
   }
 
-  const exercises = await sessionExerciseModel.getSessionExercises(session._id);
-  res.json(exercises);
+  const exercises =
+    await sessionExerciseModel.getSessionExercisesAndTemplateNames(session._id);
+  res.status(200).json(exercises);
 };
 
 const SessionExerciseInput = z.object({
@@ -159,9 +201,15 @@ export const addSessionExercise = async (req: Request, res: Response) => {
     result.data.exercise_template_id,
   );
 
+  if (!template) {
+    return res.status(404).json({ error: "Cannot find template." });
+  }
+
   // Prevents a client from using a template that belongs to another client.
-  if (!template || !template.client_id.equals(session.client_id)) {
-    return res.status(400).json({ error: "Invalid template." });
+  if (!template.client_id.equals(session.client_id)) {
+    return res
+      .status(400)
+      .json({ error: "Template does not belong to this client." });
   }
 
   const exercise = {
@@ -172,9 +220,12 @@ export const addSessionExercise = async (req: Request, res: Response) => {
     weight_in_kg: result.data.weight_in_kg,
   };
 
-  await sessionExerciseModel.addSessionExercise(exercise);
+  const exerciseResultId =
+    await sessionExerciseModel.addSessionExercise(exercise);
 
-  res.status(201).json(exercise);
+  res
+    .status(201)
+    .json({ _id: exerciseResultId, template_name: template.name, ...exercise });
 };
 
 const SessionExerciseChangeInput = z.object({
@@ -199,7 +250,8 @@ export const updateSessionExercise = async (req: Request, res: Response) => {
     return res.status(400).json({ error: "Invalid exercise id." });
   }
 
-  const exercise = await sessionExerciseModel.getSessionExerciseById(exercise_id);
+  const exercise =
+    await sessionExerciseModel.getSessionExerciseById(exercise_id);
   if (!exercise) {
     return res.status(404).json({ error: "Cannot find exercise." });
   }
@@ -236,7 +288,8 @@ export const deleteSessionExercise = async (req: Request, res: Response) => {
     return res.status(400).json({ error: "Invalid exercise id." });
   }
 
-  const exercise = await sessionExerciseModel.getSessionExerciseById(exercise_id);
+  const exercise =
+    await sessionExerciseModel.getSessionExerciseById(exercise_id);
   if (!exercise) {
     return res.status(404).json({ error: "Cannot find exercise." });
   }

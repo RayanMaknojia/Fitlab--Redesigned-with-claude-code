@@ -2,24 +2,57 @@
 // the `dark` class so other pages (login, trainer view) keep their own styling.
 // Owned by: [your name] (progress dashboard / client view).
 
-import { NavLink, Outlet } from "react-router-dom"
-import { Dumbbell, LayoutDashboard, LineChart, Calendar, Settings, LogOut } from "lucide-react"
+import { NavLink, Outlet } from "react-router-dom";
+import {
+  Dumbbell,
+  LayoutDashboard,
+  LineChart,
+  Calendar,
+  Settings,
+  LogOut,
+  ClipboardClock,
+  CalendarClock,
+} from "lucide-react";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import AuthenticatedChatbot from "@/components/chatbot/AuthenticatedChatbot"
-import { cn } from "@/lib/utils"
-import { useAuth } from "@/context/AuthContext"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import AuthenticatedChatbot from "@/components/chatbot/AuthenticatedChatbot";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 const NAV = [
   { to: "/client", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/client/progress", label: "Progress", icon: LineChart, end: false },
-  { to: "/client/schedule", label: "Schedule", icon: Calendar, end: false, soon: true },
-  { to: "/client/settings", label: "Settings", icon: Settings, end: false, soon: true },
-]
+  {
+    to: "/client/exercise-templates",
+    label: "Exercise Templates",
+    icon: ClipboardClock,
+    end: false,
+  },
+  {
+    to: "/client/workout-sessions",
+    label: "Workout Sessions",
+    icon: CalendarClock,
+    end: false,
+  },
+  {
+    to: "/client/schedule",
+    label: "Schedule",
+    icon: Calendar,
+    end: false,
+    soon: true,
+  },
+  {
+    to: "/client/settings",
+    label: "Settings",
+    icon: Settings,
+    end: false,
+    soon: true,
+  },
+];
 
 export default function ClientLayout() {
-  const { user, logout } = useAuth()
+  const { user, logout } = useAuth();
 
   return (
     <div className="dark min-h-screen bg-background text-foreground">
@@ -56,9 +89,11 @@ export default function ClientLayout() {
                 className={({ isActive }) =>
                   cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-                    isActive && !soon &&
+                    isActive &&
+                      !soon &&
                       "bg-lime-400/10 text-lime-300 hover:bg-lime-400/15 hover:text-lime-300",
-                    soon && "cursor-default opacity-50 hover:bg-transparent hover:text-muted-foreground"
+                    soon &&
+                      "cursor-default opacity-50 hover:bg-transparent hover:text-muted-foreground",
                   )
                 }
               >
@@ -76,7 +111,10 @@ export default function ClientLayout() {
           <div className="mt-auto flex items-center gap-3 rounded-xl border border-border/60 bg-card/60 p-3">
             <Avatar className="size-9 border border-lime-400/40">
               <AvatarFallback className="bg-lime-400/15 text-xs font-bold text-lime-300">
-                {user?.name.split(" ").map((n) => n[0]).join("")}
+                {user?.name
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0 flex-1">
@@ -103,5 +141,5 @@ export default function ClientLayout() {
 
       <AuthenticatedChatbot />
     </div>
-  )
+  );
 }

@@ -1,0 +1,339 @@
+import {
+  addClientExerciseTemplate,
+  deleteExerciseTemplate,
+  getClientExerciseTemplates,
+  updateExerciseTemplate,
+} from "../../controllers/exerciseTemplateController";
+import { createMockReq } from "../utils/createMockReq";
+import { createMockRes } from "../utils/createMockRes";
+import { close, connect, getDb } from "../../config/database";
+import * as userModel from "../../models/User";
+import { ObjectId } from "mongodb";
+import {
+  addExerciseTemplate,
+  deleteTemplateAndAssociatedExercises,
+  ExerciseTemplate,
+  getAllExerciseTemplatesForClient,
+  getExerciseTemplate,
+} from "../../models/ExerciseTemplate";
+import { insertTestUser } from "../utils/insertTestUser";
+
+describe("getClientExerciseTemplates", () => {
+  let testClientId: ObjectId;
+
+  beforeAll(async () => {
+    await connect();
+    await userModel.init();
+  });
+
+  afterAll(async () => {
+    await close();
+  });
+
+  beforeEach(async () => {
+    testClientId = await insertTestUser();
+
+    await getDb().collection("clients").insertOne({ _id: testClientId });
+  });
+
+  afterEach(async () => {
+    await getDb().collection("clients").deleteOne({ _id: testClientId });
+    await getDb().collection("users").deleteOne({ _id: testClientId });
+  });
+
+  it("returns 400 for invalid IDs", async () => {
+    const req = createMockReq({ params: { clientId: "bad id" } });
+    const { res, statusMock, jsonMock } = createMockRes();
+
+    await getClientExerciseTemplates(req, res);
+
+    expect(statusMock).toHaveBeenCalledWith(400);
+    expect(jsonMock).toHaveBeenCalledWith({ error: "Invalid client id." });
+
+    const req2 = createMockReq({ params: { clientId: "" } });
+    const {
+      res: res2,
+      statusMock: statusMock2,
+      jsonMock: jsonMock2,
+    } = createMockRes();
+
+    await getClientExerciseTemplates(req2, res2);
+
+    expect(statusMock2).toHaveBeenCalledWith(400);
+    expect(jsonMock2).toHaveBeenCalledWith({ error: "Invalid client id." });
+  });
+
+  it("returns 404 for nonexistent clients", async () => {
+    const req = createMockReq({
+      params: { clientId: new ObjectId().toString() },
+    });
+
+    const { res, statusMock, jsonMock } = createMockRes();
+
+    await getClientExerciseTemplates(req, res);
+
+    expect(statusMock).toHaveBeenCalledWith(404);
+    expect(jsonMock).toHaveBeenCalledWith({ error: "Cannot find client." });
+  });
+
+  it("returns 200 and a client's templates for an existing client", async () => {
+    const req = createMockReq({
+      params: { clientId: testClientId.toString() },
+    });
+
+    const sampleTemplates: ExerciseTemplate[] = [
+      { client_id: testClientId, name: "pushups" },
+      { client_id: testClientId, name: "test situps" },
+    ];
+
+    for (const t of sampleTemplates) {
+      t._id = await addExerciseTemplate(t);
+    }
+
+    const { res, statusMock, jsonMock } = createMockRes();
+
+    await getClientExerciseTemplates(req, res);
+
+    for (const t of sampleTemplates) {
+      await deleteTemplateAndAssociatedExercises(t._id as ObjectId);
+    }
+
+    expect(statusMock).toHaveBeenCalledWith(200);
+    expect(jsonMock).toHaveBeenCalledWith(sampleTemplates);
+
+    const {
+      res: res2,
+      statusMock: statusMock2,
+      jsonMock: jsonMock2,
+    } = createMockRes();
+    await getClientExerciseTemplates(req, res2);
+
+    expect(statusMock2).toHaveBeenCalledWith(200);
+    expect(jsonMock2).toHaveBeenCalledWith([]);
+  });
+});
+
+describe("addClientExerciseTemplate", () => {
+  let testClientId: ObjectId;
+
+  beforeAll(async () => {
+    await connect();
+    await userModel.init();
+  });
+
+  afterAll(async () => {
+    await close();
+  });
+
+  beforeEach(async () => {
+    testClientId = await insertTestUser();
+
+    await getDb().collection("clients").insertOne({ _id: testClientId });
+  });
+
+  afterEach(async () => {
+    await getDb()
+      .collection("exercise_templates")
+      .deleteOne({ client_id: testClientId });
+    await getDb().collection("clients").deleteOne({ _id: testClientId });
+    await getDb().collection("users").deleteOne({ _id: testClientId });
+  });
+
+  it("returns 400 for invalid names", async () => {
+    const req = createMockReq({
+      params: { clientId: testClientId.toString() },
+    });
+
+    const { res, statusMock, jsonMock } = createMockRes();
+
+    await addClientExerciseTemplate(req, res);
+
+    expect(statusMock).toHaveBeenCalledWith(400);
+    expect(jsonMock).toHaveBeenCalledWith({ error: "Invalid name." });
+
+    const sampleTemplate = { name: 32 };
+    const req2 = createMockReq({
+      body: sampleTemplate,
+      params: { clientId: testClientId.toString() },
+    });
+
+    const {
+      res: res2,
+      statusMock: statusMock2,
+      jsonMock: jsonMock2,
+    } = createMockRes();
+
+    await addClientExerciseTemplate(req2, res2);
+    expect(statusMock2).toHaveBeenCalledWith(400);
+    expect(jsonMock2).toHaveBeenCalledWith({ error: "Invalid name." });
+  });
+
+  it("returns 404 for non-existent users", async () => {
+    const sampleTemplate = { name: "really hard pushups" };
+    const req = createMockReq({
+      body: sampleTemplate,
+      params: { clientId: new ObjectId().toString() },
+    });
+
+    const { res, statusMock, jsonMock } = createMockRes();
+
+    await addClientExerciseTemplate(req, res);
+
+    expect(statusMock).toHaveBeenCalledWith(404);
+    expect(jsonMock).toHaveBeenCalledWith({ error: "Cannot find client." });
+  });
+
+  it("returns 201 and adds a new template for the user", async () => {
+    const sampleTemplate = {
+      client_id: testClientId,
+      name: "really hard pushups",
+    };
+    const req = createMockReq({
+      body: sampleTemplate,
+      params: { clientId: testClientId.toString() },
+    });
+
+    const { res, statusMock, jsonMock } = createMockRes();
+
+    await addClientExerciseTemplate(req, res);
+
+    expect(statusMock).toHaveBeenCalledWith(201);
+    expect(jsonMock).toHaveBeenCalledWith({
+      _id: expect.any(ObjectId),
+      name: sampleTemplate.name,
+      client_id: testClientId,
+    });
+
+    expect(await getAllExerciseTemplatesForClient(testClientId)).toEqual([
+      {
+        _id: expect.any(ObjectId),
+        ...sampleTemplate,
+      },
+    ]);
+  });
+});
+
+describe("updateExerciseTemplate", () => {
+  let testClientId: ObjectId;
+
+  beforeAll(async () => {
+    await connect();
+    await userModel.init();
+  });
+
+  afterAll(async () => {
+    await close();
+  });
+
+  beforeEach(async () => {
+    testClientId = await insertTestUser();
+
+    await getDb().collection("clients").insertOne({ _id: testClientId });
+  });
+
+  afterEach(async () => {
+    await getDb()
+      .collection("exercise_templates")
+      .deleteOne({ client_id: testClientId });
+    await getDb().collection("clients").deleteOne({ _id: testClientId });
+    await getDb().collection("users").deleteOne({ _id: testClientId });
+  });
+
+  it("returns 200 and modifies the exercise template", async () => {
+    const sampleTemplate = { name: "really hard pushups" };
+
+    const templateId = await addExerciseTemplate({
+      client_id: testClientId,
+      ...sampleTemplate,
+    });
+
+    const req = createMockReq({
+      body: sampleTemplate,
+      params: { templateId: templateId.toString() },
+    });
+
+    const { res, statusMock, jsonMock } = createMockRes();
+
+    await updateExerciseTemplate(req, res);
+
+    expect(statusMock).toHaveBeenCalledWith(200);
+    expect(jsonMock).toHaveBeenCalledWith({
+      template_id: templateId,
+      name: sampleTemplate.name,
+    });
+
+    const newTemplate = { name: "easy pushups" };
+
+    const req2 = createMockReq({
+      body: newTemplate,
+      params: { templateId: templateId.toString() },
+    });
+
+    const {
+      res: res2,
+      statusMock: statusMock2,
+      jsonMock: jsonMock2,
+    } = createMockRes();
+
+    await updateExerciseTemplate(req2, res2);
+
+    expect(statusMock2).toHaveBeenCalledWith(200);
+    expect(jsonMock2).toHaveBeenCalledWith({
+      template_id: templateId,
+      name: newTemplate.name,
+    });
+  });
+});
+
+describe("deleteExerciseTemplate", () => {
+  let testClientId: ObjectId;
+
+  beforeAll(async () => {
+    await connect();
+    await userModel.init();
+  });
+
+  afterAll(async () => {
+    await close();
+  });
+
+  beforeEach(async () => {
+    testClientId = await insertTestUser();
+
+    await getDb().collection("clients").insertOne({ _id: testClientId });
+  });
+
+  afterEach(async () => {
+    await getDb()
+      .collection("exercise_templates")
+      .deleteOne({ client_id: testClientId });
+    await getDb().collection("clients").deleteOne({ _id: testClientId });
+    await getDb().collection("users").deleteOne({ _id: testClientId });
+  });
+
+  it("returns 204 and deletes the template and returns 404 when trying to delete it again", async () => {
+    const sampleTemplate = { name: "really hard pushups" };
+
+    const templateId = await addExerciseTemplate({
+      client_id: testClientId,
+      ...sampleTemplate,
+    });
+
+    const req = createMockReq({
+      body: sampleTemplate,
+      params: { templateId: templateId.toString() },
+    });
+
+    const { res, statusMock } = createMockRes();
+
+    await deleteExerciseTemplate(req, res);
+
+    expect(statusMock).toHaveBeenCalledWith(204);
+
+    const { res: res2, jsonMock, statusMock: statusMock2 } = createMockRes();
+
+    await deleteExerciseTemplate(req, res2);
+    expect(statusMock2).toHaveBeenCalledWith(404);
+    expect(jsonMock).toHaveBeenCalledWith({ error: "Cannot find template." });
+  });
+});

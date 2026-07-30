@@ -8,7 +8,7 @@ export interface SessionUser {
   id: string;
   name: string;
   email: string;
-  role: "client" | "trainer";
+  role: "client" | "trainer" | "admin";
 }
 
 declare module "express-session" {

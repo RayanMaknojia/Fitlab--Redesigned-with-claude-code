@@ -7,14 +7,14 @@ export interface User {
   name: string;
   email: string;
   password_hash: string;
-  role: "client" | "trainer";
+  role: "client" | "trainer" | "admin";
 }
 
 export interface NewUserInput {
   name: string;
   email: string;
   password: string;
-  role: "client" | "trainer";
+  role: "client" | "trainer" | "admin";
 }
 
 const collection = (): Collection<User> => getDb().collection("users");
@@ -34,8 +34,24 @@ const findUserByEmail = async (email: string): Promise<User | null> => {
   return await collection().findOne({ email });
 };
 
+const findUserById = async (
+  userId: ObjectId,
+): Promise<Omit<User, "password_hash"> | null> => {
+  return await collection().findOne(
+    { _id: userId },
+    { projection: { password_hash: 0 } },
+  );
+};
+
 const userExists = async (userId: ObjectId): Promise<boolean> => {
   return (await collection().countDocuments({ _id: userId }, { limit: 1 })) === 1;
+};
+
+const updatePasswordHash = async (
+  userId: ObjectId,
+  password_hash: string,
+): Promise<void> => {
+  await collection().updateOne({ _id: userId }, { $set: { password_hash } });
 };
 
 // Registering a client also creates a shell record in clients, in the same
@@ -64,4 +80,12 @@ const addUser = async (user: Omit<User, "_id">): Promise<void> => {
   }
 };
 
-export { init, getAllUsers, findUserByEmail, userExists, addUser };
+export {
+  init,
+  getAllUsers,
+  findUserByEmail,
+  findUserById,
+  userExists,
+  addUser,
+  updatePasswordHash,
+};

@@ -2,6 +2,9 @@ import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import session from "express-session";
 import MongoStore from "connect-mongo";
+import swaggerJSDoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
+
 import { connect } from "./config/database";
 import * as userModel from "./models/User";
 import * as clientModel from "./models/Client";
@@ -9,11 +12,13 @@ import * as workoutSessionModel from "./models/WorkoutSession";
 import * as sessionExerciseModel from "./models/SessionExercise";
 import * as exerciseTemplateModel from "./models/ExerciseTemplate";
 import * as scheduleModel from "./models/Schedule";
-import bcrypt from "bcrypt";
-import {authRouter} from "./routes/auth"
+import * as passwordResetTokenModel from "./models/PasswordResetToken";
+import { authRouter } from "./routes/auth";
 import { workoutSessionRouter } from "./routes/workoutSessions";
 import { exerciseTemplateRouter } from "./routes/exerciseTemplates";
-import { chatRouter } from "./routes/chat"
+import { scheduleRouter } from "./routes/schedules";
+import { chatRouter } from "./routes/chat";
+import { dataSyncRouter } from "./routes/dataSync";
 
 const PORT = 3000;
 const app = express();
@@ -35,7 +40,7 @@ app.use(
   cors({
     origin: process.env.FRONTEND_ORIGIN ?? "http://localhost:5173",
     credentials: true,
-  })
+  }),
 );
 
 app.use(
@@ -45,12 +50,12 @@ app.use(
     resave: false,
     saveUninitialized: false,
     rolling: true,
-    store: MongoStore.create({ mongoUrl: CONNECTION_STRING }), // Use MongoDB to store session data
+    store: MongoStore.create({ mongoUrl: CONNECTION_STRING }),
     cookie: {
       httpOnly: true,
-      maxAge:  3 * 60 * 60 * 1000, // 3 hours
+      maxAge: 3 * 60 * 60 * 1000,
     },
-  })
+  }),
 );
 
 app.use((req: Request, _res: Response, next: NextFunction) => {
@@ -58,11 +63,26 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next();
 });
 
+const swaggerDefinition = {
+  openapi: "3.0.0",
+  info: {
+    title: "Express API",
+    version: "1.0.0",
+  },
+};
 
-app.use('/api', authRouter)
-app.use('/api', workoutSessionRouter)
-app.use('/api', exerciseTemplateRouter)
-app.use('/api', chatRouter)
+const spec = swaggerJSDoc({
+  definition: swaggerDefinition,
+  apis: ["./routes/*.ts", "./server.ts"],
+});
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(spec));
+app.use("/api", authRouter);
+app.use("/api/chat", chatRouter);
+app.use("/api", workoutSessionRouter);
+app.use("/api", exerciseTemplateRouter);
+app.use("/api", scheduleRouter);
+app.use("/api", dataSyncRouter);
 
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ error: "Not found" });
@@ -78,6 +98,7 @@ const startServer = async () => {
       sessionExerciseModel.init(),
       exerciseTemplateModel.init(),
       scheduleModel.init(),
+      passwordResetTokenModel.init(),
     ]);
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);

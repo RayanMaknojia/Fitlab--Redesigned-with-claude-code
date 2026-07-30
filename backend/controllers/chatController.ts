@@ -11,6 +11,10 @@ const MAX_MESSAGE_COUNT = 20
 const MAX_MESSAGE_LENGTH = 2000
 const MAX_TOTAL_CHARACTERS = 12000
 
+export const getChatHealth = async (_req: Request, res: Response) => {
+  res.json({ status: "chat endpoint OK" })
+}
+
 export const createChatReply = async (req: Request, res: Response) => {
   const { messages } = req.body ?? {}
 
