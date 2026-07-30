@@ -19,6 +19,7 @@ import type { ProgressPoint, WeeklyVolume } from "@/types/client"
 import { getExerciseNames, getWeeklyVolume, getWeightProgress } from "@/lib/clientApi"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import ProgressRecapCard from "@/components/client/ProgressRecapCard"
 
 // same accent used across the trainer UI, for chart strokes/fills
 const LIME = "#a3e635" // tailwind lime-400
@@ -113,6 +114,9 @@ export default function ClientProgress() {
           Track how your lifts and training volume have changed over time.
         </p>
       </div>
+
+      +     <ProgressRecapCard />
+
 
       {/* Weight over time, per exercise */}
       <Card className="border-border/60 bg-card/60 py-5 backdrop-blur">
