@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { close, connect, getDb } from "../../config/database";
 import * as linkRequestModel from "../../models/LinkRequest";
+import * as notificationModel from "../../models/Notification";
 import * as linkService from "../../services/linkService";
 
 let trainerId: ObjectId;
@@ -14,6 +15,7 @@ const CLIENT_EMAIL = "client-link-test@gmail.com";
 beforeAll(async () => {
   await connect();
   await linkRequestModel.init();
+  await notificationModel.init();
 });
 
 afterAll(async () => {
@@ -56,6 +58,7 @@ beforeEach(async () => {
 afterEach(async () => {
   const db = getDb();
   await db.collection("link_requests").deleteMany({});
+  await db.collection("notifications").deleteMany({});
   await db.collection("clients").deleteMany({ _id: clientId });
   await db
     .collection("users")
@@ -307,5 +310,84 @@ describe("getLinkedTrainer", () => {
       name: "link trainer",
       email: TRAINER_EMAIL,
     });
+  });
+});
+
+describe("createRequest (id-based)", () => {
+  it("creates a pending request without an email lookup, trainer-initiated", async () => {
+    const view = await linkService.createRequest(trainerId, clientId, "trainer");
+
+    expect(view.status).toBe("pending");
+    expect(view.requested_by).toBe("trainer");
+    expect(view.trainer_id).toBe(trainerId.toString());
+    expect(view.client_id).toBe(clientId.toString());
+  });
+
+  it("creates a pending request, client-initiated", async () => {
+    const view = await linkService.createRequest(trainerId, clientId, "client");
+
+    expect(view.requested_by).toBe("client");
+  });
+
+  it("rejects a duplicate pending request for the same pair", async () => {
+    await linkService.createRequest(trainerId, clientId, "trainer");
+
+    await expect(
+      linkService.createRequest(trainerId, clientId, "trainer"),
+    ).rejects.toBeInstanceOf(linkService.DuplicatePendingRequestError);
+  });
+});
+
+describe("notification side effects", () => {
+  it("notifies the client when a trainer sends a request", async () => {
+    await linkService.sendRequestToClient(trainerId, CLIENT_EMAIL);
+
+    const notifications = await getDb()
+      .collection("notifications")
+      .find({ recipient_id: clientId })
+      .toArray();
+
+    expect(notifications).toHaveLength(1);
+    expect(notifications[0]!.type).toBe("link_request_received");
+  });
+
+  it("notifies the trainer when a client sends a request", async () => {
+    await linkService.sendRequestToTrainer(clientId, TRAINER_EMAIL);
+
+    const notifications = await getDb()
+      .collection("notifications")
+      .find({ recipient_id: trainerId })
+      .toArray();
+
+    expect(notifications).toHaveLength(1);
+    expect(notifications[0]!.type).toBe("link_request_received");
+  });
+
+  it("notifies the original sender when their request is accepted", async () => {
+    const view = await linkService.sendRequestToClient(trainerId, CLIENT_EMAIL);
+
+    await linkService.respondToRequest(clientId, new ObjectId(view.request_id), true);
+
+    const notifications = await getDb()
+      .collection("notifications")
+      .find({ recipient_id: trainerId })
+      .toArray();
+
+    expect(notifications).toHaveLength(1);
+    expect(notifications[0]!.type).toBe("link_request_accepted");
+  });
+
+  it("notifies the original sender when their request is declined", async () => {
+    const view = await linkService.sendRequestToClient(trainerId, CLIENT_EMAIL);
+
+    await linkService.respondToRequest(clientId, new ObjectId(view.request_id), false);
+
+    const notifications = await getDb()
+      .collection("notifications")
+      .find({ recipient_id: trainerId })
+      .toArray();
+
+    expect(notifications).toHaveLength(1);
+    expect(notifications[0]!.type).toBe("link_request_declined");
   });
 });
