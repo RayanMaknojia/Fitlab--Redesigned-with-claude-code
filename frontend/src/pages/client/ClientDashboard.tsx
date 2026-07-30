@@ -8,6 +8,7 @@ import { ArrowUpRight, Dumbbell, Flame, TrendingUp } from "lucide-react"
 import type { ClientStats } from "@/types/client"
 import type { WorkoutSession } from "@/types"
 import { getMySessions, getStats } from "@/lib/clientApi"
+import MyTrainerCard from "@/components/client/MyTrainerCard"
 import StatTile from "@/components/client/StatTile"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -80,6 +81,9 @@ export default function ClientDashboard() {
           />
         </div>
       )}
+
+      {/* Trainer link — send/accept link requests, see your trainer */}
+      <MyTrainerCard />
 
       <div className="grid gap-4 lg:grid-cols-5">
         {/* Recent sessions */}

@@ -34,6 +34,35 @@ const findUserByEmail = async (email: string): Promise<User | null> => {
   return await collection().findOne({ email });
 };
 
+// Role-scoped lookups for the linking flow. In our design language "user"
+// covers every role; these return only the specific role asked for, and
+// never include the password hash (they're for cross-user lookups, unlike
+// findUserByEmail which login uses to verify a password).
+const findClientByEmail = async (
+  email: string,
+): Promise<Omit<User, "password_hash"> | null> => {
+  return await collection().findOne(
+    { email, role: "client" },
+    { projection: { password_hash: 0 } },
+  );
+};
+
+const findTrainerByEmail = async (
+  email: string,
+): Promise<Omit<User, "password_hash"> | null> => {
+  return await collection().findOne(
+    { email, role: "trainer" },
+    { projection: { password_hash: 0 } },
+  );
+};
+
+// Existence check without pulling the document (so callers can distinguish
+// "email not registered" from "email belongs to the wrong role" without
+// ever touching the password hash).
+const emailExists = async (email: string): Promise<boolean> => {
+  return (await collection().countDocuments({ email }, { limit: 1 })) === 1;
+};
+
 const findUserById = async (
   userId: ObjectId,
 ): Promise<Omit<User, "password_hash"> | null> => {
@@ -79,13 +108,16 @@ const addUser = async (user: Omit<User, "_id">): Promise<void> => {
     await session.endSession();
   }
 };
-
 export {
   init,
   getAllUsers,
   findUserByEmail,
+  findClientByEmail,
+  findTrainerByEmail,
+  emailExists,
   findUserById,
   userExists,
   addUser,
   updatePasswordHash,
 };
+

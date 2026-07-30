@@ -12,6 +12,7 @@ import * as workoutSessionModel from "./models/WorkoutSession";
 import * as sessionExerciseModel from "./models/SessionExercise";
 import * as exerciseTemplateModel from "./models/ExerciseTemplate";
 import * as scheduleModel from "./models/Schedule";
+import * as linkRequestModel from "./models/LinkRequest";
 import * as passwordResetTokenModel from "./models/PasswordResetToken";
 import { authRouter } from "./routes/auth";
 import { workoutSessionRouter } from "./routes/workoutSessions";
@@ -19,6 +20,9 @@ import { exerciseTemplateRouter } from "./routes/exerciseTemplates";
 import { scheduleRouter } from "./routes/schedules";
 import { chatRouter } from "./routes/chat";
 import { dataSyncRouter } from "./routes/dataSync";
+import { linkRouter } from "./routes/links";
+import swaggerJSDoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
 
 const PORT = 3000;
 const app = express();
@@ -83,6 +87,7 @@ app.use("/api", workoutSessionRouter);
 app.use("/api", exerciseTemplateRouter);
 app.use("/api", scheduleRouter);
 app.use("/api", dataSyncRouter);
+app.use("/api", linkRouter);
 
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ error: "Not found" });
@@ -98,6 +103,7 @@ const startServer = async () => {
       sessionExerciseModel.init(),
       exerciseTemplateModel.init(),
       scheduleModel.init(),
+      linkRequestModel.init(),
       passwordResetTokenModel.init(),
     ]);
     app.listen(PORT, () => {

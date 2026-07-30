@@ -10,6 +10,7 @@ import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import TrainerLayout from "@/components/trainer/TrainerLayout";
 import TrainerDashboard from "@/pages/trainer/TrainerDashboard";
 import TrainerClients from "@/pages/trainer/TrainerClients";
+import TrainerClientDetail from "@/pages/trainer/TrainerClientDetail";
 import TrainerSchedule from "@/pages/trainer/TrainerSchedule";
 import ClientLayout from "@/components/client/ClientLayout";
 import ClientDashboard from "@/pages/client/ClientDashboard";
@@ -60,6 +61,7 @@ function App() {
           >
             <Route index element={<TrainerDashboard />} />
             <Route path="clients" element={<TrainerClients />} />
+            <Route path="clients/:clientId" element={<TrainerClientDetail />} />
             <Route path="schedule" element={<TrainerSchedule />} />
           </Route>
 

@@ -184,28 +184,9 @@ describe("getMyClients", () => {
   });
 });
 
+// NOTE: invalid-id (400) and not-linked (404) cases are handled by the
+// requireLinkedClient middleware — see tests/middleware/requireLinkedClient.test.ts.
 describe("syncClientData", () => {
-  it("returns 400 for an invalid client id", async () => {
-    const { res, jsonMock, statusMock } = createMockRes();
-    await syncClientData(trainerReq({ clientId: "not-an-id" }), res);
-
-    expect(statusMock).toHaveBeenCalledWith(400);
-    expect(jsonMock).toHaveBeenCalledWith({ error: "Invalid client id." });
-  });
-
-  it("returns 404 for a client not linked to the trainer", async () => {
-    const { res, jsonMock, statusMock } = createMockRes();
-    await syncClientData(
-      trainerReq({ clientId: unlinkedClientId.toString() }),
-      res,
-    );
-
-    expect(statusMock).toHaveBeenCalledWith(404);
-    expect(jsonMock).toHaveBeenCalledWith({
-      error: "Client not linked to this trainer.",
-    });
-  });
-
   it("returns 200 and the full sync payload for a linked client", async () => {
     const { res, jsonMock, statusMock } = createMockRes();
     await syncClientData(trainerReq({ clientId: clientId.toString() }), res);
@@ -259,18 +240,6 @@ describe("getLinkedClientSessions", () => {
     ]);
   });
 
-  it("returns 404 for a client not linked to the trainer", async () => {
-    const { res, jsonMock, statusMock } = createMockRes();
-    await getLinkedClientSessions(
-      trainerReq({ clientId: unlinkedClientId.toString() }),
-      res,
-    );
-
-    expect(statusMock).toHaveBeenCalledWith(404);
-    expect(jsonMock).toHaveBeenCalledWith({
-      error: "Client not linked to this trainer.",
-    });
-  });
 });
 
 describe("getLinkedClientProgress", () => {
@@ -316,11 +285,4 @@ describe("getLinkedClientProgress", () => {
     ]);
   });
 
-  it("returns 400 for an invalid client id", async () => {
-    const { res, jsonMock, statusMock } = createMockRes();
-    await getLinkedClientProgress(trainerReq({ clientId: "bad" }), res);
-
-    expect(statusMock).toHaveBeenCalledWith(400);
-    expect(jsonMock).toHaveBeenCalledWith({ error: "Invalid client id." });
-  });
 });

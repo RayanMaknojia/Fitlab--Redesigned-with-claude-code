@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { Dumbbell, Users, Zap } from "lucide-react"
 
-import type { Client, LinkRequest } from "@/types"
+import type { ClientSummary, LinkRequest } from "@/types"
 import { getClients, getRequests, unlinkClient } from "@/lib/trainerApi"
 import ClientCard from "@/components/trainer/ClientCard"
 import LinkClientDialog from "@/components/trainer/LinkClientDialog"
@@ -54,7 +54,7 @@ function EmptyState() {
 }
 
 export default function TrainerDashboard() {
-  const [clients, setClients] = useState<Client[]>([])
+  const [clients, setClients] = useState<ClientSummary[]>([])
   const [requests, setRequests] = useState<LinkRequest[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -66,10 +66,10 @@ export default function TrainerDashboard() {
   }, [])
 
   useEffect(() => {
-    // Poll so mock "client accepted" events show up. With the real backend
-    // this becomes a websocket or refetch-on-focus.
+    // Light polling so a client accepting/sending a request shows up
+    // without a manual refresh (no websockets in this project).
     const first = setTimeout(refresh, 0)
-    const id = setInterval(refresh, 3000)
+    const id = setInterval(refresh, 10_000)
     return () => {
       clearTimeout(first)
       clearInterval(id)
@@ -81,14 +81,7 @@ export default function TrainerDashboard() {
     refresh()
   }
 
-  const sessionsThisWeek = clients.reduce(
-    (sum, c) =>
-      sum +
-      c.workout_sessions.filter(
-        (s) => Date.now() - new Date(s.session_date).getTime() < 7 * 86400_000
-      ).length,
-    0
-  )
+  const totalSessions = clients.reduce((sum, c) => sum + c.total_sessions, 0)
 
   return (
     <div className="flex flex-col gap-6">
@@ -113,7 +106,7 @@ export default function TrainerDashboard() {
       <div className="flex flex-col gap-3 sm:flex-row">
         <StatTile icon={Users} label="Active clients" value={clients.length} />
         <StatTile icon={Zap} label="Pending requests" value={requests.length} />
-        <StatTile icon={Dumbbell} label="Sessions this week" value={sessionsThisWeek} />
+        <StatTile icon={Dumbbell} label="Client sessions logged" value={totalSessions} />
       </div>
 
       <RequestsPanel requests={requests} onChanged={refresh} />
