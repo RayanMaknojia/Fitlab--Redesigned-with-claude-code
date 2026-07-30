@@ -4,6 +4,7 @@ import {
   connectToListing,
   deleteMyListing,
   getListing,
+  getListingByUser,
   getMyListing,
   upsertMyListing,
 } from "../../controllers/listingController";
@@ -199,6 +200,44 @@ describe("getListing", () => {
     const { res, statusMock, jsonMock } = createMockRes();
 
     await getListing(req, res);
+
+    expect(statusMock).toHaveBeenCalledWith(404);
+    expect(jsonMock).toHaveBeenCalledWith({ error: "Cannot find listing." });
+  });
+});
+
+describe("getListingByUser", () => {
+  it("returns the listing belonging to that user id", async () => {
+    await listingModel.upsertListing(
+      trainerId,
+      "trainer",
+      "listing trainer",
+      "Strength coach",
+      "Bio.",
+    );
+
+    const req = createMockReq({
+      session: sessionFor(clientId, "client", "listing client"),
+      params: { userId: trainerId.toString() },
+    });
+    const { res, statusMock, jsonMock } = createMockRes();
+
+    await getListingByUser(req, res);
+
+    expect(statusMock).toHaveBeenCalledWith(200);
+    expect(jsonMock).toHaveBeenCalledWith(
+      expect.objectContaining({ user_id: trainerId.toString() }),
+    );
+  });
+
+  it("returns 404 when that user has no listing", async () => {
+    const req = createMockReq({
+      session: sessionFor(clientId, "client", "listing client"),
+      params: { userId: trainerId.toString() },
+    });
+    const { res, statusMock, jsonMock } = createMockRes();
+
+    await getListingByUser(req, res);
 
     expect(statusMock).toHaveBeenCalledWith(404);
     expect(jsonMock).toHaveBeenCalledWith({ error: "Cannot find listing." });
