@@ -29,6 +29,10 @@ export async function getListing(listingId: string): Promise<Listing> {
   return request<Listing>(`/listings/${listingId}`);
 }
 
+export async function getListingByUser(userId: string): Promise<Listing> {
+  return request<Listing>(`/listings/by-user/${userId}`);
+}
+
 export async function connectToListing(listingId: string): Promise<LinkRequest> {
   return request<LinkRequest>(`/listings/${listingId}/connect`, {
     method: "POST",
