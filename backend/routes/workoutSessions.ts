@@ -12,6 +12,8 @@ import {
   deleteSessionExercise,
 } from "../controllers/workoutSessionController";
 import { requireAuth } from "../middleware/requireAuth";
+import { requireClientAccess } from "../middleware/requireClientAccess";
+import { requireWorkoutSessionAccess } from "../middleware/requireWorkoutSessionAccess";
 
 export const workoutSessionRouter = express.Router();
 
@@ -43,6 +45,8 @@ workoutSessionRouter.get(
  */
 workoutSessionRouter.get(
   "/clients/:clientId/workout-sessions",
+  requireAuth,
+  requireClientAccess,
   getClientWorkoutSessions,
 );
 
@@ -79,6 +83,8 @@ workoutSessionRouter.get(
  */
 workoutSessionRouter.post(
   "/clients/:clientId/workout-sessions",
+  requireAuth,
+  requireClientAccess,
   addClientWorkoutSession,
 );
 
@@ -102,7 +108,12 @@ workoutSessionRouter.post(
  *       404:
  *         description: Cannot find session
  */
-workoutSessionRouter.get("/workout-sessions/:sessionId", getWorkoutSessionById);
+workoutSessionRouter.get(
+  "/workout-sessions/:sessionId",
+  requireAuth,
+  requireWorkoutSessionAccess,
+  getWorkoutSessionById,
+);
 
 /**
  * @swagger
@@ -135,7 +146,12 @@ workoutSessionRouter.get("/workout-sessions/:sessionId", getWorkoutSessionById);
  *       404:
  *         description: Cannot find session
  */
-workoutSessionRouter.put("/workout-sessions/:sessionId", updateWorkoutSession);
+workoutSessionRouter.put(
+  "/workout-sessions/:sessionId",
+  requireAuth,
+  requireWorkoutSessionAccess,
+  updateWorkoutSession,
+);
 
 /**
  * @swagger
@@ -159,6 +175,8 @@ workoutSessionRouter.put("/workout-sessions/:sessionId", updateWorkoutSession);
  */
 workoutSessionRouter.delete(
   "/workout-sessions/:sessionId",
+  requireAuth,
+  requireWorkoutSessionAccess,
   deleteWorkoutSession,
 );
 
@@ -184,6 +202,8 @@ workoutSessionRouter.delete(
  */
 workoutSessionRouter.get(
   "/workout-sessions/:sessionId/exercises",
+  requireAuth,
+  requireWorkoutSessionAccess,
   getWorkoutSessionExercises,
 );
 
@@ -229,6 +249,8 @@ workoutSessionRouter.get(
  */
 workoutSessionRouter.post(
   "/workout-sessions/:sessionId/exercises",
+  requireAuth,
+  requireWorkoutSessionAccess,
   addSessionExercise,
 );
 
@@ -276,6 +298,8 @@ workoutSessionRouter.post(
  */
 workoutSessionRouter.put(
   "/workout-sessions/:sessionId/exercises/:exerciseId",
+  requireAuth,
+  requireWorkoutSessionAccess,
   updateSessionExercise,
 );
 
@@ -306,5 +330,7 @@ workoutSessionRouter.put(
  */
 workoutSessionRouter.delete(
   "/workout-sessions/:sessionId/exercises/:exerciseId",
+  requireAuth,
+  requireWorkoutSessionAccess,
   deleteSessionExercise,
 );

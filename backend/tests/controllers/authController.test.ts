@@ -67,6 +67,30 @@ describe("registerUser", () => {
     expect(jsonMock).toHaveBeenCalledWith({ error: "Invalid email format" });
   });
 
+  it("returns 400 when trying to self-register as admin", async () => {
+    const req = createMockReq({
+      body: {
+        name: "Test",
+        email: "wannabe-admin@example.com",
+        password: "password123",
+        role: "admin",
+      },
+    });
+    const { res, statusMock, jsonMock } = createMockRes();
+
+    await registerUser(req, res);
+
+    expect(statusMock).toHaveBeenCalledWith(400);
+    expect(jsonMock).toHaveBeenCalledWith({
+      error: "Role must be 'client' or 'trainer'",
+    });
+
+    const stored = await getDb()
+      .collection("users")
+      .findOne({ email: "wannabe-admin@example.com" });
+    expect(stored).toBeNull();
+  });
+
   it("registers a new client, hashes the password, and creates a linked client record", async () => {
     const req = createMockReq({
       body: {

@@ -7,14 +7,14 @@ export interface User {
   name: string;
   email: string;
   password_hash: string;
-  role: "client" | "trainer";
+  role: "client" | "trainer" | "admin";
 }
 
 export interface NewUserInput {
   name: string;
   email: string;
   password: string;
-  role: "client" | "trainer";
+  role: "client" | "trainer" | "admin";
 }
 
 const collection = (): Collection<User> => getDb().collection("users");

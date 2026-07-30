@@ -5,6 +5,9 @@ import {
   updateExerciseTemplate,
   deleteExerciseTemplate,
 } from "../controllers/exerciseTemplateController";
+import { requireAuth } from "../middleware/requireAuth";
+import { requireClientAccess } from "../middleware/requireClientAccess";
+import { requireExerciseTemplateAccess } from "../middleware/requireExerciseTemplateAccess";
 
 export const exerciseTemplateRouter = express.Router();
 
@@ -30,6 +33,8 @@ export const exerciseTemplateRouter = express.Router();
  */
 exerciseTemplateRouter.get(
   "/clients/:clientId/exercise-templates",
+  requireAuth,
+  requireClientAccess,
   getClientExerciseTemplates,
 );
 
@@ -66,6 +71,8 @@ exerciseTemplateRouter.get(
  */
 exerciseTemplateRouter.post(
   "/clients/:clientId/exercise-templates",
+  requireAuth,
+  requireClientAccess,
   addClientExerciseTemplate,
 );
 
@@ -102,6 +109,8 @@ exerciseTemplateRouter.post(
  */
 exerciseTemplateRouter.put(
   "/exercise-templates/:templateId",
+  requireAuth,
+  requireExerciseTemplateAccess,
   updateExerciseTemplate,
 );
 
@@ -127,5 +136,7 @@ exerciseTemplateRouter.put(
  */
 exerciseTemplateRouter.delete(
   "/exercise-templates/:templateId",
+  requireAuth,
+  requireExerciseTemplateAccess,
   deleteExerciseTemplate,
 );
