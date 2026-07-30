@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { api } from "@/lib/api"
+import { api } from "@/lib/authApi"
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("")
