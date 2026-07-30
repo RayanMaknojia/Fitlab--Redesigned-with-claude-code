@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 type ChatInputProps = {
   value: string
   disabled?: boolean
+  maxLength: number
   onChange: (value: string) => void
   onSend: () => void
 }
@@ -14,6 +15,7 @@ type ChatInputProps = {
 export default function ChatInput({
   value,
   disabled = false,
+  maxLength,
   onChange,
   onSend,
 }: ChatInputProps) {
@@ -36,6 +38,7 @@ export default function ChatInput({
           ref={textareaRef}
           rows={1}
           value={value}
+          maxLength={maxLength}
           onChange={(event) => onChange(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === "Enter" && !event.shiftKey) {
@@ -63,6 +66,9 @@ export default function ChatInput({
         >
           <SendHorizontal className="size-4" />
         </Button>
+      </div>
+      <div className="mt-2 text-right text-xs text-white/45">
+        {value.length}/{maxLength}
       </div>
     </div>
   )

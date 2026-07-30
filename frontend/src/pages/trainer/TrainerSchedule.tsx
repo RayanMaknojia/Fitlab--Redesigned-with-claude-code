@@ -4,8 +4,9 @@
 import { useEffect, useMemo, useState } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
-import type { ScheduleEvent } from "@/types"
-import { getScheduleEvents } from "@/lib/trainerApi"
+import type { ClientSummary, TrainerScheduleEntry } from "@/types"
+import { getClients, getScheduleEvents } from "@/lib/trainerApi"
+import AddScheduleDialog from "@/components/trainer/AddScheduleDialog"
 import RescheduleDialog from "@/components/trainer/RescheduleDialog"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -58,30 +59,34 @@ export default function TrainerSchedule() {
   const today = new Date()
   const [year, setYear] = useState(today.getFullYear())
   const [month, setMonth] = useState(today.getMonth())
-  const [events, setEvents] = useState<ScheduleEvent[]>([])
+  const [events, setEvents] = useState<TrainerScheduleEntry[]>([])
+  const [clients, setClients] = useState<ClientSummary[]>([])
   const [loading, setLoading] = useState(true)
-  const [selected, setSelected] = useState<ScheduleEvent | null>(null)
+  const [selected, setSelected] = useState<TrainerScheduleEntry | null>(null)
 
-  useEffect(() => {
-    let cancelled = false
-    getScheduleEvents().then((e) => {
-      if (!cancelled) {
-        setEvents(e)
-        setLoading(false)
-      }
+  const refresh = () => {
+    Promise.all([getScheduleEvents(), getClients()]).then(([e, c]) => {
+      setEvents(e)
+      setClients(c)
+      setLoading(false)
     })
-    return () => {
-      cancelled = true
-    }
-  }, [])
+  }
+
+  useEffect(refresh, [])
 
   const byDay = useMemo(() => {
-    const map = new Map<string, ScheduleEvent[]>()
+    const map = new Map<string, TrainerScheduleEntry[]>()
     for (const event of events) {
       const key = dayKey(new Date(event.start_time))
       map.set(key, [...(map.get(key) ?? []), event])
     }
     return map
+  }, [events])
+
+  // Stable per-client color index for the calendar chips.
+  const clientColorIndex = useMemo(() => {
+    const ids = Array.from(new Set(events.map((e) => e.client_id))).sort()
+    return new Map(ids.map((id, i) => [id, i]))
   }, [events])
 
   const cells = useMemo(() => monthCells(year, month), [year, month])
@@ -121,6 +126,7 @@ export default function TrainerSchedule() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <AddScheduleDialog clients={clients} onScheduled={refresh} />
           <Button variant="outline" size="sm" onClick={goToday}>
             Today
           </Button>
@@ -191,13 +197,18 @@ export default function TrainerSchedule() {
                 <div className="mt-1 flex flex-col gap-1">
                   {dayEvents.map((event) => (
                     <button
-                      key={`${event.client_id}-${event.start_time}`}
+                      key={event.schedule_id}
                       onClick={() => setSelected(event)}
-                      title={`${event.client_name} · ${timeLabel(event.start_time)} · ${event.duration} min — click to request a reschedule`}
+                      title={`${event.client_name} · ${timeLabel(event.start_time)} · ${event.duration_in_minutes} min — click to request a reschedule`}
                       className={cn(
                         "w-full truncate rounded-md border px-1.5 py-0.5 text-left text-[11px] font-medium transition-colors",
-                        EVENT_HUES[event.client_index % EVENT_HUES.length],
-                        !inMonth && "opacity-50"
+                        EVENT_HUES[
+                          (clientColorIndex.get(event.client_id) ?? 0) %
+                            EVENT_HUES.length
+                        ],
+                        !inMonth && "opacity-50",
+                        event.reschedule_request?.status === "pending" &&
+                          "border-dashed"
                       )}
                     >
                       <span className="opacity-75">{timeLabel(event.start_time)}</span>{" "}
@@ -211,7 +222,11 @@ export default function TrainerSchedule() {
         </div>
       </div>
 
-      <RescheduleDialog event={selected} onClose={() => setSelected(null)} />
+      <RescheduleDialog
+        event={selected}
+        onClose={() => setSelected(null)}
+        onSent={refresh}
+      />
     </div>
   )
 }

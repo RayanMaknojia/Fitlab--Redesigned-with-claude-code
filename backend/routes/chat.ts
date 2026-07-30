@@ -1,7 +1,13 @@
 import express from "express";
-import { getChatHealth, sendChatMessage } from "../controllers/chatController";
+
+import {
+  createChatReply,
+  getChatHealth,
+} from "../controllers/chatController";
+import { chatRateLimit } from "../middleware/chatRateLimit";
+import { requireAuth } from "../middleware/requireAuth";
 
 export const chatRouter = express.Router();
 
-chatRouter.get("/health", getChatHealth); // Server check endpoint
-chatRouter.post("/", sendChatMessage);
+chatRouter.get("/health", getChatHealth);
+chatRouter.post("/", requireAuth, chatRateLimit, createChatReply);

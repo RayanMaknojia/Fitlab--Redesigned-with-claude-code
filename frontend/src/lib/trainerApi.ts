@@ -1,304 +1,196 @@
-// Mock API for the trainer dashboard.
+// Trainer-side API — real fetch calls against the Express backend.
 // Owned by: Jiachen Sun (trainer-client management).
 //
-// Every function here matches the shape of a future REST endpoint
-// (commented above each one). When the Express backend is ready, replace
-// the bodies with fetch() calls — the components won't need to change.
-//
-// State persists in localStorage so the demo survives refreshes.
-// By default the trainer has NO clients (per spec); a few mock "registered
-// FitLab users" exist in a directory you can send link requests to, and one
-// incoming request is seeded so the accept/decline flow can be demoed.
+// Auth is the session cookie (credentials: "include"), so there's no token
+// plumbing here; the logged-in trainer is resolved server-side.
 
 import type {
-  Client,
+  ClientSummary,
+  ClientSyncData,
   LinkRequest,
-  RescheduleRequest,
-  Schedule,
-  ScheduleEvent,
-  WorkoutSession,
+  SyncedExercise,
+  TrainerScheduleEntry,
 } from "@/types"
 
-const STORE_KEY = "fitlab.trainer.mock.v1"
-const TRAINER_ID = "t-me" // TODO: from auth context
-const LATENCY = 450 // simulated network delay (ms)
+const API_BASE = "http://localhost:3000/api"
 
-interface Store {
-  clients: Client[]
-  requests: LinkRequest[]
-  reschedules?: RescheduleRequest[]
-}
+async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    ...options,
+  })
 
-// --- mock directory of registered client accounts (would live in the DB) ---
-
-interface DirectoryEntry {
-  client_id: string
-  name: string
-  email: string
-  goal: string
-}
-
-const DIRECTORY: DirectoryEntry[] = [
-  { client_id: "c-001", name: "Maya Chen", email: "maya@fitlab.dev", goal: "Strength" },
-  { client_id: "c-002", name: "Leo Park", email: "leo@fitlab.dev", goal: "Hypertrophy" },
-  { client_id: "c-003", name: "Sofia Reyes", email: "sofia@fitlab.dev", goal: "Weight loss" },
-  { client_id: "c-004", name: "Noah Kim", email: "noah@fitlab.dev", goal: "Endurance" },
-  { client_id: "c-005", name: "Ava Patel", email: "ava@fitlab.dev", goal: "Mobility" },
-]
-
-function makeSessions(clientId: string, count: number): WorkoutSession[] {
-  const exercises = [
-    { name: "Back Squat", sets: 4, reps: 6, weight_in_kg: 80 },
-    { name: "Bench Press", sets: 3, reps: 8, weight_in_kg: 60 },
-    { name: "Deadlift", sets: 3, reps: 5, weight_in_kg: 100 },
-    { name: "Pull Ups", sets: 3, reps: 10, weight_in_kg: null },
-  ]
-  return Array.from({ length: count }, (_, i) => ({
-    session_id: `${clientId}-s${i}`,
-    client_id: clientId,
-    exercises: exercises.slice(0, 2 + ((i + clientId.length) % 3)),
-    session_date: new Date(Date.now() - i * 3 * 86400_000).toISOString(),
-  }))
-}
-
-/**
- * Deterministic weekly training slots per client: 1-2 sessions/week on fixed
- * weekdays, generated from ~2 weeks back to ~6 weeks ahead.
- */
-function makeSchedules(clientId: string): Schedule[] {
-  const code = clientId.charCodeAt(clientId.length - 1)
-  const slots: { dow: number; hour: number; minute: number }[] = [
-    { dow: 1 + (code % 5), hour: [7, 9, 15, 17, 18][code % 5], minute: code % 2 ? 30 : 0 },
-  ]
-  if (code % 2 === 0) {
-    slots.push({ dow: 1 + ((code + 3) % 5), hour: [8, 10, 16, 18, 19][(code + 2) % 5], minute: 0 })
+  if (res.status === 204) {
+    return undefined as T
   }
-  const schedules: Schedule[] = []
-  const day = new Date()
-  day.setHours(0, 0, 0, 0)
-  day.setDate(day.getDate() - 14)
-  for (let i = 0; i < 60; i++) {
-    for (const slot of slots) {
-      if (day.getDay() === slot.dow) {
-        const start = new Date(day)
-        start.setHours(slot.hour, slot.minute, 0, 0)
-        schedules.push({
-          client_id: clientId,
-          trainer_id: TRAINER_ID,
-          start_time: start.toISOString(),
-          duration: 60,
-        })
-      }
-    }
-    day.setDate(day.getDate() + 1)
+
+  const data = await res.json()
+
+  if (!res.ok) {
+    throw new Error(data.error ?? "Request failed")
   }
-  return schedules
+
+  return data as T
 }
 
-// --- storage helpers ---
-
-function seed(): Store {
-  return {
-    clients: [], // default: no linked clients
-    requests: [
-      {
-        request_id: "r-seed-1",
-        direction: "incoming",
-        client_id: "c-003",
-        client_name: "Sofia Reyes",
-        client_email: "sofia@fitlab.dev",
-        status: "pending",
-        created_at: new Date(Date.now() - 2 * 86400_000).toISOString(),
-      },
-    ],
-  }
+/** GET /api/trainers/me/clients — linked clients with a session summary. */
+export async function getClients(): Promise<ClientSummary[]> {
+  return request("/trainers/me/clients")
 }
 
-function load(): Store {
-  try {
-    const raw = localStorage.getItem(STORE_KEY)
-    if (raw) return JSON.parse(raw) as Store
-  } catch {
-    /* fall through to seed */
-  }
-  const s = seed()
-  save(s)
-  return s
-}
-
-function save(s: Store) {
-  localStorage.setItem(STORE_KEY, JSON.stringify(s))
-}
-
-function delay<T>(value: T): Promise<T> {
-  return new Promise((resolve) => setTimeout(() => resolve(value), LATENCY))
-}
-
-function toClient(entry: DirectoryEntry): Client {
-  return {
-    client_id: entry.client_id,
-    name: entry.name,
-    email: entry.email,
-    goal: entry.goal,
-    linked_at: new Date().toISOString(),
-    workout_sessions: makeSessions(entry.client_id, 3 + (entry.client_id.charCodeAt(4) % 5)),
-    schedules: makeSchedules(entry.client_id),
-  }
-}
-
-// --- API surface (future REST endpoints noted above each) ---
-
-/** GET /api/trainers/me/clients */
-export async function getClients(): Promise<Client[]> {
-  return delay(load().clients)
-}
-
-/** GET /api/trainers/me/requests */
+/** GET /api/trainers/me/link-requests — pending requests, both directions. */
 export async function getRequests(): Promise<LinkRequest[]> {
-  return delay(load().requests.filter((r) => r.status === "pending"))
+  return request("/trainers/me/link-requests")
 }
 
-/**
- * POST /api/trainers/me/requests  { client_email }
- * Sends a link request to a registered client by email.
- */
+/** POST /api/trainers/me/link-requests — send a link request to a client by email. */
 export async function sendLinkRequest(email: string): Promise<LinkRequest> {
-  const store = load()
-  const normalized = email.trim().toLowerCase()
-  const entry = DIRECTORY.find((d) => d.email === normalized)
-  if (!entry) {
-    await delay(undefined)
-    throw new Error("No FitLab client found with that email.")
-  }
-  if (store.clients.some((c) => c.client_id === entry.client_id)) {
-    throw new Error(`${entry.name} is already your client.`)
-  }
-  if (
-    store.requests.some(
-      (r) => r.client_id === entry.client_id && r.status === "pending"
-    )
-  ) {
-    throw new Error(`A request for ${entry.name} is already pending.`)
-  }
-  const request: LinkRequest = {
-    request_id: `r-${crypto.randomUUID()}`,
-    direction: "outgoing",
-    client_id: entry.client_id,
-    client_name: entry.name,
-    client_email: entry.email,
-    status: "pending",
-    created_at: new Date().toISOString(),
-  }
-  store.requests.push(request)
-  save(store)
-
-  // Mock: the client "accepts" a few seconds later.
-  setTimeout(() => acceptRequest(request.request_id).catch(() => {}), 4000)
-
-  return delay(request)
+  return request("/trainers/me/link-requests", {
+    method: "POST",
+    body: JSON.stringify({ client_email: email }),
+  })
 }
 
-/** POST /api/trainers/me/requests/:id/accept */
-export async function acceptRequest(requestId: string): Promise<Client> {
-  const store = load()
-  const req = store.requests.find((r) => r.request_id === requestId)
-  if (!req || req.status !== "pending") throw new Error("Request not found.")
-  req.status = "accepted"
-  const entry = DIRECTORY.find((d) => d.client_id === req.client_id)
-  const client = entry
-    ? toClient(entry)
-    : {
-        client_id: req.client_id,
-        name: req.client_name,
-        email: req.client_email,
-        linked_at: new Date().toISOString(),
-        workout_sessions: [],
-        schedules: [],
-      }
-  if (!store.clients.some((c) => c.client_id === client.client_id)) {
-    store.clients.push(client)
-  }
-  save(store)
-  return delay(client)
+/** POST /api/trainers/me/link-requests/:id/accept — accept a client-initiated request. */
+export async function acceptRequest(requestId: string): Promise<LinkRequest> {
+  return request(`/trainers/me/link-requests/${requestId}/accept`, {
+    method: "POST",
+  })
 }
 
-/** POST /api/trainers/me/requests/:id/decline */
-export async function declineRequest(requestId: string): Promise<void> {
-  const store = load()
-  const req = store.requests.find((r) => r.request_id === requestId)
-  if (req) req.status = "declined"
-  save(store)
-  return delay(undefined)
+/** POST /api/trainers/me/link-requests/:id/decline */
+export async function declineRequest(requestId: string): Promise<LinkRequest> {
+  return request(`/trainers/me/link-requests/${requestId}/decline`, {
+    method: "POST",
+  })
 }
 
-/** DELETE /api/trainers/me/clients/:id */
+/** DELETE /api/trainers/me/clients/:id — unlink a client. */
 export async function unlinkClient(clientId: string): Promise<void> {
-  const store = load()
-  store.clients = store.clients.filter((c) => c.client_id !== clientId)
-  store.requests = store.requests.filter((r) => r.client_id !== clientId)
-  save(store)
-  return delay(undefined)
+  return request(`/trainers/me/clients/${clientId}`, { method: "DELETE" })
 }
 
 /**
- * GET /api/trainers/me/schedules
- * All scheduled sessions across linked clients, joined with client names.
- * Lazily backfills schedules for clients linked before this feature existed.
+ * GET /api/trainers/me/clients/:id/sync — full live payload for one linked
+ * client: profile, session history with exercises, and progress stats.
+ * Reads are live (no snapshot), so client updates appear on every fetch.
  */
-export async function getScheduleEvents(): Promise<ScheduleEvent[]> {
-  const store = load()
-  let dirty = false
-  for (const client of store.clients) {
-    if (client.schedules.length === 0) {
-      client.schedules = makeSchedules(client.client_id)
-      dirty = true
-    }
-  }
-  if (dirty) save(store)
+export async function syncClient(clientId: string): Promise<ClientSyncData> {
+  return request(`/trainers/me/clients/${clientId}/sync`)
+}
 
-  const events = store.clients.flatMap((client, index) =>
-    client.schedules.map((s) => ({
-      ...s,
-      client_name: client.name,
-      client_index: index,
-    }))
-  )
-  events.sort((a, b) => a.start_time.localeCompare(b.start_time))
-  return delay(events)
+// --- workout-session editing for linked clients ---
+// These use the shared /clients + /workout-sessions routes; the backend
+// grants access because the logged-in trainer is linked to the client.
+
+/** POST /api/clients/:clientId/workout-sessions — log a session for the client. */
+export async function addWorkoutSession(
+  clientId: string,
+  sessionDate: string,
+): Promise<{ _id: string }> {
+  return request(`/clients/${clientId}/workout-sessions`, {
+    method: "POST",
+    body: JSON.stringify({ session_date: sessionDate }),
+  })
+}
+
+/** DELETE /api/workout-sessions/:sessionId */
+export async function deleteWorkoutSession(sessionId: string): Promise<void> {
+  return request(`/workout-sessions/${sessionId}`, { method: "DELETE" })
+}
+
+/** POST /api/workout-sessions/:sessionId/exercises */
+export async function addSessionExercise(
+  sessionId: string,
+  input: {
+    exercise_template_id: string
+    sets: number
+    reps: number
+    weight_in_kg: number
+  },
+): Promise<SyncedExercise> {
+  return request(`/workout-sessions/${sessionId}/exercises`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  })
+}
+
+/** PUT /api/workout-sessions/:sessionId/exercises/:exerciseId */
+export async function updateSessionExercise(
+  sessionId: string,
+  exerciseId: string,
+  input: { sets: number; reps: number; weight_in_kg: number },
+): Promise<void> {
+  await request(`/workout-sessions/${sessionId}/exercises/${exerciseId}`, {
+    method: "PUT",
+    body: JSON.stringify(input),
+  })
+}
+
+/** DELETE /api/workout-sessions/:sessionId/exercises/:exerciseId */
+export async function deleteSessionExercise(
+  sessionId: string,
+  exerciseId: string,
+): Promise<void> {
+  return request(`/workout-sessions/${sessionId}/exercises/${exerciseId}`, {
+    method: "DELETE",
+  })
+}
+
+/** GET /api/clients/:clientId/exercise-templates — the client's exercise library. */
+export async function getClientTemplates(
+  clientId: string,
+): Promise<{ _id: string; name: string }[]> {
+  return request(`/clients/${clientId}/exercise-templates`)
+}
+
+/** POST /api/clients/:clientId/exercise-templates — add to the client's library. */
+export async function addClientTemplate(
+  clientId: string,
+  name: string,
+): Promise<{ _id: string; name: string }> {
+  return request(`/clients/${clientId}/exercise-templates`, {
+    method: "POST",
+    body: JSON.stringify({ name }),
+  })
+}
+
+/** GET /api/trainers/me/schedules — merged calendar across linked clients. */
+export async function getScheduleEvents(): Promise<TrainerScheduleEntry[]> {
+  return request("/trainers/me/schedules")
+}
+
+/** POST /api/clients/:clientId/schedules — book a session for a linked client. */
+export async function addSchedule(
+  clientId: string,
+  input: { start_time: string; duration_in_minutes: number },
+): Promise<void> {
+  await request(`/clients/${clientId}/schedules`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  })
+}
+
+/** DELETE /api/schedules/:scheduleId — cancel a session. */
+export async function deleteSchedule(scheduleId: string): Promise<void> {
+  return request(`/schedules/${scheduleId}`, { method: "DELETE" })
 }
 
 /**
- * POST /api/trainers/me/reschedule-requests
- * Asks a client to move a session. Backend/client-approval flow comes later —
- * for now the request is just stored as pending.
+ * POST /api/trainers/me/schedules/:id/reschedule-request — propose a new
+ * slot; the client accepts (schedule moves) or declines.
  */
-export async function requestReschedule(input: {
-  client_id: string
-  original_start: string
-  proposed_start: string | null
-  reason: string
-}): Promise<RescheduleRequest> {
-  const store = load()
-  const request: RescheduleRequest = {
-    request_id: `rs-${crypto.randomUUID()}`,
-    ...input,
-    status: "pending",
-    created_at: new Date().toISOString(),
-  }
-  store.reschedules = [...(store.reschedules ?? []), request]
-  save(store)
-  return delay(request)
+export async function requestReschedule(
+  scheduleId: string,
+  input: {
+    proposed_start_time: string
+    proposed_duration_in_minutes: number
+    message?: string
+  },
+): Promise<void> {
+  await request(`/trainers/me/schedules/${scheduleId}/reschedule-request`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  })
 }
-
-/** GET /api/trainers/me/reschedule-requests */
-export async function getRescheduleRequests(): Promise<RescheduleRequest[]> {
-  return delay(load().reschedules ?? [])
-}
-
-/** Demo helper: reset mock data back to the empty default. */
-export function resetMockData(): void {
-  localStorage.removeItem(STORE_KEY)
-}
-
-/** Emails that exist in the mock directory (shown as hints in the UI). */
-export const DEMO_EMAILS = DIRECTORY.map((d) => d.email)

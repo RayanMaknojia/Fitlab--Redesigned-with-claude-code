@@ -1,9 +1,8 @@
 import { useNavigate } from "react-router-dom"
-import { ArrowUpRight, Flame, MoreVertical, UserMinus } from "lucide-react"
+import { ArrowUpRight, CalendarCheck, Flame, MoreVertical, UserMinus } from "lucide-react"
 
-import type { Client } from "@/types"
+import type { ClientSummary } from "@/types"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import {
@@ -37,22 +36,16 @@ export default function ClientCard({
   index,
   onUnlink,
 }: {
-  client: Client
+  client: ClientSummary
   index: number
   onUnlink: (clientId: string) => void
 }) {
   const navigate = useNavigate()
   const hue = AVATAR_HUES[index % AVATAR_HUES.length]
-  const sessions = client.workout_sessions
-  const lastSession = sessions[0]
-
-  // tiny activity sparkline: exercises per session, most recent last
-  const spark = sessions.slice(0, 8).reverse()
-  const max = Math.max(1, ...spark.map((s) => s.exercises.length))
 
   const openClient = () => {
-    // Client page view is owned by another teammate — we only route to it.
-    navigate(`/clients/${client.client_id}`)
+    // Trainer-side synced view: history, progress, and editing.
+    navigate(`/trainer/clients/${client.client_id}`)
   }
 
   return (
@@ -89,46 +82,33 @@ export default function ClientCard({
       </CardHeader>
 
       <CardContent className="px-5">
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1.5">
-            <Flame className="size-3.5 text-lime-400" />
-            {sessions.length} session{sessions.length === 1 ? "" : "s"}
-          </span>
-          <span>
-            {lastSession ? `Last: ${daysAgo(lastSession.session_date)}` : "No sessions yet"}
-          </span>
-        </div>
-        <div className="mt-3 flex h-9 items-end gap-1">
-          {spark.length > 0 ? (
-            spark.map((s) => (
-              <div
-                key={s.session_id}
-                title={new Date(s.session_date).toLocaleDateString()}
-                className="flex-1 rounded-sm bg-lime-400/70 transition-colors group-hover:bg-lime-400"
-                style={{ height: `${(s.exercises.length / max) * 100}%` }}
-              />
-            ))
-          ) : (
-            <div className="w-full self-center rounded-md border border-dashed border-border/70 py-2 text-center text-[11px] text-muted-foreground">
-              activity will appear here
-            </div>
-          )}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between rounded-lg border border-border/60 bg-background/40 px-3 py-2 text-xs">
+            <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+              <Flame className="size-3.5 text-lime-400" /> Workout sessions
+            </span>
+            <span className="font-semibold text-foreground">
+              {client.total_sessions}
+            </span>
+          </div>
+          <div className="flex items-center justify-between rounded-lg border border-border/60 bg-background/40 px-3 py-2 text-xs">
+            <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+              <CalendarCheck className="size-3.5 text-lime-400" /> Last session
+            </span>
+            <span className="font-semibold text-foreground">
+              {client.last_session_date
+                ? daysAgo(client.last_session_date)
+                : "none yet"}
+            </span>
+          </div>
         </div>
       </CardContent>
 
-      <CardFooter className="justify-between px-5">
-        {client.goal && (
-          <Badge
-            variant="outline"
-            className="border-lime-400/30 bg-lime-400/5 text-lime-300"
-          >
-            {client.goal}
-          </Badge>
-        )}
+      <CardFooter className="justify-end px-5">
         <Button
           variant="ghost"
           size="sm"
-          className="ml-auto text-muted-foreground group-hover:text-lime-300"
+          className="text-muted-foreground group-hover:text-lime-300"
           onClick={openClient}
         >
           View profile <ArrowUpRight data-icon="inline-end" />
