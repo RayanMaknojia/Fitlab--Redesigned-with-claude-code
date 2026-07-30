@@ -1,10 +1,11 @@
-// Reschedule request form. Submitting stores a pending request in the mock
-// API — the client-approval / backend flow is intentionally left for later.
+// Reschedule request form. Sends the proposal to the backend
+// (POST /api/trainers/me/schedules/:id/reschedule-request); the client
+// then accepts (schedule moves) or declines from their side.
 
 import { useState } from "react"
 import { CalendarClock, Loader2 } from "lucide-react"
 
-import type { ScheduleEvent } from "@/types"
+import type { TrainerScheduleEntry } from "@/types"
 import { requestReschedule } from "@/lib/trainerApi"
 import { Button } from "@/components/ui/button"
 import {
@@ -18,52 +19,65 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-function formatSession(event: ScheduleEvent) {
+function formatSession(event: TrainerScheduleEntry) {
   const d = new Date(event.start_time)
   return `${d.toLocaleDateString(undefined, {
     weekday: "short",
     month: "short",
     day: "numeric",
   })} · ${d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })} · ${
-    event.duration
+    event.duration_in_minutes
   } min`
 }
 
 export default function RescheduleDialog({
   event,
   onClose,
+  onSent,
 }: {
-  event: ScheduleEvent | null
+  event: TrainerScheduleEntry | null
   onClose: () => void
+  onSent?: () => void
 }) {
   const [date, setDate] = useState("")
   const [time, setTime] = useState("")
-  const [reason, setReason] = useState("")
+  // null = untouched → default to the duration of the session being moved.
+  const [durationInput, setDurationInput] = useState<string | null>(null)
+  const [message, setMessage] = useState("")
   const [busy, setBusy] = useState(false)
   const [sent, setSent] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const duration =
+    durationInput ?? (event ? String(event.duration_in_minutes) : "60")
 
   const close = () => {
     setDate("")
     setTime("")
-    setReason("")
+    setDurationInput(null)
+    setMessage("")
     setSent(false)
+    setError(null)
     onClose()
   }
 
+  const valid = date && time && Number(duration) > 0
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!event) return
+    if (!event || !valid) return
     setBusy(true)
+    setError(null)
     try {
-      const proposed =
-        date && time ? new Date(`${date}T${time}`).toISOString() : null
-      await requestReschedule({
-        client_id: event.client_id,
-        original_start: event.start_time,
-        proposed_start: proposed,
-        reason: reason.trim(),
+      await requestReschedule(event.schedule_id, {
+        proposed_start_time: new Date(`${date}T${time}`).toISOString(),
+        proposed_duration_in_minutes: Number(duration),
+        ...(message.trim() && { message: message.trim() }),
       })
       setSent(true)
+      onSent?.()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.")
     } finally {
       setBusy(false)
     }
@@ -85,6 +99,12 @@ export default function RescheduleDialog({
                   {event.client_name}
                 </span>{" "}
                 — {formatSession(event)}
+                {event.reschedule_request?.status === "pending" && (
+                  <span className="mt-1 block text-xs">
+                    A proposal is already pending — sending a new one replaces
+                    it.
+                  </span>
+                )}
               </>
             )}
           </DialogDescription>
@@ -92,17 +112,14 @@ export default function RescheduleDialog({
 
         {sent ? (
           <div className="rounded-lg border border-lime-400/30 bg-lime-400/10 p-4 text-sm">
-            Reschedule request sent to {event?.client_name}. They'll be
-            notified and can accept a new time.
-            <span className="mt-1 block text-xs text-muted-foreground">
-              (Backend flow coming later — the request is stored as pending.)
-            </span>
+            Reschedule request sent to {event?.client_name}. The session moves
+            to the new slot once they accept.
           </div>
         ) : (
           <form onSubmit={submit} className="flex flex-col gap-4">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <div className="flex flex-col gap-2">
-                <Label htmlFor="rs-date">Proposed date</Label>
+                <Label htmlFor="rs-date">New date</Label>
                 <Input
                   id="rs-date"
                   type="date"
@@ -111,7 +128,7 @@ export default function RescheduleDialog({
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="rs-time">Proposed time</Label>
+                <Label htmlFor="rs-time">New time</Label>
                 <Input
                   id="rs-time"
                   type="time"
@@ -119,22 +136,32 @@ export default function RescheduleDialog({
                   onChange={(e) => setTime(e.target.value)}
                 />
               </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="rs-duration">Minutes</Label>
+                <Input
+                  id="rs-duration"
+                  type="number"
+                  min={15}
+                  step={15}
+                  value={duration}
+                  onChange={(e) => setDurationInput(e.target.value)}
+                />
+              </div>
             </div>
-            <p className="-mt-2 text-xs text-muted-foreground">
-              Leave blank to let the client pick a time.
-            </p>
 
             <div className="flex flex-col gap-2">
-              <Label htmlFor="rs-reason">Reason (optional)</Label>
+              <Label htmlFor="rs-message">Message (optional)</Label>
               <textarea
-                id="rs-reason"
+                id="rs-message"
                 rows={3}
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
                 placeholder="e.g. conflict with another session…"
                 className="w-full resize-none rounded-lg border border-input bg-input/30 px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
               />
             </div>
+
+            {error && <p className="text-sm text-destructive">{error}</p>}
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={close}>
@@ -142,7 +169,7 @@ export default function RescheduleDialog({
               </Button>
               <Button
                 type="submit"
-                disabled={busy}
+                disabled={busy || !valid}
                 className="bg-lime-400 font-semibold text-black hover:bg-lime-300"
               >
                 {busy && <Loader2 data-icon="inline-start" className="animate-spin" />}

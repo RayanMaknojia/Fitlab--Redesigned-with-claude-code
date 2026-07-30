@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Loader2, UserPlus } from "lucide-react"
 
-import { sendLinkRequest, DEMO_EMAILS } from "@/lib/trainerApi"
+import { sendLinkRequest } from "@/lib/trainerApi"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -76,9 +76,6 @@ export default function LinkClientDialog({
           <div className="rounded-lg border border-lime-400/30 bg-lime-400/10 p-4 text-sm">
             Request sent to <span className="font-semibold">{sent}</span>. It
             will show under pending requests until they accept.
-            <span className="mt-1 block text-xs text-muted-foreground">
-              (Demo: the client auto-accepts after a few seconds.)
-            </span>
           </div>
         ) : (
           <form onSubmit={submit} className="flex flex-col gap-4">
@@ -93,20 +90,6 @@ export default function LinkClientDialog({
                 autoFocus
               />
               {error && <p className="text-sm text-destructive">{error}</p>}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-xs text-muted-foreground">Demo accounts:</span>
-              {DEMO_EMAILS.map((demo) => (
-                <button
-                  key={demo}
-                  type="button"
-                  onClick={() => setEmail(demo)}
-                  className="rounded-full border border-border/70 px-2 py-0.5 text-xs text-muted-foreground transition-colors hover:border-lime-400/50 hover:text-lime-300"
-                >
-                  {demo}
-                </button>
-              ))}
             </div>
 
             <DialogFooter>

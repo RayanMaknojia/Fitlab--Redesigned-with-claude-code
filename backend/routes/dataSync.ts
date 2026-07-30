@@ -6,6 +6,7 @@ import {
   getLinkedClientProgress,
 } from "../controllers/dataSyncController";
 import { requireAuth } from "../middleware/requireAuth";
+import { requireLinkedClient } from "../middleware/requireLinkedClient";
 import { requireTrainer } from "../middleware/requireTrainer";
 
 // DataSyncupService routes: trainer-only, read-only endpoints for pulling
@@ -54,7 +55,11 @@ dataSyncRouter.get("/trainers/me/clients", getMyClients);
  *       404:
  *         description: Client not found or not linked to this trainer
  */
-dataSyncRouter.get("/trainers/me/clients/:clientId/sync", syncClientData);
+dataSyncRouter.get(
+  "/trainers/me/clients/:clientId/sync",
+  requireLinkedClient,
+  syncClientData,
+);
 
 /**
  * @swagger
@@ -82,6 +87,7 @@ dataSyncRouter.get("/trainers/me/clients/:clientId/sync", syncClientData);
  */
 dataSyncRouter.get(
   "/trainers/me/clients/:clientId/workout-sessions",
+  requireLinkedClient,
   getLinkedClientSessions,
 );
 
@@ -111,5 +117,6 @@ dataSyncRouter.get(
  */
 dataSyncRouter.get(
   "/trainers/me/clients/:clientId/progress",
+  requireLinkedClient,
   getLinkedClientProgress,
 );

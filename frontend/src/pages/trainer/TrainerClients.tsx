@@ -4,21 +4,21 @@
 import { useEffect, useMemo, useState } from "react"
 import { Search } from "lucide-react"
 
-import type { Client } from "@/types"
+import type { ClientSummary } from "@/types"
 import { getClients, unlinkClient } from "@/lib/trainerApi"
 import ClientCard from "@/components/trainer/ClientCard"
 import LinkClientDialog from "@/components/trainer/LinkClientDialog"
 import { Input } from "@/components/ui/input"
 
 export default function TrainerClients() {
-  const [clients, setClients] = useState<Client[]>([])
+  const [clients, setClients] = useState<ClientSummary[]>([])
   const [query, setQuery] = useState("")
 
   const refresh = () => getClients().then(setClients)
 
   useEffect(() => {
     refresh()
-    const id = setInterval(refresh, 3000)
+    const id = setInterval(refresh, 10_000)
     return () => clearInterval(id)
   }, [])
 
@@ -27,9 +27,7 @@ export default function TrainerClients() {
     if (!q) return clients
     return clients.filter(
       (c) =>
-        c.name.toLowerCase().includes(q) ||
-        c.email.toLowerCase().includes(q) ||
-        c.goal?.toLowerCase().includes(q)
+        c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q)
     )
   }, [clients, query])
 
@@ -50,7 +48,7 @@ export default function TrainerClients() {
       <div className="relative max-w-sm">
         <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          placeholder="Search by name, email or goal…"
+          placeholder="Search by name or email…"
           className="pl-9"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
