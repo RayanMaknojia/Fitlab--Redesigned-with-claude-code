@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { api } from "@/lib/api"
+import { api } from "@/lib/authApi"
 
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams()

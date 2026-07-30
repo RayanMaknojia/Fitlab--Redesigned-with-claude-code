@@ -5,10 +5,8 @@
 // backend; the rest of these functions derive stats/graphs from that same
 // list so there's only one network call per page load.
 
-const API_BASE = "http://localhost:3000/api";
-
 import type { WorkoutSession } from "@/types";
-import { api } from "@/lib/api";
+import { request } from "@/lib/request";
 import type {
   ClientStats,
   ExerciseTemplate,
@@ -16,13 +14,14 @@ import type {
   ProgressPoint,
   SessionExercise,
   WeeklyVolume,
+  WorkoutSession as WorkoutSessionRecord,
 } from "@/types/client";
 
 let sessionsCache: Promise<WorkoutSession[]> | null = null;
 
 function loadSessions(): Promise<WorkoutSession[]> {
   if (!sessionsCache) {
-    sessionsCache = api.getMyWorkoutSessions();
+    sessionsCache = request<WorkoutSession[]>("/me/workout-sessions");
   }
   return sessionsCache;
 }
@@ -142,15 +141,9 @@ export async function getStats(): Promise<ClientStats> {
 export async function getExerciseTemplates(
   clientId: string,
 ): Promise<ExerciseTemplate[]> {
-  const res = await fetch(`${API_BASE}/clients/${clientId}/exercise-templates`);
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.error);
-  }
-
-  return data;
+  return request<ExerciseTemplate[]>(
+    `/clients/${clientId}/exercise-templates`,
+  );
 }
 
 export async function addExerciseTemplate(
@@ -161,22 +154,13 @@ export async function addExerciseTemplate(
     throw new Error("Cannot have empty name");
   }
 
-  const res = await fetch(
-    `${API_BASE}/clients/${clientId}/exercise-templates`,
+  return request<ExerciseTemplate>(
+    `/clients/${clientId}/exercise-templates`,
     {
       method: "POST",
       body: JSON.stringify({ name }),
-      headers: { "Content-Type": "application/json" },
     },
   );
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.error);
-  }
-
-  return data;
 }
 
 export async function updateExerciseTemplate(
@@ -187,129 +171,75 @@ export async function updateExerciseTemplate(
     throw new Error("Cannot update with empty name");
   }
 
-  const res = await fetch(`${API_BASE}/exercise-templates/${templateId}`, {
+  return request<ExerciseTemplate>(`/exercise-templates/${templateId}`, {
     method: "PUT",
     body: JSON.stringify({ name }),
-    headers: { "Content-Type": "application/json" },
   });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.error);
-  }
-
-  return data;
 }
 
 export async function deleteExerciseTemplate(
   templateId: string,
 ): Promise<void> {
-  const res = await fetch(`${API_BASE}/exercise-templates/${templateId}`, {
+  await request<void>(`/exercise-templates/${templateId}`, {
     method: "DELETE",
   });
-
-  if (!res.ok) {
-    const data = await res.json();
-    throw new Error(data.error);
-  }
 }
 
-export async function getClientSessions(clientId: string) {
-  const res = await fetch(
-    `${API_BASE}/clients/${clientId}/workout-sessions`,
-    {},
+export async function getClientSessions(
+  clientId: string,
+): Promise<WorkoutSessionRecord[]> {
+  return request<WorkoutSessionRecord[]>(
+    `/clients/${clientId}/workout-sessions`,
   );
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.error);
-  }
-
-  return data;
 }
 
-export async function addClientSession(clientId: string, session_date: string) {
+export async function addClientSession(
+  clientId: string,
+  session_date: string,
+): Promise<WorkoutSessionRecord> {
   if (!session_date) {
     throw new Error("Must enter in date");
   }
 
-  const res = await fetch(`${API_BASE}/clients/${clientId}/workout-sessions`, {
-    method: "POST",
-    body: JSON.stringify({ session_date }),
-    headers: { "Content-Type": "application/json" },
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.error);
-  }
-
-  return data;
+  return request<WorkoutSessionRecord>(
+    `/clients/${clientId}/workout-sessions`,
+    {
+      method: "POST",
+      body: JSON.stringify({ session_date }),
+    },
+  );
 }
 
 export async function getSessionById(
   sessionId: string,
-): Promise<WorkoutSession> {
-  const res = await fetch(`${API_BASE}/workout-sessions/${sessionId}`);
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.error);
-  }
-
-  return data;
+): Promise<WorkoutSessionRecord> {
+  return request<WorkoutSessionRecord>(`/workout-sessions/${sessionId}`);
 }
 
 export async function updateSessionById(
   sessionId: string,
   session_date: string,
-) {
+): Promise<WorkoutSessionRecord> {
   if (!session_date) {
     throw new Error("Must enter in date");
   }
 
-  const res = await fetch(`${API_BASE}/workout-sessions/${sessionId}`, {
+  return request<WorkoutSessionRecord>(`/workout-sessions/${sessionId}`, {
     method: "PUT",
     body: JSON.stringify({ session_date }),
-    headers: { "Content-Type": "application/json" },
   });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.error);
-  }
-
-  return data;
 }
 
 export async function deleteSessionById(sessionId: string) {
-  const res = await fetch(`${API_BASE}/workout-sessions/${sessionId}`, {
+  await request<void>(`/workout-sessions/${sessionId}`, {
     method: "DELETE",
   });
-
-  if (!res.ok) {
-    const data = await res.json();
-    throw new Error(data.error);
-  }
 }
 
-export async function getSessionExercisesById(sessionId: string) {
-  const res = await fetch(
-    `${API_BASE}/workout-sessions/${sessionId}/exercises`,
-  );
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.error);
-  }
-
-  return data;
+export async function getSessionExercisesById(
+  sessionId: string,
+): Promise<SessionExercise[]> {
+  return request<SessionExercise[]>(`/workout-sessions/${sessionId}/exercises`);
 }
 
 export async function addExerciseToSession(
@@ -322,22 +252,13 @@ export async function addExerciseToSession(
     );
   }
 
-  const res = await fetch(
-    `${API_BASE}/workout-sessions/${sessionId}/exercises`,
+  return request<SessionExercise>(
+    `/workout-sessions/${sessionId}/exercises`,
     {
       method: "POST",
       body: JSON.stringify({ ...exercise }),
-      headers: { "Content-Type": "application/json" },
     },
   );
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.error);
-  }
-
-  return data;
 }
 
 export async function updateExerciseById(
@@ -347,38 +268,24 @@ export async function updateExerciseById(
     SessionExercise,
     "session_id" | "template_name" | "exercise_template_id"
   >,
-) {
-  const res = await fetch(
-    `${API_BASE}/workout-sessions/${sessionId}/exercises/${exerciseId}`,
+): Promise<SessionExercise> {
+  return request<SessionExercise>(
+    `/workout-sessions/${sessionId}/exercises/${exerciseId}`,
     {
       method: "PUT",
       body: JSON.stringify(exercise),
-      headers: { "Content-Type": "application/json" },
     },
   );
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.error);
-  }
-
-  return data;
 }
 
 export async function deleteExerciseById(
   sessionId: string,
   exerciseId: string,
 ) {
-  const res = await fetch(
-    `${API_BASE}/workout-sessions/${sessionId}/exercises/${exerciseId}`,
+  await request<void>(
+    `/workout-sessions/${sessionId}/exercises/${exerciseId}`,
     {
       method: "DELETE",
     },
   );
-
-  if (!res.ok) {
-    const data = await res.json();
-    throw new Error(data.error);
-  }
 }
