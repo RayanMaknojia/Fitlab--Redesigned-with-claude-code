@@ -2,6 +2,9 @@ import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import session from "express-session";
 import MongoStore from "connect-mongo";
+import swaggerJSDoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
+
 import { connect } from "./config/database";
 import * as userModel from "./models/User";
 import * as clientModel from "./models/Client";
@@ -16,8 +19,6 @@ import { exerciseTemplateRouter } from "./routes/exerciseTemplates";
 import { scheduleRouter } from "./routes/schedules";
 import { chatRouter } from "./routes/chat";
 import { dataSyncRouter } from "./routes/dataSync";
-import swaggerJSDoc from "swagger-jsdoc";
-import swaggerUi from "swagger-ui-express";
 
 const PORT = 3000;
 const app = express();
@@ -49,10 +50,10 @@ app.use(
     resave: false,
     saveUninitialized: false,
     rolling: true,
-    store: MongoStore.create({ mongoUrl: CONNECTION_STRING }), // Use MongoDB to store session data
+    store: MongoStore.create({ mongoUrl: CONNECTION_STRING }),
     cookie: {
       httpOnly: true,
-      maxAge: 3 * 60 * 60 * 1000, // 3 hours
+      maxAge: 3 * 60 * 60 * 1000,
     },
   }),
 );

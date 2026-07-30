@@ -7,8 +7,7 @@ export async function request<T>(path: string, options?: RequestInit): Promise<T
     ...options,
   });
 
-  // 204 No Content has no body — calling .json() on it throws, since there's
-  // nothing to parse.
+  // 204 No Content has no body, so .json() would throw.
   const data = res.status === 204 ? null : await res.json();
 
   if (!res.ok) {
