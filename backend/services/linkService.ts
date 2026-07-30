@@ -5,6 +5,7 @@ import * as userModel from "../models/User";
 import * as clientModel from "../models/Client";
 import * as linkRequestModel from "../models/LinkRequest";
 import type { LinkRequest } from "../models/LinkRequest";
+import * as notificationModel from "../models/Notification";
 
 /**
  * LinkService
@@ -157,12 +158,39 @@ const getRequestViewById = async (
   return toView(rows[0]);
 };
 
+// --- notifications ---
+
+// Who should be notified when a request is created, and what it should say.
+const newRequestNotification = (view: LinkRequestView) => {
+  const initiatedByTrainer = view.requested_by === "trainer";
+  return {
+    recipientId: new ObjectId(initiatedByTrainer ? view.client_id : view.trainer_id),
+    message: `${initiatedByTrainer ? view.trainer_name : view.client_name} sent you a connection request.`,
+  };
+};
+
+// Who should be notified when a request is accepted/declined, and what it
+// should say. Always the side that sent the original request.
+const respondedNotification = (view: LinkRequestView) => {
+  const initiatedByTrainer = view.requested_by === "trainer";
+  const responderName = initiatedByTrainer ? view.client_name : view.trainer_name;
+  const verb = view.status === "accepted" ? "accepted" : "declined";
+  return {
+    recipientId: new ObjectId(initiatedByTrainer ? view.trainer_id : view.client_id),
+    type: (view.status === "accepted"
+      ? "link_request_accepted"
+      : "link_request_declined") as notificationModel.NotificationType,
+    message: `${responderName} ${verb} your connection request.`,
+  };
+};
+
 // --- sending requests ---
 
 // Shared guts of both send directions: validates the pair can link and
 // inserts the pending request. The unique partial index backstops the
 // duplicate check against concurrent sends.
-const createRequest = async (
+// Exported for the marketplace's id-based Connect flow.
+export const createRequest = async (
   trainerId: ObjectId,
   clientId: ObjectId,
   requestedBy: "trainer" | "client",
@@ -196,7 +224,19 @@ const createRequest = async (
 
   try {
     const id = await linkRequestModel.addLinkRequest(request);
-    return await getRequestViewById(id);
+    const view = await getRequestViewById(id);
+
+    const { recipientId, message } = newRequestNotification(view);
+    await notificationModel.addNotification({
+      recipient_id: recipientId,
+      type: "link_request_received",
+      link_request_id: id,
+      message,
+      read: false,
+      created_at: new Date(),
+    });
+
+    return view;
   } catch (e) {
     // Two identical requests raced past the check; the unique index wins.
     if (e instanceof MongoServerError && e.code === 11000) {
@@ -296,7 +336,17 @@ export const respondToRequest = async (
 
   if (!accept) {
     await linkRequestModel.setStatus(requestId, "declined", respondedAt);
-    return await getRequestViewById(requestId);
+    const view = await getRequestViewById(requestId);
+    const { recipientId, type, message } = respondedNotification(view);
+    await notificationModel.addNotification({
+      recipient_id: recipientId,
+      type,
+      link_request_id: requestId,
+      message,
+      read: false,
+      created_at: new Date(),
+    });
+    return view;
   }
 
   const session = getClient().startSession();
@@ -337,7 +387,17 @@ export const respondToRequest = async (
     await session.endSession();
   }
 
-  return await getRequestViewById(requestId);
+  const view = await getRequestViewById(requestId);
+  const { recipientId, type, message } = respondedNotification(view);
+  await notificationModel.addNotification({
+    recipient_id: recipientId,
+    type,
+    link_request_id: requestId,
+    message,
+    read: false,
+    created_at: new Date(),
+  });
+  return view;
 };
 
 // --- unlinking ---
