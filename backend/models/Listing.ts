@@ -1,4 +1,4 @@
-import { Collection, ObjectId } from "mongodb";
+import { ClientSession, Collection, ObjectId } from "mongodb";
 import { getDb } from "../config/database";
 
 export type ListingRole = "client" | "trainer";
@@ -72,7 +72,11 @@ export const upsertListing = async (
 
 export const deleteListingByUserId = async (
   userId: ObjectId,
+  session?: ClientSession,
 ): Promise<boolean> => {
-  const result = await collection().deleteOne({ user_id: userId });
+  const result = await collection().deleteOne(
+    { user_id: userId },
+    session ? { session } : {},
+  );
   return result.deletedCount === 1;
 };

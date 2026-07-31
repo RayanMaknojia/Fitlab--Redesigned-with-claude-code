@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import { close, connect, getDb } from "../../config/database";
 import * as linkRequestModel from "../../models/LinkRequest";
 import * as notificationModel from "../../models/Notification";
+import * as listingModel from "../../models/Listing";
 import * as linkService from "../../services/linkService";
 
 let trainerId: ObjectId;
@@ -16,6 +17,7 @@ beforeAll(async () => {
   await connect();
   await linkRequestModel.init();
   await notificationModel.init();
+  await listingModel.init();
 });
 
 afterAll(async () => {
@@ -59,6 +61,7 @@ afterEach(async () => {
   const db = getDb();
   await db.collection("link_requests").deleteMany({});
   await db.collection("notifications").deleteMany({});
+  await db.collection("listings").deleteMany({});
   await db.collection("clients").deleteMany({ _id: clientId });
   await db
     .collection("users")
@@ -192,6 +195,52 @@ describe("respondToRequest", () => {
       .collection("link_requests")
       .findOne({ _id: new ObjectId(fromOtherTrainer.request_id) });
     expect(other?.status).toBe("declined");
+  });
+
+  it("removes the client's listing on accept, but not the trainer's", async () => {
+    await listingModel.upsertListing(
+      clientId,
+      "client",
+      "link client",
+      "Seeking a coach",
+      "Bio.",
+    );
+    await listingModel.upsertListing(
+      trainerId,
+      "trainer",
+      "link trainer",
+      "Strength coach",
+      "Bio.",
+    );
+
+    const view = await linkService.sendRequestToClient(trainerId, CLIENT_EMAIL);
+    await linkService.respondToRequest(
+      clientId,
+      new ObjectId(view.request_id),
+      true,
+    );
+
+    expect(await listingModel.getListingByUserId(clientId)).toBeNull();
+    expect(await listingModel.getListingByUserId(trainerId)).not.toBeNull();
+  });
+
+  it("declining leaves both listings alone", async () => {
+    await listingModel.upsertListing(
+      clientId,
+      "client",
+      "link client",
+      "Seeking a coach",
+      "Bio.",
+    );
+
+    const view = await linkService.sendRequestToClient(trainerId, CLIENT_EMAIL);
+    await linkService.respondToRequest(
+      clientId,
+      new ObjectId(view.request_id),
+      false,
+    );
+
+    expect(await listingModel.getListingByUserId(clientId)).not.toBeNull();
   });
 
   it("declining keeps the client unlinked", async () => {

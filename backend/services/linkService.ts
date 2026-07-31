@@ -6,6 +6,7 @@ import * as clientModel from "../models/Client";
 import * as linkRequestModel from "../models/LinkRequest";
 import type { LinkRequest } from "../models/LinkRequest";
 import * as notificationModel from "../models/Notification";
+import * as listingModel from "../models/Listing";
 
 /**
  * LinkService
@@ -377,6 +378,9 @@ export const respondToRequest = async (
         respondedAt,
         session,
       );
+
+      // The client now has a trainer, so they're no longer "seeking" one.
+      await listingModel.deleteListingByUserId(request.client_id, session);
     });
   } catch (e) {
     if (e instanceof ClientHasTrainerError) {
