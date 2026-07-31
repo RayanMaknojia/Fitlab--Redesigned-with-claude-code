@@ -13,7 +13,16 @@ import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
 import { getMyNotifications } from "@/lib/notificationsApi"
 
-const NAV = [
+
+type NavItem = {
+  to: string
+  label: string
+  icon: typeof LayoutDashboard
+  end: boolean
+  soon?: boolean
+}
+
+const NAV: NavItem[] = [
   { to: "/trainer", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/trainer/clients", label: "Clients", icon: Users, end: false },
   { to: "/trainer/browse", label: "Find clients", icon: Search, end: false },
