@@ -12,7 +12,7 @@ export interface Listing {
   name: string;
   headline: string;
   bio: string;
-  // "removed" is set by admin moderation #TODO not built yet.
+  // "removed" is set by admin moderation.
   status: ListingStatus;
   removed_by?: ObjectId;
   removed_reason?: string;
@@ -79,4 +79,44 @@ export const deleteListingByUserId = async (
     session ? { session } : {},
   );
   return result.deletedCount === 1;
+};
+
+/** Every listing, any role/status, newest first. For admin moderation. */
+export const getAllListingsForAdmin = async (): Promise<Listing[]> => {
+  return await collection().find({}).sort({ created_at: -1 }).toArray();
+};
+
+const removedFields = (removedBy: ObjectId, reason: string | undefined) => ({
+  status: "removed" as const,
+  removed_by: removedBy,
+  ...(reason ? { removed_reason: reason } : {}),
+  updated_at: new Date(),
+});
+
+export const markRemoved = async (
+  listingId: ObjectId,
+  removedBy: ObjectId,
+  reason: string | undefined,
+  session?: ClientSession,
+): Promise<boolean> => {
+  const result = await collection().updateOne(
+    { _id: listingId },
+    { $set: removedFields(removedBy, reason) },
+    session ? { session } : {},
+  );
+  return result.matchedCount === 1;
+};
+
+export const markRemovedForUser = async (
+  userId: ObjectId,
+  removedBy: ObjectId,
+  reason: string | undefined,
+  session?: ClientSession,
+): Promise<boolean> => {
+  const result = await collection().updateOne(
+    { user_id: userId },
+    { $set: removedFields(removedBy, reason) },
+    session ? { session } : {},
+  );
+  return result.matchedCount === 1;
 };

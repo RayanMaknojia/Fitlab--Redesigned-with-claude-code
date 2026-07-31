@@ -290,6 +290,31 @@ describe("loginUser", () => {
     expect(jsonMock).toHaveBeenCalledWith({ error: "Invalid credentials" });
   });
 
+  it("returns 403 for a blocked user with correct credentials", async () => {
+    const password_hash = await bcrypt.hash("correct-password", 10);
+    await userModel.addUser({
+      name: "Blocked User",
+      email: "blocked@example.com",
+      password_hash,
+      role: "client",
+    });
+    const blockedUser = await userModel.findUserByEmail("blocked@example.com");
+    await userModel.setUserBlocked(blockedUser!._id!, true);
+
+    const req = createMockReq({
+      body: { email: "blocked@example.com", password: "correct-password" },
+      session: createMockSession(),
+    });
+    const { res, statusMock, jsonMock } = createMockRes();
+
+    await loginUser(req, res);
+
+    expect(statusMock).toHaveBeenCalledWith(403);
+    expect(jsonMock).toHaveBeenCalledWith({
+      error: "This account has been blocked.",
+    });
+  });
+
   it("logs in with correct credentials and stores the session user", async () => {
     const session = createMockSession();
     const req = createMockReq({

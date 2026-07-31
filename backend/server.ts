@@ -25,6 +25,7 @@ import { dataSyncRouter } from "./routes/dataSync";
 import { linkRouter } from "./routes/links";
 import { listingRouter } from "./routes/listings";
 import { notificationRouter } from "./routes/notifications";
+import { adminRouter } from "./routes/admin";
 
 const PORT = 3000;
 const app = express();
@@ -92,6 +93,7 @@ app.use("/api", dataSyncRouter);
 app.use("/api", linkRouter);
 app.use("/api", listingRouter);
 app.use("/api", notificationRouter);
+app.use("/api/admin", adminRouter);
 
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ error: "Not found" });
