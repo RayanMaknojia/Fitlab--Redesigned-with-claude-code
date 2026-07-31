@@ -13,8 +13,7 @@
 // place tomorrow, with no code changes needed.
 
 import { getStats, getWeeklyVolume } from "@/lib/clientApi"
-
-const API_BASE = "http://localhost:3000/api"
+import { chatApi } from "@/lib/chatApi"
 
 export interface RecapResult {
   text: string
@@ -58,7 +57,7 @@ function fallbackRecap(summary: Awaited<ReturnType<typeof buildSummary>>): strin
 
   if (summary.current_streak_weeks > 0) {
     lines.push(
-      `You're on a ${summary.current_streak_weeks}-week training streak — keep it going.`
+      `You're on a ${summary.current_streak_weeks}-week training streak, keep it going.`
     )
   }
 
@@ -83,37 +82,27 @@ export async function generateProgressRecap(): Promise<RecapResult> {
   const summary = await buildSummary()
 
   try {
-    const res = await fetch(`${API_BASE}/chat`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        messages: [
-          {
-            role: "user",
-            content:
-              `Here is my current FitLab progress data as JSON:\n${JSON.stringify(
-                summary,
-                null,
-                2
-              )}\n\n` +
-              "Write a short, encouraging 2-4 sentence progress recap based on this data. Do not invent numbers that aren't in the data.",
-          },
-        ],
-      }),
+    const { message } = await chatApi.chat({
+      messages: [
+        {
+          role: "user",
+          content:
+            `Here is my current FitLab progress data as JSON:\n${JSON.stringify(
+              summary,
+              null,
+              2
+            )}\n\n` +
+            "Write a short, encouraging 2-4 sentence progress recap based on this data. Do not invent numbers that aren't in the data.",
+        },
+      ],
     })
 
-    if (!res.ok) throw new Error(`chat endpoint returned ${res.status}`)
-
-    const data = await res.json()
-    const text = data?.message?.content
+    const text = message?.content
     if (!text || typeof text !== "string") throw new Error("empty AI response")
 
     return { text, source: "ai" }
   } catch {
-    // /api/chat isn't reachable yet — use the local fallback so the feature
-    // still works end-to-end. No error surfaced to the user; this is
-    // expected until Ricky's branch merges.
+
     return { text: fallbackRecap(summary), source: "fallback" }
   }
 }
