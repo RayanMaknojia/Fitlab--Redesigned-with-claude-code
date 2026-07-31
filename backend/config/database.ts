@@ -3,7 +3,11 @@ import { loadEnvFile } from "process";
 
 loadEnvFile();
 
-const CONNECTION_STRING = process.env.CONNECTION_STRING;
+// Under Jest, @shelf/jest-mongodb's environment injects an isolated
+// in-memory Mongo instance via this global. Prefer it so tests never
+// touch the real dev database.
+const MONGO_TEST_URI = (globalThis as { __MONGO_URI__?: string }).__MONGO_URI__;
+const CONNECTION_STRING = MONGO_TEST_URI ?? process.env.CONNECTION_STRING;
 
 if (!CONNECTION_STRING) {
   throw new Error("CONNECTION_STRING is not set.");

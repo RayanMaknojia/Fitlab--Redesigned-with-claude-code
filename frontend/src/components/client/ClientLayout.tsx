@@ -2,11 +2,15 @@
 // the `dark` class so other pages (login, trainer view) keep their own styling.
 // Owned by: [your name] (progress dashboard / client view).
 
+import { useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import {
+  Bell,
   Dumbbell,
   LayoutDashboard,
   LineChart,
+  Search,
+  UserSquare2,
   Calendar,
   Settings,
   LogOut,
@@ -19,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import AuthenticatedChatbot from "@/components/chatbot/AuthenticatedChatbot";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
+import { getMyNotifications } from "@/lib/notificationsApi";
 
 const NAV = [
   { to: "/client", label: "Dashboard", icon: LayoutDashboard, end: true },
@@ -33,6 +38,19 @@ const NAV = [
     to: "/client/workout-sessions",
     label: "Workout Sessions",
     icon: CalendarClock,
+    end: false,
+  },
+  { to: "/client/browse", label: "Find trainers", icon: Search, end: false },
+  {
+    to: "/client/my-listing",
+    label: "My listing",
+    icon: UserSquare2,
+    end: false,
+  },
+  {
+    to: "/client/notifications",
+    label: "Notifications",
+    icon: Bell,
     end: false,
   },
   {
@@ -53,6 +71,20 @@ const NAV = [
 
 export default function ClientLayout() {
   const { user, logout } = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const refresh = () =>
+      getMyNotifications().then((n) =>
+        setUnreadCount(n.filter((x) => !x.read).length),
+      );
+    const first = setTimeout(refresh, 0);
+    const id = setInterval(refresh, 10_000);
+    return () => {
+      clearTimeout(first);
+      clearInterval(id);
+    };
+  }, []);
 
   return (
     <div className="dark min-h-screen bg-background text-foreground">
@@ -102,6 +134,11 @@ export default function ClientLayout() {
                 {soon && (
                   <Badge variant="secondary" className="ml-auto text-[10px]">
                     soon
+                  </Badge>
+                )}
+                {to === "/client/notifications" && unreadCount > 0 && (
+                  <Badge className="ml-auto bg-lime-400 text-[10px] text-black">
+                    {unreadCount}
                   </Badge>
                 )}
               </NavLink>
