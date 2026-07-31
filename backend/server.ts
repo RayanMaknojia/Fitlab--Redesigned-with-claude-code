@@ -21,8 +21,6 @@ import { scheduleRouter } from "./routes/schedules";
 import { chatRouter } from "./routes/chat";
 import { dataSyncRouter } from "./routes/dataSync";
 import { linkRouter } from "./routes/links";
-import swaggerJSDoc from "swagger-jsdoc";
-import swaggerUi from "swagger-ui-express";
 
 const PORT = 3000;
 const app = express();
