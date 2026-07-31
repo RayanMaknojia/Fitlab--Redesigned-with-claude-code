@@ -8,6 +8,7 @@ export interface User {
   email: string;
   password_hash: string;
   role: "client" | "trainer" | "admin";
+  blocked?: boolean;
 }
 
 export interface NewUserInput {
@@ -83,6 +84,13 @@ const updatePasswordHash = async (
   await collection().updateOne({ _id: userId }, { $set: { password_hash } });
 };
 
+const setUserBlocked = async (
+  userId: ObjectId,
+  blocked: boolean,
+): Promise<void> => {
+  await collection().updateOne({ _id: userId }, { $set: { blocked } });
+};
+
 // Registering a client also creates a shell record in clients, in the same
 // transaction so a crash can't leave one without the other. Requires mongod
 // replication enabled (replSetName set in mongod.cfg).
@@ -119,5 +127,6 @@ export {
   userExists,
   addUser,
   updatePasswordHash,
+  setUserBlocked,
 };
 

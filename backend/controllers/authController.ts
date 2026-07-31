@@ -71,6 +71,10 @@ export const loginUser = async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
+    if (user.blocked) {
+      return res.status(403).json({ error: "This account has been blocked." });
+    }
+
     req.session.user = {
       id: user._id!.toString(),
       name: user.name,
