@@ -29,6 +29,7 @@ import RequestDetail from "@/pages/marketplace/RequestDetail";
 import AdminLayout from "@/components/admin/AdminLayout";
 import AdminUsers from "@/pages/admin/AdminUsers";
 import AdminListings from "@/pages/admin/AdminListings";
+import SettingsPage from "@/pages/SettingsPage";
 
 // Route ownership:
 //   /trainer/*                          → Jiachen Sun (trainer-client management) — implemented
@@ -80,6 +81,7 @@ function App() {
             <Route path="notifications" element={<Notifications />} />
             <Route path="requests/:requestId" element={<RequestDetail />} />
             <Route path="schedule" element={<TrainerSchedule />} />
+            <Route path="settings" element={<SettingsPage />} />
           </Route>
 
           {/* Client side */}
@@ -107,6 +109,7 @@ function App() {
             <Route path="my-listing" element={<MyListing />} />
             <Route path="notifications" element={<Notifications />} />
             <Route path="requests/:requestId" element={<RequestDetail />} />
+            <Route path="settings" element={<SettingsPage />} />
           </Route>
 
           {/* Admin side */}

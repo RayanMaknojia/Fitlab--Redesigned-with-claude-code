@@ -65,7 +65,6 @@ const NAV = [
     label: "Settings",
     icon: Settings,
     end: false,
-    soon: true,
   },
 ];
 

@@ -35,4 +35,12 @@ export const api = {
       method: "POST",
       body: JSON.stringify(input),
     }),
+
+  // NOTE: backend endpoint not implemented yet (auth team) — expects
+  // POST /auth/change-password { currentPassword, newPassword }.
+  changePassword: (input: { currentPassword: string; newPassword: string }) =>
+    request<{ ok: boolean }>("/auth/change-password", {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
 };
