@@ -3,7 +3,7 @@ import { useAuth } from "@/context/AuthContext";
 
 interface RequireAuthProps {
   children: React.ReactNode;
-  role?: "client" | "trainer";
+  role?: "client" | "trainer" | "admin";
 }
 
 export default function RequireAuth({ children, role }: RequireAuthProps) {

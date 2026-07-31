@@ -40,6 +40,7 @@ function Home() {
 
   if (loading) return <p>Loading...</p>;
   if (!user) return <Navigate to="/login" replace />;
+  if (user.role === "admin") return <Navigate to="/admin" replace />;
   return (
     <Navigate to={user.role === "trainer" ? "/trainer" : "/client"} replace />
   );

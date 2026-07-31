@@ -4,7 +4,7 @@ export interface ApiUser {
   id: string;
   name: string;
   email: string;
-  role: "client" | "trainer";
+  role: "client" | "trainer" | "admin";
 }
 
 export const api = {
