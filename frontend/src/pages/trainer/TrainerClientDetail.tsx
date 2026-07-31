@@ -48,6 +48,10 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import {
+  findTemplateByName,
+  presetGroupsNotIn,
+} from "@/lib/presetExercises"
 import { cn } from "@/lib/utils"
 
 interface Template {
@@ -235,6 +239,7 @@ function AddExerciseForm({
   onChanged: () => void
 }) {
   const NEW = "__new__"
+  const PRESET = "preset:"
   const [templateId, setTemplateId] = useState("")
   const [newName, setNewName] = useState("")
   const [sets, setSets] = useState("3")
@@ -242,6 +247,11 @@ function AddExerciseForm({
   const [weight, setWeight] = useState("0")
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Common movements the client hasn't saved yet. Choosing one adds it to
+  // their library on first use, so trainers don't have to type it out.
+  const presetGroups = useMemo(() => presetGroupsNotIn(templates), [templates])
+  const isPreset = templateId.startsWith(PRESET)
 
   const valid =
     (templateId === NEW ? newName.trim().length > 0 : templateId) &&
@@ -256,9 +266,15 @@ function AddExerciseForm({
     setError(null)
     try {
       let id = templateId
-      if (templateId === NEW) {
-        const created = await addClientTemplate(clientId, newName.trim())
-        id = created._id
+      if (templateId === NEW || isPreset) {
+        const name = isPreset
+          ? templateId.slice(PRESET.length)
+          : newName.trim()
+        // A preset may already exist under the same name (e.g. the client
+        // added it themselves between fetches) — reuse it instead of
+        // creating a duplicate.
+        const existing = findTemplateByName(templates, name)
+        id = existing?._id ?? (await addClientTemplate(clientId, name))._id
       }
       await addSessionExercise(sessionId, {
         exercise_template_id: id,
@@ -287,13 +303,31 @@ function AddExerciseForm({
         <option value="" disabled>
           Add exercise…
         </option>
-        {templates.map((t) => (
-          <option key={t._id} value={t._id}>
-            {t.name}
-          </option>
+        {templates.length > 0 && (
+          <optgroup label="Client's library">
+            {templates.map((t) => (
+              <option key={t._id} value={t._id}>
+                {t.name}
+              </option>
+            ))}
+          </optgroup>
+        )}
+        {presetGroups.map((g) => (
+          <optgroup key={g.category} label={`Common · ${g.category}`}>
+            {g.exercises.map((name) => (
+              <option key={name} value={`${PRESET}${name}`}>
+                {name}
+              </option>
+            ))}
+          </optgroup>
         ))}
-        <option value={NEW}>+ New exercise…</option>
+        <option value={NEW}>+ Custom exercise…</option>
       </select>
+      {isPreset && (
+        <span className="rounded-full bg-lime-400/10 px-2 py-1 text-[11px] font-medium text-lime-300">
+          Adds to library
+        </span>
+      )}
       {templateId === NEW && (
         <Input
           placeholder="Exercise name"
