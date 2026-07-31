@@ -26,6 +26,9 @@ import ListingDetail from "@/pages/marketplace/ListingDetail";
 import MyListing from "@/pages/marketplace/MyListing";
 import Notifications from "@/pages/marketplace/Notifications";
 import RequestDetail from "@/pages/marketplace/RequestDetail";
+import AdminLayout from "@/components/admin/AdminLayout";
+import AdminUsers from "@/pages/admin/AdminUsers";
+import AdminListings from "@/pages/admin/AdminListings";
 import SettingsPage from "@/pages/SettingsPage";
 
 // Route ownership:
@@ -35,12 +38,14 @@ import SettingsPage from "@/pages/SettingsPage";
 //   /client/*                           → progress dashboard team — implemented
 //   /*/browse, /*/my-listing,
 //   /*/notifications, /*/requests/*     - Alex (marketplace) - implemented
+//   /admin/*                            - Alex (admin portal) - implemented
 
 function Home() {
   const { user, loading } = useAuth();
 
   if (loading) return <p>Loading...</p>;
   if (!user) return <Navigate to="/login" replace />;
+  if (user.role === "admin") return <Navigate to="/admin" replace />;
   return (
     <Navigate to={user.role === "trainer" ? "/trainer" : "/client"} replace />
   );
@@ -105,6 +110,19 @@ function App() {
             <Route path="notifications" element={<Notifications />} />
             <Route path="requests/:requestId" element={<RequestDetail />} />
             <Route path="settings" element={<SettingsPage />} />
+          </Route>
+
+          {/* Admin side */}
+          <Route
+            path="/admin"
+            element={
+              <RequireAuth role="admin">
+                <AdminLayout />
+              </RequireAuth>
+            }
+          >
+            <Route index element={<AdminUsers />} />
+            <Route path="listings" element={<AdminListings />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
