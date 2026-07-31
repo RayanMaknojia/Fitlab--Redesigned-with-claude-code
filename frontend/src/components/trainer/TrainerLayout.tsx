@@ -20,7 +20,7 @@ const NAV = [
   { to: "/trainer/my-listing", label: "My listing", icon: UserSquare2, end: false },
   { to: "/trainer/notifications", label: "Notifications", icon: Bell, end: false },
   { to: "/trainer/schedule", label: "Schedule", icon: Calendar, end: false },
-  { to: "/trainer/settings", label: "Settings", icon: Settings, end: false, soon: true },
+  { to: "/trainer/settings", label: "Settings", icon: Settings, end: false },
 ]
 
 export default function TrainerLayout() {
