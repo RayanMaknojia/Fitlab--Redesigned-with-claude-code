@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useState, type FormEvent } from "react"
 import { Loader2, Trash2 } from "lucide-react"
 
 import { useAuth } from "@/context/AuthContext"
@@ -39,7 +39,7 @@ export default function MyListing() {
     return () => clearTimeout(id)
   }, [refresh])
 
-  const save = async (e: React.FormEvent) => {
+  const save = async (e: FormEvent) => {
     e.preventDefault()
     setBusy(true)
     setError(null)
@@ -72,7 +72,10 @@ export default function MyListing() {
     }
   }
 
-  const seeking = user?.role === "client" ? "seeking a trainer" : "your services"
+  const subtitle =
+    user?.role === "client"
+      ? "Advertise that you're seeking a trainer so trainers can find you."
+      : "Advertise your services so clients looking for a trainer can find you."
 
   return (
     <div className="flex flex-col gap-6">
@@ -81,9 +84,7 @@ export default function MyListing() {
           My listing<span className="text-lime-400">.</span>
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          {loading
-            ? "Loading..."
-            : `Advertise that you're ${seeking} so the other side can find you.`}
+          {loading ? "Loading..." : subtitle}
         </p>
       </div>
 
