@@ -26,6 +26,9 @@ import ListingDetail from "@/pages/marketplace/ListingDetail";
 import MyListing from "@/pages/marketplace/MyListing";
 import Notifications from "@/pages/marketplace/Notifications";
 import RequestDetail from "@/pages/marketplace/RequestDetail";
+import AdminLayout from "@/components/admin/AdminLayout";
+import AdminUsers from "@/pages/admin/AdminUsers";
+import AdminListings from "@/pages/admin/AdminListings";
 
 // Route ownership:
 //   /trainer/*                          → Jiachen Sun (trainer-client management) — implemented
@@ -34,6 +37,7 @@ import RequestDetail from "@/pages/marketplace/RequestDetail";
 //   /client/*                           → progress dashboard team — implemented
 //   /*/browse, /*/my-listing,
 //   /*/notifications, /*/requests/*     - Alex (marketplace) - implemented
+//   /admin/*                            - Alex (admin portal) - implemented
 
 function Home() {
   const { user, loading } = useAuth();
@@ -103,6 +107,19 @@ function App() {
             <Route path="my-listing" element={<MyListing />} />
             <Route path="notifications" element={<Notifications />} />
             <Route path="requests/:requestId" element={<RequestDetail />} />
+          </Route>
+
+          {/* Admin side */}
+          <Route
+            path="/admin"
+            element={
+              <RequireAuth role="admin">
+                <AdminLayout />
+              </RequireAuth>
+            }
+          >
+            <Route index element={<AdminUsers />} />
+            <Route path="listings" element={<AdminListings />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
