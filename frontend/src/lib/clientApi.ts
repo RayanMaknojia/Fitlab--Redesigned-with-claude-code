@@ -4,6 +4,10 @@
 // getMySessions fetches the logged-in client's workout sessions from the
 // backend; the rest of these functions derive stats/graphs from that same
 // list so there's only one network call per page load.
+//
+// sessionsCache is invalidated (cleared) after any operation that mutates
+// session or exercise data, so pages like /client/progress refetch fresh
+// data instead of showing stale results until a manual page refresh.
 
 import type { WorkoutSession } from "@/types";
 import { request } from "@/lib/request";
@@ -24,6 +28,16 @@ function loadSessions(): Promise<WorkoutSession[]> {
     sessionsCache = request<WorkoutSession[]>("/me/workout-sessions");
   }
   return sessionsCache;
+}
+
+/**
+ * Clears the cached session list so the next read (getMySessions,
+ * getStats, getWeightProgress, getWeeklyVolume, etc.) refetches fresh data
+ * from the backend. Called automatically after any operation that mutates
+ * session or exercise data.
+ */
+export function clearSessionsCache(): void {
+  sessionsCache = null;
 }
 
 function startOfWeek(iso: string): string {
@@ -171,10 +185,15 @@ export async function updateExerciseTemplate(
     throw new Error("Cannot update with empty name");
   }
 
-  return request<ExerciseTemplate>(`/exercise-templates/${templateId}`, {
-    method: "PUT",
-    body: JSON.stringify({ name }),
-  });
+  const result = await request<ExerciseTemplate>(
+    `/exercise-templates/${templateId}`,
+    {
+      method: "PUT",
+      body: JSON.stringify({ name }),
+    },
+  );
+  clearSessionsCache(); // renamed template may affect exercise names shown
+  return result;
 }
 
 export async function deleteExerciseTemplate(
@@ -201,13 +220,15 @@ export async function addClientSession(
     throw new Error("Must enter in date");
   }
 
-  return request<WorkoutSessionRecord>(
+  const result = await request<WorkoutSessionRecord>(
     `/clients/${clientId}/workout-sessions`,
     {
       method: "POST",
       body: JSON.stringify({ session_date }),
     },
   );
+  clearSessionsCache();
+  return result;
 }
 
 export async function getSessionById(
@@ -224,16 +245,22 @@ export async function updateSessionById(
     throw new Error("Must enter in date");
   }
 
-  return request<WorkoutSessionRecord>(`/workout-sessions/${sessionId}`, {
-    method: "PUT",
-    body: JSON.stringify({ session_date }),
-  });
+  const result = await request<WorkoutSessionRecord>(
+    `/workout-sessions/${sessionId}`,
+    {
+      method: "PUT",
+      body: JSON.stringify({ session_date }),
+    },
+  );
+  clearSessionsCache();
+  return result;
 }
 
 export async function deleteSessionById(sessionId: string) {
   await request<void>(`/workout-sessions/${sessionId}`, {
     method: "DELETE",
   });
+  clearSessionsCache();
 }
 
 export async function getSessionExercisesById(
@@ -252,13 +279,15 @@ export async function addExerciseToSession(
     );
   }
 
-  return request<SessionExercise>(
+  const result = await request<SessionExercise>(
     `/workout-sessions/${sessionId}/exercises`,
     {
       method: "POST",
       body: JSON.stringify({ ...exercise }),
     },
   );
+  clearSessionsCache();
+  return result;
 }
 
 export async function updateExerciseById(
@@ -269,13 +298,15 @@ export async function updateExerciseById(
     "session_id" | "template_name" | "exercise_template_id"
   >,
 ): Promise<SessionExercise> {
-  return request<SessionExercise>(
+  const result = await request<SessionExercise>(
     `/workout-sessions/${sessionId}/exercises/${exerciseId}`,
     {
       method: "PUT",
       body: JSON.stringify(exercise),
     },
   );
+  clearSessionsCache();
+  return result;
 }
 
 export async function deleteExerciseById(
@@ -288,4 +319,5 @@ export async function deleteExerciseById(
       method: "DELETE",
     },
   );
+  clearSessionsCache();
 }
