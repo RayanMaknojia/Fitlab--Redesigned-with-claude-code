@@ -131,7 +131,7 @@ export default function ClientSessions() {
         ) : sessions.length > 0 ? (
           sessions.map((s) => {
             return (
-              <Item variant="outline" key={s._id}>
+              <Item variant="outline" key={s._id} data-testid="session-row">
                 <ItemContent>
                   <ItemTitle>
                     {new Date(s.session_date).toLocaleString("en-US", {

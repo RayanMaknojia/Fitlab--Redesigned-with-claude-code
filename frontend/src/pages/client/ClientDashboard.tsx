@@ -146,18 +146,21 @@ export default function ClientDashboard() {
             <StatPanel
               icon={CalendarCheck}
               label="Sessions this week"
+              testId="stat-sessions-week"
               value={stats.sessions_this_week}
               note="In the last 7 days"
             />
             <StatPanel
               icon={Flame}
               label="Current streak"
+              testId="stat-streak"
               value={`${streak} wk${streak === 1 ? "" : "s"}`}
               note={streak > 0 ? "Weeks in a row with a session" : "Train this week to start one"}
             />
             <StatPanel
               icon={Dumbbell}
               label="Total sessions"
+              testId="stat-total-sessions"
               value={stats.total_sessions}
               note="Since you joined FitLab"
             />
@@ -184,6 +187,7 @@ export default function ClientDashboard() {
                   return (
                     <li
                       key={s.session_id}
+                      data-testid="recent-session"
                       className="flex items-center gap-4 rounded-lg px-3 py-3 transition-colors duration-150 [@media(hover:hover)]:hover:bg-muted/70"
                     >
                       <div className="flex size-12 shrink-0 flex-col items-center justify-center rounded-lg bg-secondary text-secondary-foreground">

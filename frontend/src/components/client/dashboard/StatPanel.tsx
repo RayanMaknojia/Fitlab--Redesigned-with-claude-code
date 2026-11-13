@@ -7,11 +7,14 @@ export default function StatPanel({
   label,
   value,
   note,
+  testId,
 }: {
   icon: LucideIcon
   label: string
   value: string | number
   note: string
+  /** data-testid for the value, used by e2e tests. */
+  testId?: string
 }) {
   return (
     <div className="flex items-start gap-4 rounded-xl border border-border bg-card p-5 shadow-[0_1px_2px_rgb(11_21_48/0.04)]">
@@ -20,7 +23,9 @@ export default function StatPanel({
       </div>
       <div className="min-w-0">
         <div className="text-sm text-muted-foreground">{label}</div>
-        <div className="mt-1 text-3xl leading-none font-semibold tracking-tight">{value}</div>
+        <div data-testid={testId} className="mt-1 text-3xl leading-none font-semibold tracking-tight">
+          {value}
+        </div>
         <div className="mt-2 text-sm text-muted-foreground">{note}</div>
       </div>
     </div>

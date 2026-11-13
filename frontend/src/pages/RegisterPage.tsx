@@ -89,7 +89,11 @@ export default function RegisterPage() {
                 Trainer
               </Label>
             </RadioGroup>
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {error && (
+              <p role="alert" className="text-sm text-destructive">
+                {error}
+              </p>
+            )}
           </CardContent>
           <CardFooter className="border-0 bg-transparent px-0 flex flex-col gap-4">
             <Button type="submit" className="w-full press h-10 bg-primary font-semibold text-primary-foreground hover:bg-primary/90">

@@ -214,7 +214,7 @@ export default function SessionPage() {
             ) : exercises.length > 0 ? (
               exercises.map((e) => {
                 return (
-                  <Item variant="outline" key={e._id}>
+                  <Item variant="outline" key={e._id} data-testid="session-exercise">
                     <ItemContent>
                       <ItemTitle>{e.template_name}</ItemTitle>
                       <ItemDescription>

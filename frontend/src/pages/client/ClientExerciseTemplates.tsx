@@ -104,7 +104,7 @@ export default function ClientExerciseTemplates() {
           ) : templates.length > 0 ? (
             <ul className="grid animate-fade-in gap-1 sm:grid-cols-2">
               {templates.map((t) => (
-                <li key={t._id}>
+                <li key={t._id} data-testid="template-row">
                   <ExerciseTemplateCard
                     t={t}
                     handleDeleteTemplate={handleDeleteTemplate}
