@@ -1,173 +1,206 @@
-# Project Application Proposal: FitLab
-  Canvas group 3
-  Alexander Cannuli, Edison Lu, Jiachen Sun, Rayan Maknojia, Ricky Tat
+# FitLab
 
-## The Problem
+FitLab is a web app that connects personal-training **clients** and **trainers**:
+- **Clients:** log workout sessions, track progress and personal bests, book sessions, and find
+  a trainer.
+- **Trainers:** manage linked clients, review their training, and schedule and reschedule
+  sessions.
+- **Admins:** moderate users and listings.
+- **AI chat:** a built-in assistant answers fitness questions.
 
-Many fitness trainers currently manage client progress through scattered tools like spreadsheets, messaging apps, and notebooks. This makes it difficult to track a client’s full progress over time, especially when managing multiple clients online or in person. Regular users also often struggle to know what exercises to do, how to track their routine, or how to understand their progress without hiring a trainer.
+**Stack:** React + TypeScript (Vite, Tailwind, shadcn/ui) frontend, Node.js + Express backend,
+MongoDB. It all runs locally with Docker Compose.
 
-FitLab makes it easy for users to track their workouts since all information about their fitness routine is stored in one place. Furthermore, FitLab helps trainers make better decisions regarding their clients’ workout history and progress
+## Origin and what's in this repo
 
+FitLab started as a **team project of 5** (Canvas group 3: Alexander Cannuli, Edison Lu, Jiachen
+Sun, Rayan Maknojia, Ricky Tat). The original proposal, with the per-member feature split,
+architecture and data model, is in [`docs/PROPOSAL.md`](docs/PROPOSAL.md).
 
-## Target Audience 
-The target audience for FitLab is personal trainers with several clients, people working out at the gym who want to keep a record of their fitness routine, and regular users who need general advice regarding workout and health. FitLab will be useful for those who like a visual representation of progress.
+This repository carries the team's full history and code, plus later work on top of it.
 
+**From the team project:**
+- **Auth and roles:** register, log in and out, password reset, client, trainer and admin roles.
+- **Workout tracking:** sessions, exercises and exercise templates.
+- **Trainer–client management:** link requests, viewing a client's data, schedules and
+  reschedule requests.
+- **Progress dashboard and charts**, plus an **AI progress recap**.
+- **AI chatbot:** through the Groq API.
+- **Marketplace and admin:** trainer and client listings, notifications, and an admin portal.
 
-## Scope and Main Features
+**Added afterwards (with Claude Code):**
+- **Redesign:** a new UI across every page.
+- **New pages:** a public landing page and a client Schedule page.
+- **Presets:** exercise and workout presets.
+- **Layout:** works on wide screens and on phones.
+- **Docker Compose:** the original deployment's Compose setup, adapted to run locally, plus an
+  `e2e` profile that runs the Playwright tests.
+- **Testing:** a ranked test plan ([`TEST_PLAN.md`](TEST_PLAN.md)) and a Playwright end-to-end
+  suite.
+- **Bug fix:** a fix for a cross-user data leak.
 
-**User Authentication and Role Management (Assigned to: Alex)**
-
-Users will be able to register, log in, and choose whether they are a client or trainer. The app will support role-based access so trainers and clients see different dashboards.
-
-**Main tasks:**
-- User registration and login
-- Password hashing
-- Role-based dashboard access
-- Admin user management
-
-**Fitness Data Tracking (Assigned to: Edison)**
-
-Users will be able to log their workouts, exercises, and fitness progress.
-
-**Main tasks:**
-- Add workout logs
-- Add exercise details
-- View previous history
-
-**Trainer-Client Management/Data Syncup (Assigned to: Jiachen Sun)**
-
-Trainers will be able to manage their clients and access shared client data and clients are able to sync up the data with trainers. This is one of the main features of FitLab.
-
-**Main tasks:**
-- Client connection/request system
-- View client workout/progress data
-- Trainer updates the client data and save the changes in the backend
-- Updated data will be applied to Client’s side as well
-
-**Progress Dashboard and Graphs (Assigned to: Rayan Maknojia)**
-
-FitLab will generate visual progress over time dynamically using charts and summaries. 
-
-**Main tasks:**
-- Workout progress graphs
-- Body measurement or weight progress
-- Weekly/monthly summaries
-- Client progress dashboard for trainers
-
-**AI Fitness Chatbot (Assigned to: Ricky)**
-
-FitLab will include an AI chatbot that can answer general fitness-related questions. This will be especially useful for regular users who do not currently have a trainer. 
-
-**Main tasks:**
-- Chatbot UI
-- Third-party AI API integration
-- Context-aware recommendations based on user goals and previous progress 
-- User profile and workout history analysis for personalized guidance 
-- Save optional chat history
-
-## High-Level Architecture
-
-FitLab will use **Stack A: Express + React**.
-
-**Frontend**: React and shadcn/ui as the CSS framework
-
-**Backend**: Node.js + Express.js
-
-**Database**: MongoDB
-
-**Internal service**: A Node.js + Express.js server
-
-**External service**: An AI API like OpenAI API or Gemini API for the chatbot
-
-**Deployment**: The React frontend (served by nginx, which also reverse-proxies `/api`), the Express backend and MongoDB run locally as Docker Compose services.
-
-## Running locally (Docker Compose)
-
-1. Create `backend/.env` from `backend/.env.example`. Inside Compose, set
-   `CONNECTION_STRING=mongodb://mongo:27017/fitlab?directConnection=true` and
-   `FRONTEND_ORIGIN=http://localhost:8080`, and choose a random `SESSION_SECRET`.
-   Fill in `GROQ_API_KEY` (chatbot) and the Gmail values (password reset) if you need those features.
-2. Run `docker compose up --build`.
-3. Open http://localhost:8080.
-
-## Database Entities and Relationships
-
-Regular users can sign up as a gym client or gym trainer. A trainer can have multiple clients, and clients can only have 1 trainer. A client will store a WorkoutSessions field as an array to record their progress and a Schedules field as an array of times the client is training at the gym.
-
-```mermaid
-classDiagram
-    class Users {
-        +user_id: UUID «PK»
-        +name: string
-        +password_hash: string
-        +role: "client" | "trainer"
-    }
-
-    class Clients {
-        +client_id: UUID «PK: user_id»
-        +trainer_id: UUID «FK: user_id»
-        +workout_sessions: WorkoutSession[]
-        +schedules: Schedule[]
-    }
-
-    class WorkoutSessions {
-        +session_id: UUID «PK»
-        +client_id: UUID «FK: user_id»
-        +exercises: Exercise[]
-        +session_date: Date
-    }
-
-    class Schedules {
-        +client_id: UUID «FK: user_id»
-        +trainer_id: UUID «FK: user_id»
-        +start_time: Date
-        +duration: number
-    }
-
-    class Exercise {
-        +name: string
-        +sets: number
-        +reps: number
-        +weight_in_kg: number | null
-    }
-
-    Users "1" --> "1" Clients
-    Clients "1" --> "many" WorkoutSessions
-    Clients "1" --> "many" Schedules
-    WorkoutSessions "1" --> "many" Exercise
+```
+frontend/   React app (served by nginx, which also proxies /api to the backend)
+backend/    Express API + Jest tests
+e2e/        Playwright end-to-end tests (run in Docker)
+docs/       Original team proposal
 ```
 
+## My contributions
 
+**In the original team project** (my assigned feature: Progress Dashboard and Graphs)
+- Built the client progress dashboard in React and TypeScript, with Recharts charts driven by
+  the REST API.
+- Built the workout progress graphs (such as weight progression and weekly training volume),
+  the body measurement and weight progress graphs, and the weekly and monthly summaries.
+- Built the AI progress recap, which summarizes a client's stats through the Groq (Llama) API
+  and falls back to a locally generated summary if the service fails.
+- Deployed the full stack on a GCP VM with Docker Compose (nginx reverse proxy, Express,
+  MongoDB replica set) and diagnosed production-only build and networking issues.
+- Worked in a team of 5 using feature branches and pull requests.
 
-## Why This Team for This Project
+**Afterwards (done with Claude Code)**
+- Directed Claude Code to redesign the frontend, and reviewed the changes before committing.
+- Had it read the codebase and produce a test plan, which I reviewed and ranked by user impact
+  ([`TEST_PLAN.md`](TEST_PLAN.md)).
+- Built a Playwright end-to-end suite that runs in Docker, covering signup, login failures,
+  logging a workout, cross-user data isolation and template deletion.
+- The suite showed that the previous user's data could appear after a new login in the same
+  tab. A regression test reproduces it, and the fix is verified by that test.
+- Listed the known issues below with their impact and how each was verified.
 
-Our team is a good fit for FitLab because the project can be divided into clear features that match different parts of full-stack development. Some members can focus on frontend pages and user experience, while others can focus on backend APIs, database design, authentication, deployment, and external API integration. 
+Claude Code wrote most of the code for the redesign and the tests. I set the direction,
+reviewed the changes, ran the suite and checked the results.
 
-Each main feature is also large enough to count as one feature per member, which helps keep the work balanced across the group. 
-**Team Member Focus Areas** 
-**Alexander Cannuli**: User Authentication and Role Management
-**Edison Lu**: Fitness data tracking and workout session structure 
-**Jiachen Sun**: Trainer-Client Management
-**Rayan Maknojia**: Progress Dashboard and Graphs 
-**Ricky Tat**: AI fitness chatbot and external API integration 
+## Run the app (Docker Compose)
 
-## Framework Justification
+Requires Docker with Compose. Node and npm are **not** needed on the host.
 
-**Why two apps over one**
+1. Create the backend config. `backend/.env` is git-ignored and the backend won't start
+   without it:
 
-This app can potentially have multiple frontends (for example, a mobile frontend as clients may want to record their progress immediately at the gym). In that case, our Express API can still work for the mobile frontend.
+   ```sh
+   cp backend/.env.example backend/.env
+   ```
 
-We also value separation of concerns. Our backend will be complex, involving data syncing, persistent real-time connections, background processing, and potentially more. We find a separate backend easier to maintain and manage.
+2. In `backend/.env`, set the values that make sense inside Compose:
 
-**Repo structure**
+   ```sh
+   CONNECTION_STRING=mongodb://mongo:27017/fitlab?directConnection=true
+   FRONTEND_ORIGIN=http://localhost:8080
+   SESSION_SECRET=<any long random string>
+   ```
 
-We plan to work in 1 repo that contains a frontend folder with all our React app code, and a backend folder with our Express.js and our Node.js server code. Doing so allows teammates to focus on only 1 repo while still separating frontend work and backend work.
+   **Optional values:**
+   - `GROQ_API_KEY`, for the AI chatbot and AI recap. Get a free key at https://console.groq.com.
+     - **Chatbot:** without a key, the chat endpoint returns "GROQ_API_KEY is not configured."
+     - **Progress recap:** without a key, it falls back to a locally generated summary that is
+       labelled as such.
+   - `GMAIL_USER` and `GMAIL_APP_PASSWORD`, so password-reset emails can be sent.
 
-**How the two apps talk**
+3. Build and start everything in the background:
 
-The React frontend will communicate with our Express backend through REST API requests. The front end runs on 1 port and the backend on another port. They run in 2 different Docker containers orchestrated by Docker Compose. Nginx will act as our reverse proxy.
+   ```sh
+   docker compose up -d --build
+   ```
 
-**API style**
+4. Open **http://localhost:8080**.
 
-We’ll use the standard REST API style as it’s the one we all have the most experience with.
-REST API allows FitLab to manage resources such as users, workouts, and progress records through a consistent interface. This supports trainers and clients in accessing and updating data efficiently.
+**Ports:** the API is also exposed on `localhost:3000`, and MongoDB runs inside Compose with a
+named volume (`mongo-data`), so data survives restarts.
+
+**Useful commands:**
+
+```sh
+docker compose logs -f        # follow logs (Ctrl+C stops following, not the app)
+docker compose down           # stop everything (keeps the database volume)
+```
+
+## Run the end-to-end tests (Docker)
+
+The tests run in the official Playwright image (`mcr.microsoft.com/playwright:v1.65.0-noble`),
+pinned to the same version as `@playwright/test` (1.65.0). Nothing is installed on the host.
+
+With the app running (`docker compose up -d --build`), from the repo root:
+
+```sh
+docker compose --profile e2e run --rm e2e
+```
+
+- **Profile:** the `e2e` service is behind a Compose profile, so `docker compose up` never
+  starts it.
+- **Target URL:** tests target `BASE_URL`, which defaults to `http://frontend`, the frontend
+  container on the Compose network. Override it to test another deployment:
+
+  ```sh
+  BASE_URL=http://localhost:8080 docker compose --profile e2e run --rm e2e
+  ```
+
+- **Output:**
+  - **HTML report:** `e2e/playwright-report/`.
+  - **Failure traces and screenshots:** `e2e/test-results/`.
+- **Test users:** each test creates its own users with a unique email
+  (`e2e-<tag>-<timestamp>-<random>@example.com`). They remain in the local database.
+
+**Result of the last run:**
+
+```
+Running 5 tests using 5 workers
+
+  ✘  1 [chromium] › tests/05-template-delete-history.spec.ts:13:1 › deleting a template keeps it in the history of both sessions that used it (1.4s)
+  ✓  5 [chromium] › tests/04-cross-user-data-leak.spec.ts:15:1 › after A logs out and B logs in, none of A's data appears (1.7s)
+  ✓  2 [chromium] › tests/01-signup-login-empty-dashboard.spec.ts:5:1 › signup redirects to /login without logging in, then login shows an empty dashboard (1.8s)
+  ✓  4 [chromium] › tests/02-login-failures.spec.ts:6:1 › wrong password and unknown email both show the same 'Invalid credentials' error (2.1s)
+  ✓  3 [chromium] › tests/03-log-workout-dashboard.spec.ts:14:1 › logging a session with an exercise shows up on the dashboard (3.0s)
+
+  5 passed (4.5s)
+```
+
+The ✘ on test 05 is expected. It's marked `test.fail()` for a known bug (see below), and
+Playwright counts an expected failure as a pass. If that bug is fixed, Playwright reports the
+test as "unexpectedly passed", which is the reminder to remove the marker.
+
+### What the 5 tests cover, and why these
+
+[`TEST_PLAN.md`](TEST_PLAN.md) ranks the main flows by **user impact**, meaning how many users a
+failure hits and whether the damage can be undone, not by how easy they are to test. The ranking
+is: logging a workout, login, signup, progress dashboard, logout, AI recap. These five tests cover
+the top of that ranking and its highest-impact findings.
+
+| Test | What it checks | Why it was chosen |
+|---|---|---|
+| `01-signup-login-empty-dashboard` | Signup redirects to `/login` and does **not** create a session (`/api/auth/me` returns 401, `/client` bounces to login). Logging in then shows an empty dashboard. | Signup and login gate every user. It's the plan's flows 3 → 2 → 4. |
+| `02-login-failures` | A wrong password and an unknown email show the **same** "Invalid credentials" alert, and neither creates a session. | Login is rank 2. The same message prevents finding out which emails have accounts. |
+| `03-log-workout-dashboard` | Creates a session through the UI, adds Back Squat 4×8 at 60 kg, then sees it in the dashboard's totals, recent sessions and personal bests. | Logging a workout is rank 1. The plan calls flows 1 → 3 its "most valuable single end-to-end test". |
+| `04-cross-user-data-leak` | User A logs out and user B logs in **in the same tab**. None of A's data appears on B's dashboard or Progress page. | A privacy bug that this suite found and that was then fixed. Kept as a regression test. |
+| `05-template-delete-history` | Deleting an exercise template should keep it in past sessions. Marked `test.fail()` because today it doesn't. | The plan's highest-impact item: permanent loss of training history. |
+
+**Conventions:**
+- **Locators:** `getByRole` and `getByLabel` first, `data-testid` only where there's no
+  accessible role or name.
+- **Waiting:** no fixed sleeps.
+- **Known bugs:** marked with `test.fail()` and a comment, asserting the *correct* behaviour.
+
+The backend also has Jest unit and integration tests in `backend/tests` (`npm test` in
+`backend/`). They weren't run as part of this work, because npm isn't installed on the machine
+used.
+
+## Known issues
+
+These are issues found in the code or in a running app that are **not fixed** yet. "How
+verified" says whether each was seen running or read in the code. More detail, including other
+suspected issues, is in [`TEST_PLAN.md`](TEST_PLAN.md).
+
+| Issue | Impact | How verified |
+|---|---|---|
+| **Deleting a template deletes its history.** Removing an exercise template also removes every logged exercise that used it, in every session (`deleteTemplateAndAssociatedExercises`), and the Delete button has no confirmation. | One click permanently erases that exercise's history and personal bests. | Run: e2e test 05 (expected failure). Code read. |
+| **No password policy.** Signup only checks that a password is present. | Accounts can be created with a 1-character password. | Code read (`authController.registerUser`). |
+| **Decimal weights rejected.** `weight_in_kg` must be a whole number (`z.int()`). | A lift such as 62.5 kg can't be logged as it was done. | Code read (`workoutSessionController`). |
+| **The "Add a session" dialog stays open after submit.** | Users have to close it by hand and may think the save failed. | Run: seen during e2e test 03, which presses Escape to work around it. |
+| **The "View" link is nested in a button** in the workout sessions list. | Invalid HTML, and confusing for keyboard and screen-reader users. | Run: e2e accessibility snapshot (`button > link "View"`). |
+| **No error handling on dashboard load.** `ClientDashboard` uses `Promise.all` without a `catch`. | If the stats request fails, the dashboard shows loading placeholders forever, with no error. | Code read. Not yet reproduced. |
+| **A failed logout may leave you logged in on screen (suspected).** `logout()` awaits the API call before clearing the user. | If the request fails, the user could still appear logged in and get no feedback. | Code read (`AuthContext.logout`). Not yet reproduced. |
+
+**Fixed:** the cross-user data leak. The workout-sessions cache wasn't cleared on login or
+logout, so the next user in the same tab saw the previous user's data. It's fixed in
+`AuthContext` and covered by e2e test 04.

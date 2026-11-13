@@ -1,0 +1,18 @@
+time="2026-11-12T19:32:26-07:00" level=warning msg="/home/rma120/sfuhome/vibeprojects/vbc/fitlab/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container fitlab-backend Running 
+ Container fitlab-frontend Running 
+ Container fitlab-mongo Running 
+ Container fitlab-mongo Waiting 
+ Container fitlab-mongo Healthy 
+ Container fitlab-e2e-run-4a45f16b40c7 Creating 
+ Container fitlab-e2e-run-4a45f16b40c7 Created 
+
+Running 5 tests using 5 workers
+
+  ✘  3 [chromium] › tests/05-template-delete-history.spec.ts:13:1 › deleting a template keeps it in the history of both sessions that used it (1.3s)
+  ✓  1 [chromium] › tests/01-signup-login-empty-dashboard.spec.ts:5:1 › signup redirects to /login without logging in, then login shows an empty dashboard (1.6s)
+  ✓  2 [chromium] › tests/04-cross-user-data-leak.spec.ts:15:1 › after A logs out and B logs in, none of A's data appears (1.7s)
+  ✓  4 [chromium] › tests/02-login-failures.spec.ts:6:1 › wrong password and unknown email both show the same 'Invalid credentials' error (1.9s)
+  ✓  5 [chromium] › tests/03-log-workout-dashboard.spec.ts:14:1 › logging a session with an exercise shows up on the dashboard (3.2s)
+
+  5 passed (4.3s)
