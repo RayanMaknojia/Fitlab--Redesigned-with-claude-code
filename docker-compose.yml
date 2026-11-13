@@ -38,5 +38,24 @@ services:
     depends_on:
       - backend
 
+  # End-to-end tests (Playwright). Not started by `docker compose up`; run with:
+  #   docker compose --profile e2e run --rm e2e
+  # Keep the image tag in sync with @playwright/test in e2e/package.json.
+  e2e:
+    image: mcr.microsoft.com/playwright:v1.65.0-noble
+    profiles: ["e2e"]
+    working_dir: /e2e
+    volumes:
+      - ./e2e:/e2e
+      - e2e-node-modules:/e2e/node_modules
+    environment:
+      BASE_URL: ${BASE_URL:-http://frontend}
+      CI: ${CI:-}
+    ipc: host
+    depends_on:
+      - frontend
+    command: ["sh", "-c", "npm install --no-audit --no-fund --silent && npx playwright test"]
+
 volumes:
   mongo-data:
+  e2e-node-modules:

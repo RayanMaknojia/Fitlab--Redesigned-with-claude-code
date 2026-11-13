@@ -1,0 +1,11 @@
+{
+  "name": "fitlab-e2e",
+  "private": true,
+  "description": "FitLab end-to-end tests (Playwright). Run through Docker: see e2e/README.md",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.0"
+  }
+}
