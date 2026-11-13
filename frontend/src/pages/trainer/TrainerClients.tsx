@@ -40,7 +40,7 @@ export default function TrainerClients() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-          Client<span className="text-lime-400">s</span>
+          Client<span className="text-primary">s</span>
         </h1>
         <LinkClientDialog onRequestSent={refresh} />
       </div>

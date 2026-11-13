@@ -47,7 +47,7 @@ export default function BrowseTrainers() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-          Find a trainer<span className="text-lime-400">.</span>
+          Find a trainer<span className="text-primary">.</span>
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Browse trainers advertising their services and send a connection request.

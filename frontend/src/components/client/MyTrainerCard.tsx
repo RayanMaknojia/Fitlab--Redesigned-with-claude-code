@@ -102,10 +102,10 @@ export default function MyTrainerCard() {
   }
 
   return (
-    <Card className="border-border/60 bg-card/60 py-5 backdrop-blur">
+    <Card className="gap-4 rounded-xl border border-border bg-card py-5 shadow-[0_1px_2px_rgb(11_21_48/0.04)] ring-0">
       <CardHeader className="flex-row items-center gap-2 px-5">
-        <UserRound className="size-4 text-lime-500" />
-        <CardTitle className="text-sm">My trainer</CardTitle>
+        <UserRound className="size-4 text-primary" />
+        <CardTitle className="text-base font-semibold">My trainer</CardTitle>
         {requests.length > 0 && (
           <Badge variant="secondary" className="ml-1">
             {requests.length} pending
@@ -115,11 +115,11 @@ export default function MyTrainerCard() {
 
       <CardContent className="flex flex-col gap-3 px-5">
         {loading ? (
-          <div className="h-16 animate-pulse rounded-lg bg-muted/40" />
+          <div className="h-16 animate-pulse rounded-lg bg-muted" />
         ) : trainer ? (
-          <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-background/40 p-3">
+          <div className="flex items-center gap-3 rounded-lg bg-muted/60 p-3">
             <Avatar className="size-9">
-              <AvatarFallback className="bg-lime-400/15 text-xs font-bold text-lime-600">
+              <AvatarFallback className="bg-secondary text-xs font-bold text-secondary-foreground">
                 {initials(trainer.name)}
               </AvatarFallback>
             </Avatar>
@@ -146,7 +146,7 @@ export default function MyTrainerCard() {
               return (
                 <div
                   key={req.request_id}
-                  className="flex items-center gap-3 rounded-lg border border-border/60 bg-background/40 p-3"
+                  className="flex items-center gap-3 rounded-lg bg-muted/60 p-3"
                 >
                   <Avatar className="size-8">
                     <AvatarFallback className="bg-muted text-xs font-semibold">
@@ -168,7 +168,7 @@ export default function MyTrainerCard() {
                       <Button
                         size="icon-sm"
                         aria-label={`Accept ${req.trainer_name}`}
-                        className="bg-lime-400 text-black hover:bg-lime-300"
+                        className="press"
                         disabled={busyId === req.request_id}
                         onClick={() => respond(req.request_id, "accept")}
                       >
@@ -208,7 +208,7 @@ export default function MyTrainerCard() {
               <Button
                 type="submit"
                 disabled={busy || !email.trim()}
-                className="shrink-0 bg-lime-400 font-semibold text-black hover:bg-lime-300"
+                className="press shrink-0 font-semibold"
               >
                 {busy ? (
                   <Loader2 data-icon="inline-start" className="animate-spin" />
@@ -226,7 +226,7 @@ export default function MyTrainerCard() {
 
         {error && <p className="text-sm text-destructive">{error}</p>}
         {notice && !error && (
-          <p className="text-sm text-lime-600">{notice}</p>
+          <p className="text-sm text-primary">{notice}</p>
         )}
       </CardContent>
     </Card>

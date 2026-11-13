@@ -2,12 +2,15 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
+@import "@fontsource-variable/bricolage-grotesque";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
     --font-heading: var(--font-sans);
     --font-sans: 'Geist Variable', sans-serif;
+    --font-display: 'Bricolage Grotesque Variable', 'Geist Variable', sans-serif;
+    --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -115,6 +118,110 @@
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.556 0 0);
+}
+
+/* FitLab light theme — the app-wide default (overrides the shadcn defaults
+   in the first :root block above).
+   Scene: a client reviewing their week on a laptop, at home, in daylight.
+   Contrast: ink on surface 16.9:1, muted 6.2:1, white on primary 5.9:1. */
+:root {
+    --fl-ink: #0b1530;
+    --fl-primary: #2453ff;
+    --fl-primary-strong: #1238c9;
+    --fl-primary-soft: #e8eeff;
+    --fl-ground: #f4f6fb;
+    --fl-surface: #ffffff;
+    --fl-muted: #566078;
+    --fl-line: #e2e7f1;
+    /* Welcome-banner gradient: deep cobalt -> cobalt -> bright sky blue. */
+    --fl-banner: linear-gradient(118deg, #1238c9 0%, #2453ff 48%, #5b95ff 100%);
+
+    --background: var(--fl-ground);
+    --foreground: var(--fl-ink);
+    --card: var(--fl-surface);
+    --card-foreground: var(--fl-ink);
+    --popover: var(--fl-surface);
+    --popover-foreground: var(--fl-ink);
+    --primary: var(--fl-primary);
+    --primary-foreground: #ffffff;
+    --secondary: var(--fl-primary-soft);
+    --secondary-foreground: var(--fl-primary-strong);
+    --muted: #eef1f7;
+    --muted-foreground: var(--fl-muted);
+    --accent: var(--fl-primary-soft);
+    --accent-foreground: var(--fl-primary-strong);
+    --destructive: #d92d3a;
+    --border: var(--fl-line);
+    --input: #d5dcea;
+    --ring: var(--fl-primary);
+    --radius: 0.75rem;
+    --chart-1: #2453ff;
+    --chart-2: #5b95ff;
+    --chart-3: #1238c9;
+    --chart-4: #9db8ff;
+    --chart-5: #0b1530;
+    --sidebar: var(--fl-surface);
+    --sidebar-foreground: var(--fl-ink);
+    --sidebar-primary: var(--fl-primary);
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: var(--fl-primary-soft);
+    --sidebar-accent-foreground: var(--fl-primary-strong);
+    --sidebar-border: var(--fl-line);
+    --sidebar-ring: var(--fl-primary);
+
+    color-scheme: light;
+    font-variant-numeric: tabular-nums;
+}
+
+::selection {
+    background: rgb(36 83 255 / 0.18);
+    color: var(--fl-ink);
+}
+
+@utility bg-fl-banner {
+    background-image: var(--fl-banner);
+}
+
+/* Press feedback for anything clickable inside the theme (emil-design-eng). */
+@utility press {
+    transition: transform 160ms var(--ease-out-strong), background-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
+    &:active {
+        transform: scale(0.97);
+    }
+}
+
+/* Signature moment: trained days in the week strip fill up from the bottom
+   once stats load. Staggered per day via --i; content is visible by default
+   when motion is reduced. */
+@keyframes fl-day-fill {
+    from {
+        clip-path: inset(100% 0 0 0 round 0.5rem);
+    }
+    to {
+        clip-path: inset(0 0 0 0 round 0.5rem);
+    }
+}
+
+@keyframes fl-fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@utility animate-day-fill {
+    animation: fl-day-fill 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--i, 0) * 55ms + 120ms);
+    @media (prefers-reduced-motion: reduce) {
+        animation: fl-fade-in 200ms ease both;
+        animation-delay: 0ms;
+    }
+}
+
+@utility animate-fade-in {
+    animation: fl-fade-in 220ms ease-out both;
 }
 
 @layer base {

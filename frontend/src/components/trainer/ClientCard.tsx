@@ -13,11 +13,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 const AVATAR_HUES = [
-  "from-lime-400/30 to-emerald-500/20 text-lime-300",
-  "from-cyan-400/30 to-blue-500/20 text-cyan-300",
-  "from-fuchsia-400/30 to-purple-500/20 text-fuchsia-300",
-  "from-amber-400/30 to-orange-500/20 text-amber-300",
-  "from-rose-400/30 to-red-500/20 text-rose-300",
+  "from-primary/20 to-[#5b95ff]/15 text-primary",
+  "from-cyan-400/30 to-blue-500/20 text-cyan-800",
+  "from-fuchsia-400/30 to-purple-500/20 text-fuchsia-700",
+  "from-amber-400/30 to-orange-500/20 text-amber-800",
+  "from-rose-400/30 to-red-500/20 text-rose-700",
 ]
 
 function initials(name: string) {
@@ -49,7 +49,7 @@ export default function ClientCard({
   }
 
   return (
-    <Card className="group gap-4 border-border/60 bg-card/60 py-5 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-lime-400/40 hover:shadow-[0_8px_40px_-12px] hover:shadow-lime-400/20">
+    <Card className="group gap-4 border-border bg-card shadow-[0_1px_2px_rgb(11_21_48/0.04)] py-5 transition-[transform,box-shadow,border-color] duration-200 [@media(hover:hover)]:hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[0_8px_40px_-12px] hover:shadow-primary/10">
       <CardHeader className="flex-row items-center gap-3 px-5">
         <Avatar className={`size-11 bg-gradient-to-br ${hue.split(" text-")[0]}`}>
           <AvatarFallback
@@ -70,7 +70,7 @@ export default function ClientCard({
               <MoreVertical />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="dark">
+          <DropdownMenuContent align="end">
             <DropdownMenuItem
               variant="destructive"
               onSelect={() => onUnlink(client.client_id)}
@@ -83,17 +83,17 @@ export default function ClientCard({
 
       <CardContent className="px-5">
         <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between rounded-lg border border-border/60 bg-background/40 px-3 py-2 text-xs">
+          <div className="flex items-center justify-between rounded-lg border border-border bg-muted/50 px-3 py-2 text-xs">
             <span className="inline-flex items-center gap-1.5 text-muted-foreground">
-              <Flame className="size-3.5 text-lime-400" /> Workout sessions
+              <Flame className="size-3.5 text-primary" /> Workout sessions
             </span>
             <span className="font-semibold text-foreground">
               {client.total_sessions}
             </span>
           </div>
-          <div className="flex items-center justify-between rounded-lg border border-border/60 bg-background/40 px-3 py-2 text-xs">
+          <div className="flex items-center justify-between rounded-lg border border-border bg-muted/50 px-3 py-2 text-xs">
             <span className="inline-flex items-center gap-1.5 text-muted-foreground">
-              <CalendarCheck className="size-3.5 text-lime-400" /> Last session
+              <CalendarCheck className="size-3.5 text-primary" /> Last session
             </span>
             <span className="font-semibold text-foreground">
               {client.last_session_date
@@ -108,7 +108,7 @@ export default function ClientCard({
         <Button
           variant="ghost"
           size="sm"
-          className="text-muted-foreground group-hover:text-lime-300"
+          className="text-muted-foreground group-hover:text-primary"
           onClick={openClient}
         >
           View profile <ArrowUpRight data-icon="inline-end" />

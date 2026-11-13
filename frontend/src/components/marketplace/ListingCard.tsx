@@ -27,10 +27,10 @@ export default function ListingCard({
   const navigate = useNavigate()
 
   return (
-    <Card className="group gap-4 border-border/60 bg-card/60 py-5 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-lime-400/40 hover:shadow-[0_8px_40px_-12px] hover:shadow-lime-400/20">
+    <Card className="group gap-4 border-border bg-card shadow-[0_1px_2px_rgb(11_21_48/0.04)] py-5 transition-[transform,box-shadow,border-color] duration-200 [@media(hover:hover)]:hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[0_8px_40px_-12px] hover:shadow-primary/10">
       <CardHeader className="flex-row items-center gap-3 px-5">
-        <Avatar className="size-11 bg-gradient-to-br from-lime-400/30 to-emerald-500/20">
-          <AvatarFallback className="bg-gradient-to-br from-lime-400/30 to-emerald-500/20 text-sm font-bold text-lime-300">
+        <Avatar className="size-11 bg-gradient-to-br from-primary/20 to-[#5b95ff]/15">
+          <AvatarFallback className="bg-gradient-to-br from-primary/20 to-[#5b95ff]/15 text-sm font-bold text-primary">
             {initials(listing.name)}
           </AvatarFallback>
         </Avatar>
@@ -52,14 +52,14 @@ export default function ListingCard({
         <Button
           variant="ghost"
           size="sm"
-          className="text-muted-foreground group-hover:text-lime-300"
+          className="text-muted-foreground group-hover:text-primary"
           onClick={() => navigate(`${basePath}/${listing.listing_id}`)}
         >
           View profile <ArrowUpRight data-icon="inline-end" />
         </Button>
 
         {status === "linked" ? (
-          <Badge variant="outline" className="gap-1 text-lime-500">
+          <Badge variant="outline" className="gap-1 text-primary">
             <Check className="size-3" /> Linked
           </Badge>
         ) : status === "pending" ? (
@@ -70,7 +70,7 @@ export default function ListingCard({
           <Button
             size="sm"
             disabled={busy}
-            className="bg-lime-400 font-semibold text-black hover:bg-lime-300"
+            className="bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
             onClick={onConnect}
           >
             {busy ? (

@@ -9,7 +9,12 @@ interface RequireAuthProps {
 export default function RequireAuth({ children, role }: RequireAuthProps) {
   const { user, loading } = useAuth();
 
-  if (loading) return <p>Loading...</p>;
+  if (loading)
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground">
+        Loading…
+      </div>
+    );
   if (!user) return <Navigate to="/login" replace />;
   if (role && user.role !== role) return <Navigate to="/" replace />;
 

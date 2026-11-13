@@ -67,7 +67,7 @@ export default function Notifications() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-            Notifications<span className="text-lime-400">.</span>
+            Notifications<span className="text-primary">.</span>
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Connection requests and their responses.
@@ -99,9 +99,9 @@ export default function Notifications() {
               <Card
                 key={n.notification_id}
                 onClick={() => open(n)}
-                className="cursor-pointer flex-row items-center gap-3 border-border/60 bg-card/60 px-4 py-3 backdrop-blur transition-colors hover:border-lime-400/40"
+                className="cursor-pointer flex-row items-center gap-3 border-border bg-card shadow-[0_1px_2px_rgb(11_21_48/0.04)] px-4 py-3 transition-colors hover:border-primary/40"
               >
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-lime-400/15 text-lime-500">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-primary">
                   <Icon className="size-4" />
                 </div>
                 <CardContent className="min-w-0 flex-1 p-0">
@@ -111,7 +111,7 @@ export default function Notifications() {
                   <p className="text-xs text-muted-foreground">{timeAgo(n.created_at)}</p>
                 </CardContent>
                 {!n.read && (
-                  <Badge className="bg-lime-400 text-black">
+                  <Badge className="bg-primary text-primary-foreground">
                     <Bell className="size-3" />
                   </Badge>
                 )}

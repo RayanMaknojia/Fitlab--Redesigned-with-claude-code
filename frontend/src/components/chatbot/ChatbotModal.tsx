@@ -47,23 +47,23 @@ export default function ChatbotModal({
       <DialogContent
         aria-describedby="fitlab-ai-description"
         showCloseButton={false}
-        className="top-auto left-auto flex h-[100dvh] w-screen translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-white/10 bg-[linear-gradient(180deg,rgba(22,22,22,0.98),rgba(15,15,15,0.98))] p-0 shadow-[0_28px_80px_-32px_rgba(0,0,0,0.9)] sm:right-6 sm:bottom-24 sm:left-auto sm:top-auto sm:h-[min(700px,calc(100dvh-6rem))] sm:w-[min(460px,calc(100vw-3rem))] sm:rounded-[28px]"
+        className="top-auto left-auto flex h-[100dvh] w-screen translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-border bg-card p-0 shadow-[0_24px_60px_-24px_rgb(11_21_48/0.35)] sm:right-6 sm:bottom-24 sm:left-auto sm:top-auto sm:h-[min(700px,calc(100dvh-6rem))] sm:w-[min(460px,calc(100vw-3rem))] sm:rounded-[28px]"
       >
-        <div className="flex items-start justify-between border-b border-white/10 bg-black/20 px-4 py-4 sm:px-5">
+        <div className="flex items-start justify-between border-b border-border bg-muted/50 px-4 py-4 sm:px-5">
           <div className="min-w-0">
             <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-2xl bg-lime-400/15 text-lime-300 ring-1 ring-lime-300/20">
+              <div className="flex size-10 items-center justify-center rounded-2xl bg-secondary text-primary ring-1 ring-primary/20">
                 <Bot className="size-5" />
               </div>
               <div className="min-w-0">
-                <DialogTitle className="truncate text-base font-semibold text-white">
+                <DialogTitle className="truncate text-base font-semibold text-foreground">
                   FitLab AI
                 </DialogTitle>
                 <DialogDescription
                   id="fitlab-ai-description"
                   className="mt-1 flex items-center gap-2 text-xs text-muted-foreground"
                 >
-                  <span className="inline-flex size-2 rounded-full bg-lime-300 shadow-[0_0_10px_oklch(0.85_0.19_135/0.95)]" />
+                  <span className="inline-flex size-2 rounded-full bg-emerald-500" />
                   Online
                 </DialogDescription>
               </div>
@@ -76,7 +76,7 @@ export default function ChatbotModal({
               variant="ghost"
               size="icon"
               aria-label="Close FitLab AI chat"
-              className="size-10 rounded-xl text-muted-foreground hover:bg-white/8 hover:text-foreground"
+              className="size-10 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground"
             >
               <X className="size-5" />
             </Button>
@@ -91,8 +91,8 @@ export default function ChatbotModal({
 
             {loading && (
               <div className="flex justify-start">
-                <div className="flex items-center gap-2 rounded-2xl rounded-bl-md border border-white/10 bg-white/6 px-4 py-3 text-sm text-white backdrop-blur-sm">
-                  <Sparkles className="size-4 animate-pulse text-lime-300" />
+                <div className="flex items-center gap-2 rounded-2xl rounded-bl-md border border-border bg-muted px-4 py-3 text-sm text-foreground">
+                  <Sparkles className="size-4 animate-pulse text-primary" />
                   FitLab AI is thinking...
                 </div>
               </div>

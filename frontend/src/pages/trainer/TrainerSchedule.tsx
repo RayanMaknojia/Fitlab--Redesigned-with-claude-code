@@ -13,11 +13,11 @@ import { cn } from "@/lib/utils"
 
 // per-client chip colors (index matches dashboard avatar hues)
 const EVENT_HUES = [
-  "border-lime-400/40 bg-lime-400/10 text-lime-300 hover:bg-lime-400/20",
-  "border-cyan-400/40 bg-cyan-400/10 text-cyan-300 hover:bg-cyan-400/20",
-  "border-fuchsia-400/40 bg-fuchsia-400/10 text-fuchsia-300 hover:bg-fuchsia-400/20",
-  "border-amber-400/40 bg-amber-400/10 text-amber-300 hover:bg-amber-400/20",
-  "border-rose-400/40 bg-rose-400/10 text-rose-300 hover:bg-rose-400/20",
+  "border-primary/40 bg-secondary text-primary hover:bg-secondary",
+  "border-cyan-400/40 bg-cyan-400/10 text-cyan-800 hover:bg-cyan-400/20",
+  "border-fuchsia-400/40 bg-fuchsia-400/10 text-fuchsia-700 hover:bg-fuchsia-400/20",
+  "border-amber-400/40 bg-amber-400/10 text-amber-800 hover:bg-amber-400/20",
+  "border-rose-400/40 bg-rose-400/10 text-rose-700 hover:bg-rose-400/20",
 ]
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
@@ -118,7 +118,7 @@ export default function TrainerSchedule() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-            Schedul<span className="text-lime-400">e</span>
+            Schedul<span className="text-primary">e</span>
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {monthCount} session{monthCount === 1 ? "" : "s"} in {monthLabel}.
@@ -160,8 +160,8 @@ export default function TrainerSchedule() {
       )}
 
       {/* Calendar */}
-      <div className="overflow-hidden rounded-xl border border-border/60 bg-card/40 backdrop-blur">
-        <div className="grid grid-cols-7 border-b border-border/60">
+      <div className="overflow-hidden rounded-xl border border-border bg-card">
+        <div className="grid grid-cols-7 border-b border-border">
           {WEEKDAYS.map((d) => (
             <div
               key={d}
@@ -182,14 +182,14 @@ export default function TrainerSchedule() {
                 key={date.toISOString()}
                 className={cn(
                   "min-h-24 border-t border-r border-border/40 p-1.5 [&:nth-child(7n)]:border-r-0",
-                  !inMonth && "bg-background/40"
+                  !inMonth && "bg-muted/50"
                 )}
               >
                 <div
                   className={cn(
                     "mx-auto flex size-6 items-center justify-center rounded-full text-xs",
                     !inMonth && "text-muted-foreground/50",
-                    isToday && "bg-lime-400 font-bold text-black"
+                    isToday && "bg-primary font-bold text-primary-foreground"
                   )}
                 >
                   {date.getDate()}

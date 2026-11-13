@@ -47,7 +47,7 @@ export default function BrowseClients() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-          Find a client<span className="text-lime-400">.</span>
+          Find a client<span className="text-primary">.</span>
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Browse clients advertising that they're seeking a trainer and send a connection request.

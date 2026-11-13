@@ -85,10 +85,10 @@ export default function RescheduleDialog({
 
   return (
     <Dialog open={event !== null} onOpenChange={(open) => !open && close()}>
-      <DialogContent className="dark border-border/60 text-foreground">
+      <DialogContent className="border-border text-foreground">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <CalendarClock className="size-5 text-lime-400" />
+            <CalendarClock className="size-5 text-primary" />
             Request a reschedule
           </DialogTitle>
           <DialogDescription>
@@ -111,7 +111,7 @@ export default function RescheduleDialog({
         </DialogHeader>
 
         {sent ? (
-          <div className="rounded-lg border border-lime-400/30 bg-lime-400/10 p-4 text-sm">
+          <div className="rounded-lg border border-primary/30 bg-secondary p-4 text-sm">
             Reschedule request sent to {event?.client_name}. The session moves
             to the new slot once they accept.
           </div>
@@ -170,7 +170,7 @@ export default function RescheduleDialog({
               <Button
                 type="submit"
                 disabled={busy || !valid}
-                className="bg-lime-400 font-semibold text-black hover:bg-lime-300"
+                className="bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
               >
                 {busy && <Loader2 data-icon="inline-start" className="animate-spin" />}
                 Send request

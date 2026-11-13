@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { Dumbbell } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -14,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import AuthShell from "@/components/AuthShell"
 import { useAuth } from "@/context/AuthContext"
 
 export default function LoginPage() {
@@ -36,22 +36,14 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="dark relative flex min-h-screen items-center justify-center bg-background p-4 text-foreground">
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_60%_40%_at_15%_-10%,oklch(0.85_0.21_128/0.13),transparent),radial-gradient(ellipse_50%_35%_at_90%_110%,oklch(0.7_0.15_200/0.1),transparent)]"
-      />
-
-      <Card className="relative w-full max-w-sm">
-        <CardHeader className="items-center text-center">
-          <div className="flex size-9 items-center justify-center rounded-xl bg-lime-400 text-black shadow-[0_0_24px_-4px] shadow-lime-400/60">
-            <Dumbbell className="size-5" />
-          </div>
-          <CardTitle className="mt-2 text-lg">Log in to FitLab</CardTitle>
+    <AuthShell photo>
+      <Card className="w-full gap-6 border-0 bg-transparent py-0 shadow-none ring-0">
+        <CardHeader className="px-0">
+          <CardTitle className="font-display text-3xl font-bold tracking-tight">Log in to FitLab</CardTitle>
           <CardDescription>Welcome back — enter your details below.</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <CardContent className="flex flex-col gap-4">
+          <CardContent className="px-0 flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -68,7 +60,7 @@ export default function LoginPage() {
                 <Label htmlFor="password">Password</Label>
                 <Link
                   to="/forgot-password"
-                  className="text-sm text-lime-400 underline-offset-4 hover:underline"
+                  className="text-sm text-primary underline-offset-4 hover:underline"
                 >
                   Forgot password?
                 </Link>
@@ -85,25 +77,25 @@ export default function LoginPage() {
               <Checkbox
                 checked={rememberMe}
                 onCheckedChange={(checked) => setRememberMe(checked === true)}
-                className="data-checked:border-lime-400 data-checked:bg-lime-400 data-checked:text-black"
+                className="data-checked:border-primary data-checked:bg-primary data-checked:text-primary-foreground"
               />
               Remember me
             </Label>
             {error && <p className="text-sm text-destructive">{error}</p>}
           </CardContent>
-          <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full bg-lime-400 font-semibold text-black hover:bg-lime-300">
+          <CardFooter className="border-0 bg-transparent px-0 flex flex-col gap-4">
+            <Button type="submit" className="w-full press h-10 bg-primary font-semibold text-primary-foreground hover:bg-primary/90">
               Log in
             </Button>
             <p className="text-sm text-muted-foreground">
               No account?{" "}
-              <Link to="/register" className="text-lime-400 underline-offset-4 hover:underline">
+              <Link to="/register" className="text-primary underline-offset-4 hover:underline">
                 Register
               </Link>
             </p>
           </CardFooter>
         </form>
       </Card>
-    </div>
+    </AuthShell>
   )
 }

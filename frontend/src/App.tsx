@@ -6,6 +6,7 @@ import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
+import LandingPage from "@/pages/LandingPage";
 
 import TrainerLayout from "@/components/trainer/TrainerLayout";
 import TrainerDashboard from "@/pages/trainer/TrainerDashboard";
@@ -15,6 +16,7 @@ import TrainerSchedule from "@/pages/trainer/TrainerSchedule";
 import ClientLayout from "@/components/client/ClientLayout";
 import ClientDashboard from "@/pages/client/ClientDashboard";
 import ClientProgress from "@/pages/client/ClientProgress";
+import ClientSchedule from "@/pages/client/ClientSchedule";
 
 import { NotFound } from "@/pages/placeholders";
 import ClientExerciseTemplates from "./pages/client/ClientExerciseTemplates";
@@ -43,8 +45,13 @@ import SettingsPage from "@/pages/SettingsPage";
 function Home() {
   const { user, loading } = useAuth();
 
-  if (loading) return <p>Loading...</p>;
-  if (!user) return <Navigate to="/login" replace />;
+  if (loading)
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground">
+        Loading…
+      </div>
+    );
+  if (!user) return <LandingPage />;
   if (user.role === "admin") return <Navigate to="/admin" replace />;
   return (
     <Navigate to={user.role === "trainer" ? "/trainer" : "/client"} replace />
@@ -109,6 +116,7 @@ function App() {
             <Route path="my-listing" element={<MyListing />} />
             <Route path="notifications" element={<Notifications />} />
             <Route path="requests/:requestId" element={<RequestDetail />} />
+            <Route path="schedule" element={<ClientSchedule />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>
 

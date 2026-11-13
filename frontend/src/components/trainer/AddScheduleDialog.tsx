@@ -71,14 +71,14 @@ export default function AddScheduleDialog({
     <Dialog open={open} onOpenChange={reset}>
       <DialogTrigger asChild>
         <Button
-          className="bg-lime-400 font-semibold text-black hover:bg-lime-300"
+          className="bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
           disabled={clients.length === 0}
           title={clients.length === 0 ? "Link a client first" : undefined}
         >
           <CalendarPlus data-icon="inline-start" /> Add session
         </Button>
       </DialogTrigger>
-      <DialogContent className="dark border-border/60 text-foreground">
+      <DialogContent className="border-border text-foreground">
         <DialogHeader>
           <DialogTitle>Book a training session</DialogTitle>
           <DialogDescription>
@@ -148,7 +148,7 @@ export default function AddScheduleDialog({
             <Button
               type="submit"
               disabled={busy || !valid}
-              className="bg-lime-400 font-semibold text-black hover:bg-lime-300"
+              className="bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
             >
               {busy && <Loader2 data-icon="inline-start" className="animate-spin" />}
               Book session

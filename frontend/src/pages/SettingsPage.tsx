@@ -61,10 +61,10 @@ export default function SettingsPage() {
       </div>
 
       {/* Change password */}
-      <Card className="border-border/60 bg-card/60">
+      <Card className="border-border bg-card shadow-[0_1px_2px_rgb(11_21_48/0.04)]">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <KeyRound className="size-4 text-lime-300" />
+            <KeyRound className="size-4 text-primary" />
             Change password
           </CardTitle>
           <CardDescription>
@@ -109,7 +109,7 @@ export default function SettingsPage() {
             <Button
               type="submit"
               disabled={saving}
-              className="bg-lime-400 text-black hover:bg-lime-300"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {saving ? "Updating..." : "Update password"}
             </Button>
@@ -118,10 +118,10 @@ export default function SettingsPage() {
       </Card>
 
       {/* Log out */}
-      <Card className="border-border/60 bg-card/60">
+      <Card className="border-border bg-card shadow-[0_1px_2px_rgb(11_21_48/0.04)]">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <LogOut className="size-4 text-rose-300" />
+            <LogOut className="size-4 text-rose-700" />
             Log out
           </CardTitle>
           <CardDescription>

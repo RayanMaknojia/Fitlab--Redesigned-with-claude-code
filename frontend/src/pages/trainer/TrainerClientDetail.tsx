@@ -82,9 +82,9 @@ function StatTile({
   value: string | number
 }) {
   return (
-    <Card className="flex-1 gap-0 border-border/60 bg-card/60 py-4 backdrop-blur">
+    <Card className="flex-1 gap-0 border-border bg-card shadow-[0_1px_2px_rgb(11_21_48/0.04)] py-4">
       <CardContent className="flex items-center gap-3 px-4">
-        <div className="flex size-10 items-center justify-center rounded-lg bg-lime-400/10 text-lime-300">
+        <div className="flex size-10 items-center justify-center rounded-lg bg-secondary text-primary">
           <Icon className="size-5" />
         </div>
         <div>
@@ -149,7 +149,7 @@ function ExerciseRow({
 
   if (editing) {
     return (
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-lime-400/40 bg-background/40 p-2 pl-3">
+      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-primary/40 bg-muted/50 p-2 pl-3">
         <span className="min-w-28 flex-1 truncate text-sm font-medium">
           {exercise.name}
         </span>
@@ -176,7 +176,7 @@ function ExerciseRow({
             size="sm"
             disabled={busy || !valid}
             onClick={save}
-            className="bg-lime-400 text-black hover:bg-lime-300"
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
           >
             {busy ? <Loader2 className="animate-spin" /> : "Save"}
           </Button>
@@ -190,14 +190,14 @@ function ExerciseRow({
   }
 
   return (
-    <div className="group/ex flex items-center gap-2 rounded-lg border border-border/60 bg-background/40 p-2 pl-3">
+    <div className="group/ex flex items-center gap-2 rounded-lg border border-border bg-muted/50 p-2 pl-3">
       <span className="min-w-0 flex-1 truncate text-sm font-medium">
         {exercise.name}
       </span>
       <span className="text-xs text-muted-foreground">
         {exercise.sets} × {exercise.reps}
         {exercise.weight_in_kg > 0 && (
-          <span className="ml-1.5 font-semibold text-lime-300">
+          <span className="ml-1.5 font-semibold text-primary">
             {exercise.weight_in_kg} kg
           </span>
         )}
@@ -324,7 +324,7 @@ function AddExerciseForm({
         <option value={NEW}>+ Custom exercise…</option>
       </select>
       {isPreset && (
-        <span className="rounded-full bg-lime-400/10 px-2 py-1 text-[11px] font-medium text-lime-300">
+        <span className="rounded-full bg-secondary px-2 py-1 text-[11px] font-medium text-primary">
           Adds to library
         </span>
       )}
@@ -359,7 +359,7 @@ function AddExerciseForm({
         type="submit"
         size="sm"
         disabled={busy || !valid}
-        className="bg-lime-400 text-black hover:bg-lime-300"
+        className="bg-primary text-primary-foreground hover:bg-primary/90"
       >
         {busy ? <Loader2 className="animate-spin" /> : <Plus />}
       </Button>
@@ -397,7 +397,7 @@ function SessionCard({
   }
 
   return (
-    <div className="rounded-xl border border-border/60 bg-card/40">
+    <div className="rounded-xl border border-border bg-card">
       <div className="flex w-full items-center gap-2 p-3">
         <button
           onClick={() => setOpen(!open)}
@@ -430,7 +430,7 @@ function SessionCard({
       </div>
 
       {open && (
-        <div className="flex flex-col gap-2 border-t border-border/60 p-3">
+        <div className="flex flex-col gap-2 border-t border-border p-3">
           {session.exercises.map((exercise) => (
             <ExerciseRow
               key={exercise.exercise_id}
@@ -571,8 +571,8 @@ export default function TrainerClientDetail() {
           </Link>
         </Button>
         <div className="mt-2 flex flex-wrap items-center gap-4">
-          <Avatar className="size-14 border border-lime-400/40">
-            <AvatarFallback className="bg-lime-400/15 text-lg font-bold text-lime-300">
+          <Avatar className="size-14 border border-primary/40">
+            <AvatarFallback className="bg-secondary text-lg font-bold text-primary">
               {initials(data.client.name)}
             </AvatarFallback>
           </Avatar>
@@ -607,7 +607,7 @@ export default function TrainerClientDetail() {
 
       <div className="grid gap-4 xl:grid-cols-5">
         {/* Progress */}
-        <Card className="border-border/60 bg-card/60 py-5 backdrop-blur xl:col-span-3">
+        <Card className="border-border bg-card shadow-[0_1px_2px_rgb(11_21_48/0.04)] py-5 xl:col-span-3">
           <CardHeader className="flex-row flex-wrap items-center gap-2 px-5">
             <CardTitle className="text-sm">Progress</CardTitle>
             {data.progress.length > 0 && (
@@ -640,8 +640,8 @@ export default function TrainerClientDetail() {
                     <YAxis tick={{ fontSize: 11 }} stroke="currentColor" opacity={0.5} unit=" kg" />
                     <Tooltip
                       contentStyle={{
-                        background: "oklch(0.18 0 0)",
-                        border: "1px solid oklch(0.3 0 0)",
+                        background: "#ffffff",
+                        border: "1px solid #e2e7f1",
                         borderRadius: 8,
                         fontSize: 12,
                       }}
@@ -649,7 +649,7 @@ export default function TrainerClientDetail() {
                     <Line
                       type="monotone"
                       dataKey="weight"
-                      stroke="oklch(0.85 0.21 128)"
+                      stroke="#2453ff"
                       strokeWidth={2}
                       dot={{ r: 3 }}
                     />
@@ -664,7 +664,7 @@ export default function TrainerClientDetail() {
                 {data.progress.map((p) => (
                   <div
                     key={p.exercise_template_id}
-                    className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-border/60 bg-background/40 px-3 py-2 text-xs"
+                    className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-border bg-muted/50 px-3 py-2 text-xs"
                   >
                     <span className="min-w-24 flex-1 truncate font-medium text-foreground">
                       {p.name}
@@ -678,8 +678,8 @@ export default function TrainerClientDetail() {
                     <span
                       className={cn(
                         "font-semibold",
-                        p.weight_change_in_kg > 0 && "text-lime-300",
-                        p.weight_change_in_kg < 0 && "text-rose-300",
+                        p.weight_change_in_kg > 0 && "text-primary",
+                        p.weight_change_in_kg < 0 && "text-rose-700",
                         p.weight_change_in_kg === 0 && "text-muted-foreground"
                       )}
                     >
@@ -694,7 +694,7 @@ export default function TrainerClientDetail() {
         </Card>
 
         {/* Workout history (editable) */}
-        <Card className="border-border/60 bg-card/60 py-5 backdrop-blur xl:col-span-2">
+        <Card className="border-border bg-card shadow-[0_1px_2px_rgb(11_21_48/0.04)] py-5 xl:col-span-2">
           <CardHeader className="flex-row items-center gap-2 px-5">
             <CardTitle className="text-sm">Workout history</CardTitle>
             <Badge variant="secondary" className="ml-1">{data.sessions.length}</Badge>
@@ -710,7 +710,7 @@ export default function TrainerClientDetail() {
               <Button
                 type="submit"
                 disabled={addingSession || !newSessionDate}
-                className="shrink-0 bg-lime-400 font-semibold text-black hover:bg-lime-300"
+                className="shrink-0 bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
               >
                 {addingSession ? (
                   <Loader2 data-icon="inline-start" className="animate-spin" />

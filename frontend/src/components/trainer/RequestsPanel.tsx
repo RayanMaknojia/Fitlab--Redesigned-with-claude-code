@@ -41,9 +41,9 @@ export default function RequestsPanel({
   }
 
   return (
-    <Card className="gap-3 border-border/60 bg-card/60 py-5 backdrop-blur">
+    <Card className="gap-3 border-border bg-card shadow-[0_1px_2px_rgb(11_21_48/0.04)] py-5">
       <CardHeader className="flex-row items-center gap-2 px-5">
-        <Clock className="size-4 text-lime-400" />
+        <Clock className="size-4 text-primary" />
         <CardTitle className="text-sm">Pending requests</CardTitle>
         <Badge variant="secondary" className="ml-1">{requests.length}</Badge>
       </CardHeader>
@@ -54,7 +54,7 @@ export default function RequestsPanel({
           return (
             <div
               key={req.request_id}
-              className="flex items-center gap-3 rounded-lg border border-border/60 bg-background/40 p-3"
+              className="flex items-center gap-3 rounded-lg border border-border bg-muted/50 p-3"
             >
               <Avatar className="size-8">
                 <AvatarFallback className="bg-muted text-xs font-semibold">
@@ -74,7 +74,7 @@ export default function RequestsPanel({
                   <Button
                     size="icon-sm"
                     aria-label={`Accept ${req.client_name}`}
-                    className="bg-lime-400 text-black hover:bg-lime-300"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90"
                     disabled={busyId === req.request_id}
                     onClick={() => act(req.request_id, "accept")}
                   >

@@ -15,9 +15,9 @@ export default function StatTile({
   value: string | number
 }) {
   return (
-    <Card className="flex-1 gap-0 border-border/60 bg-card/60 py-4 backdrop-blur">
+    <Card className="flex-1 gap-0 border-border bg-card shadow-[0_1px_2px_rgb(11_21_48/0.04)] py-4">
       <CardContent className="flex items-center gap-3 px-4">
-        <div className="flex size-10 items-center justify-center rounded-lg bg-lime-400/10 text-lime-300">
+        <div className="flex size-10 items-center justify-center rounded-lg bg-secondary text-primary">
           <Icon className="size-5" />
         </div>
         <div>

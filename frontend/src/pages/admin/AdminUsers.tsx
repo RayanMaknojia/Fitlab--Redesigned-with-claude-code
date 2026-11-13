@@ -59,7 +59,7 @@ export default function AdminUsers() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-          Users<span className="text-lime-400">.</span>
+          Users<span className="text-primary">.</span>
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Every registered account. Block an account to prevent future logins and take down their listing.
@@ -96,7 +96,7 @@ export default function AdminUsers() {
             return (
               <Card
                 key={u._id}
-                className="flex-row items-center gap-3 border-border/60 bg-card/60 px-4 py-3 backdrop-blur"
+                className="flex-row items-center gap-3 border-border bg-card shadow-[0_1px_2px_rgb(11_21_48/0.04)] px-4 py-3"
               >
                 <Avatar className="size-9">
                   <AvatarFallback className="bg-muted text-xs font-semibold">

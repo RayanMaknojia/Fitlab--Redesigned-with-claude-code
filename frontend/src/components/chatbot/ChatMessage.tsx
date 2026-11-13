@@ -14,8 +14,8 @@ export default function ChatMessage({ message }: ChatMessageProps) {
         className={cn(
           "max-w-[85%] whitespace-pre-wrap break-words rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm",
           isUser
-            ? "rounded-br-md bg-lime-400 text-black"
-            : "rounded-bl-md border border-white/10 bg-white/6 text-white backdrop-blur-sm"
+            ? "rounded-br-md bg-primary text-primary-foreground"
+            : "rounded-bl-md border border-border bg-muted text-foreground"
         )}
       >
         {message.content}

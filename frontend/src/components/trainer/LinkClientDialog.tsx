@@ -58,12 +58,12 @@ export default function LinkClientDialog({
     <Dialog open={open} onOpenChange={reset}>
       <DialogTrigger asChild>
         {trigger ?? (
-          <Button className="bg-lime-400 font-semibold text-black hover:bg-lime-300">
+          <Button className="bg-primary font-semibold text-primary-foreground hover:bg-primary/90">
             <UserPlus data-icon="inline-start" /> Link a client
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="dark border-border/60 text-foreground">
+      <DialogContent className="border-border text-foreground">
         <DialogHeader>
           <DialogTitle>Link a client</DialogTitle>
           <DialogDescription>
@@ -73,7 +73,7 @@ export default function LinkClientDialog({
         </DialogHeader>
 
         {sent ? (
-          <div className="rounded-lg border border-lime-400/30 bg-lime-400/10 p-4 text-sm">
+          <div className="rounded-lg border border-primary/30 bg-secondary p-4 text-sm">
             Request sent to <span className="font-semibold">{sent}</span>. It
             will show under pending requests until they accept.
           </div>
@@ -96,7 +96,7 @@ export default function LinkClientDialog({
               <Button
                 type="submit"
                 disabled={busy || !email.trim()}
-                className="bg-lime-400 font-semibold text-black hover:bg-lime-300"
+                className="bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
               >
                 {busy && <Loader2 data-icon="inline-start" className="animate-spin" />}
                 Send request

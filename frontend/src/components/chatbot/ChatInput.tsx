@@ -32,8 +32,8 @@ export default function ChatInput({
   }, [value])
 
   return (
-    <div className="border-t border-white/10 bg-black/10 p-3 sm:p-4">
-      <div className="flex items-end gap-3 rounded-2xl border border-white/10 bg-black/20 p-2 pl-3 shadow-inner shadow-black/20 backdrop-blur-sm">
+    <div className="border-t border-border bg-card p-3 sm:p-4">
+      <div className="flex items-end gap-3 rounded-2xl border border-input bg-background p-2 pl-3 transition-colors focus-within:border-primary/50">
         <textarea
           ref={textareaRef}
           rows={1}
@@ -50,7 +50,7 @@ export default function ChatInput({
             }
           }}
           placeholder="Ask about workouts, recovery, or goals..."
-          className="max-h-35 min-h-10 flex-1 resize-none bg-transparent py-2 text-sm leading-6 text-white outline-none placeholder:text-white/55"
+          className="max-h-35 min-h-10 flex-1 resize-none bg-transparent py-2 text-sm leading-6 text-foreground outline-none placeholder:text-muted-foreground"
         />
 
         <Button
@@ -60,14 +60,14 @@ export default function ChatInput({
           disabled={disabled || !value.trim()}
           aria-label="Send message"
           className={cn(
-            "size-10 rounded-xl bg-lime-400 text-black shadow-[0_10px_24px_-16px_oklch(0.78_0.19_134/0.95)] hover:bg-lime-300",
+            "size-10 rounded-xl bg-primary text-primary-foreground press hover:bg-primary/90",
             "disabled:bg-muted disabled:text-muted-foreground"
           )}
         >
           <SendHorizontal className="size-4" />
         </Button>
       </div>
-      <div className="mt-2 text-right text-xs text-white/45">
+      <div className="mt-2 text-right text-xs text-muted-foreground">
         {value.length}/{maxLength}
       </div>
     </div>

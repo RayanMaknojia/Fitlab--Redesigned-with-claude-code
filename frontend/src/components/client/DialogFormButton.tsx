@@ -30,15 +30,15 @@ export default function DialogFormButton({
   return (
     <Dialog modal={modal}>
       <DialogTrigger asChild>{dialogTriggerButton}</DialogTrigger>
-      <DialogContent className="sm:max-w-sm dark">
+      <DialogContent className="sm:max-w-sm">
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <DialogHeader className="text-white">
+          <DialogHeader className="text-foreground">
             <DialogTitle>{dialogHeaderText}</DialogTitle>
           </DialogHeader>
           {children}
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline" className="text-white">
+              <Button variant="outline" className="text-foreground">
                 {closeButtonText}
               </Button>
             </DialogClose>

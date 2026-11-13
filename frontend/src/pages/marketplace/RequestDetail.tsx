@@ -107,10 +107,10 @@ export default function RequestDetail() {
         <ArrowLeft data-icon="inline-start" /> Back
       </Button>
 
-      <Card className="border-border/60 bg-card/60 py-5 backdrop-blur">
+      <Card className="border-border bg-card shadow-[0_1px_2px_rgb(11_21_48/0.04)] py-5">
         <CardHeader className="flex-row items-center gap-4 px-5">
-          <Avatar className="size-14 bg-gradient-to-br from-lime-400/30 to-emerald-500/20">
-            <AvatarFallback className="bg-gradient-to-br from-lime-400/30 to-emerald-500/20 text-lg font-bold text-lime-300">
+          <Avatar className="size-14 bg-gradient-to-br from-primary/20 to-[#5b95ff]/15">
+            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-[#5b95ff]/15 text-lg font-bold text-primary">
               {initials(counterpartName)}
             </AvatarFallback>
           </Avatar>
@@ -138,7 +138,7 @@ export default function RequestDetail() {
             <div className="flex gap-2">
               <Button
                 disabled={busy}
-                className="bg-lime-400 font-semibold text-black hover:bg-lime-300"
+                className="bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
                 onClick={() => respond(true)}
               >
                 {busy ? (

@@ -38,7 +38,7 @@ function ListingRow({
   }
 
   return (
-    <Card className="border-border/60 bg-card/60 py-4 backdrop-blur">
+    <Card className="border-border bg-card shadow-[0_1px_2px_rgb(11_21_48/0.04)] py-4">
       <CardHeader className="flex-row items-center gap-3 px-4">
         <Avatar className="size-10">
           <AvatarFallback className="bg-muted text-xs font-semibold">
@@ -122,7 +122,7 @@ export default function AdminListings() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-          Listings<span className="text-lime-400">.</span>
+          Listings<span className="text-primary">.</span>
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Every marketplace listing, active and removed.

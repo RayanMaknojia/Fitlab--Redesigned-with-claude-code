@@ -21,9 +21,9 @@ function StatTile({
   value: string | number
 }) {
   return (
-    <Card className="flex-1 gap-0 border-border/60 bg-card/60 py-4 backdrop-blur">
+    <Card className="flex-1 gap-0 border-border bg-card shadow-[0_1px_2px_rgb(11_21_48/0.04)] py-4">
       <CardContent className="flex items-center gap-3 px-4">
-        <div className="flex size-10 items-center justify-center rounded-lg bg-lime-400/10 text-lime-300">
+        <div className="flex size-10 items-center justify-center rounded-lg bg-secondary text-primary">
           <Icon className="size-5" />
         </div>
         <div>
@@ -38,8 +38,8 @@ function StatTile({
 function EmptyState() {
   return (
     <div className="flex flex-col items-center rounded-2xl border border-dashed border-border/70 px-6 py-16 text-center">
-      <div className="flex size-16 items-center justify-center rounded-2xl bg-lime-400/10">
-        <Users className="size-8 text-lime-400" />
+      <div className="flex size-16 items-center justify-center rounded-2xl bg-secondary">
+        <Users className="size-8 text-primary" />
       </div>
       <h3 className="mt-5 text-lg font-semibold">No clients yet</h3>
       <p className="mt-1 max-w-sm text-sm text-muted-foreground">
@@ -96,7 +96,7 @@ export default function TrainerDashboard() {
             })}
           </p>
           <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
-            Your Client<span className="text-lime-400">s</span>
+            Your Client<span className="text-primary">s</span>
           </h1>
         </div>
         {clients.length > 0 && <LinkClientDialog onRequestSent={refresh} />}

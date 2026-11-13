@@ -79,7 +79,16 @@ FitLab will use **Stack A: Express + React**.
 
 **External service**: An AI API like OpenAI API or Gemini API for the chatbot
 
-**Deployment**: The React frontend and Express backend run on a Ubuntu Linux GCP VM with nginx acting as the reverse proxy.
+**Deployment**: The React frontend (served by nginx, which also reverse-proxies `/api`), the Express backend and MongoDB run locally as Docker Compose services.
+
+## Running locally (Docker Compose)
+
+1. Create `backend/.env` from `backend/.env.example`. Inside Compose, set
+   `CONNECTION_STRING=mongodb://mongo:27017/fitlab?directConnection=true` and
+   `FRONTEND_ORIGIN=http://localhost:8080`, and choose a random `SESSION_SECRET`.
+   Fill in `GROQ_API_KEY` (chatbot) and the Gmail values (password reset) if you need those features.
+2. Run `docker compose up --build`.
+3. Open http://localhost:8080.
 
 ## Database Entities and Relationships
 
@@ -156,7 +165,7 @@ We plan to work in 1 repo that contains a frontend folder with all our React app
 
 **How the two apps talk**
 
-The React frontend will communicate with our Express backend through REST API requests. The front end runs on 1 port and the backend on another port. They both run on the same GCP VM but in 2 different docker containers. Nginx will act as our reverse proxy.
+The React frontend will communicate with our Express backend through REST API requests. The front end runs on 1 port and the backend on another port. They run in 2 different Docker containers orchestrated by Docker Compose. Nginx will act as our reverse proxy.
 
 **API style**
 

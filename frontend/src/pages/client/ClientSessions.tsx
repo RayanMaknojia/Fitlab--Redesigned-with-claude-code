@@ -102,7 +102,7 @@ export default function ClientSessions() {
       </div>
       <DialogFormButton
         dialogTriggerButton={
-          <Button className="bg-lime-400 font-semibold text-black hover:bg-lime-300 w-max">
+          <Button className="bg-primary font-semibold text-primary-foreground hover:bg-primary/90 w-max">
             Add a session
           </Button>
         }
@@ -113,19 +113,19 @@ export default function ClientSessions() {
       >
         <FieldGroup>
           <Field>
-            <Label htmlFor="date" className="text-white">
+            <Label htmlFor="date" className="text-foreground">
               Date
             </Label>
             <Input
               id="date"
               name="date"
-              className="text-white"
+              className="text-foreground"
               type="datetime-local"
             />
           </Field>
         </FieldGroup>
       </DialogFormButton>
-      <Card className="border-border/60 bg-card/60 py-5 backdrop-blur p-6 flex">
+      <Card className="border-border bg-card shadow-[0_1px_2px_rgb(11_21_48/0.04)] py-5 p-6 flex">
         {loading ? (
           <div className="h-64 animate-pulse rounded-lg bg-muted/40" />
         ) : sessions.length > 0 ? (
@@ -160,13 +160,13 @@ export default function ClientSessions() {
                   >
                     <FieldGroup>
                       <Field>
-                        <Label htmlFor="date" className="text-white">
+                        <Label htmlFor="date" className="text-foreground">
                           Date
                         </Label>
                         <Input
                           id="date"
                           name="date"
-                          className="text-white"
+                          className="text-foreground"
                           type="datetime-local"
                         />
                       </Field>

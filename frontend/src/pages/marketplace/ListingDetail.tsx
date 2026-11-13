@@ -101,10 +101,10 @@ export default function ListingDetail() {
         <ArrowLeft data-icon="inline-start" /> Back
       </Button>
 
-      <Card className="border-border/60 bg-card/60 py-5 backdrop-blur">
+      <Card className="border-border bg-card shadow-[0_1px_2px_rgb(11_21_48/0.04)] py-5">
         <CardHeader className="flex-row items-center gap-4 px-5">
-          <Avatar className="size-14 bg-gradient-to-br from-lime-400/30 to-emerald-500/20">
-            <AvatarFallback className="bg-gradient-to-br from-lime-400/30 to-emerald-500/20 text-lg font-bold text-lime-300">
+          <Avatar className="size-14 bg-gradient-to-br from-primary/20 to-[#5b95ff]/15">
+            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-[#5b95ff]/15 text-lg font-bold text-primary">
               {initials(listing.name)}
             </AvatarFallback>
           </Avatar>
@@ -113,7 +113,7 @@ export default function ListingDetail() {
             <div className="text-sm text-muted-foreground">{listing.headline}</div>
           </div>
           {status === "linked" ? (
-            <Badge variant="outline" className="gap-1 text-lime-500">
+            <Badge variant="outline" className="gap-1 text-primary">
               <Check className="size-3" /> Linked
             </Badge>
           ) : status === "pending" ? (
@@ -123,7 +123,7 @@ export default function ListingDetail() {
           ) : (
             <Button
               disabled={busy}
-              className="bg-lime-400 font-semibold text-black hover:bg-lime-300"
+              className="bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
               onClick={connect}
             >
               {busy ? (
@@ -139,7 +139,7 @@ export default function ListingDetail() {
         <CardContent className="px-5">
           <p className="whitespace-pre-wrap text-sm text-foreground">{listing.bio}</p>
           {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
-          {notice && !error && <p className="mt-3 text-sm text-lime-600">{notice}</p>}
+          {notice && !error && <p className="mt-3 text-sm text-primary">{notice}</p>}
         </CardContent>
       </Card>
     </div>

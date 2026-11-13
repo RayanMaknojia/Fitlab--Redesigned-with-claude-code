@@ -16,9 +16,9 @@ export default function ExerciseTemplateCard({
   handleDeleteTemplate: (_id: string) => Promise<void>;
 }) {
   return (
-    <Item variant="outline">
+    <Item className="rounded-lg transition-colors [@media(hover:hover)]:hover:bg-muted/60">
       <ItemContent>
-        <ItemTitle>{t.name}</ItemTitle>
+        <ItemTitle className="font-medium">{t.name}</ItemTitle>
       </ItemContent>
       <ItemActions>
         <DialogFormButton
@@ -34,10 +34,10 @@ export default function ExerciseTemplateCard({
         >
           <FieldGroup>
             <Field>
-              <Label htmlFor="new-name" className="text-white">
+              <Label htmlFor="new-name" className="text-foreground">
                 Name
               </Label>
-              <Input id="new-name" name="new-name" className="text-white" />
+              <Input id="new-name" name="new-name" className="text-foreground" defaultValue={t.name} required />
             </Field>
           </FieldGroup>
         </DialogFormButton>

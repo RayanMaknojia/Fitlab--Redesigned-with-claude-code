@@ -30,10 +30,10 @@ export default function ProgressRecapCard() {
   }
 
   return (
-    <Card className="border-border/60 bg-card/60 py-5 backdrop-blur">
+    <Card className="border-border bg-card shadow-[0_1px_2px_rgb(11_21_48/0.04)] py-5">
       <CardHeader className="flex-row items-center justify-between gap-4 px-5">
         <CardTitle className="flex items-center gap-2 text-sm">
-          <Sparkles className="size-4 text-lime-400" />
+          <Sparkles className="size-4 text-primary" />
           AI progress recap
         </CardTitle>
         {source === "fallback" && (
@@ -50,7 +50,7 @@ export default function ProgressRecapCard() {
             </p>
             <Button
               size="sm"
-              className="bg-lime-400 font-semibold text-black hover:bg-lime-300"
+              className="bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
               onClick={generate}
             >
               Generate recap

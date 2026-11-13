@@ -22,9 +22,9 @@ import { cn } from "@/lib/utils"
 import ProgressRecapCard from "@/components/client/ProgressRecapCard"
 
 // same accent used across the trainer UI, for chart strokes/fills
-const LIME = "#a3e635" // tailwind lime-400
-const GRID = "oklch(1 0 0 / 10%)"
-const AXIS_TEXT = "oklch(0.708 0 0)" // matches --muted-foreground in dark mode
+const PRIMARY = "#2453ff" // FitLab primary (cobalt)
+const GRID = "#e2e7f1" // --border
+const AXIS_TEXT = "#566078" // --muted-foreground
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" })
@@ -47,9 +47,9 @@ function ChartTooltip({
 }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-lg border border-border/60 bg-popover px-3 py-2 text-xs shadow-md">
+    <div className="rounded-lg border border-border bg-popover px-3 py-2 text-xs shadow-md">
       <div className="font-medium text-popover-foreground">{label}</div>
-      <div className="mt-0.5 text-lime-300">
+      <div className="mt-0.5 text-primary">
         {payload[0].value} {unit}
       </div>
     </div>
@@ -108,7 +108,7 @@ export default function ClientProgress() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-          Progress<span className="text-lime-400">.</span>
+          Progress<span className="text-primary">.</span>
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Track how your lifts and training volume have changed over time.
@@ -119,7 +119,7 @@ export default function ClientProgress() {
 
 
       {/* Weight over time, per exercise */}
-      <Card className="border-border/60 bg-card/60 py-5 backdrop-blur">
+      <Card className="border-border bg-card shadow-[0_1px_2px_rgb(11_21_48/0.04)] py-5">
         <CardHeader className="flex-row items-center justify-between gap-4 px-5">
           <CardTitle className="text-sm">Weight progress</CardTitle>
           {exercises.length > 0 && (
@@ -153,7 +153,7 @@ export default function ClientProgress() {
                   <span
                     className={cn(
                       "text-sm font-medium",
-                      delta > 0 && "text-lime-400",
+                      delta > 0 && "text-primary",
                       delta < 0 && "text-destructive",
                       delta === 0 && "text-muted-foreground"
                     )}
@@ -184,9 +184,9 @@ export default function ClientProgress() {
                   <Line
                     type="monotone"
                     dataKey="weight"
-                    stroke={LIME}
+                    stroke={PRIMARY}
                     strokeWidth={2.5}
-                    dot={{ r: 3, fill: LIME, strokeWidth: 0 }}
+                    dot={{ r: 3, fill: PRIMARY, strokeWidth: 0 }}
                     activeDot={{ r: 5 }}
                   />
                 </LineChart>
@@ -197,7 +197,7 @@ export default function ClientProgress() {
       </Card>
 
       {/* Weekly training volume */}
-      <Card className="border-border/60 bg-card/60 py-5 backdrop-blur">
+      <Card className="border-border bg-card shadow-[0_1px_2px_rgb(11_21_48/0.04)] py-5">
         <CardHeader className="px-5">
           <CardTitle className="text-sm">Weekly training volume</CardTitle>
           <p className="text-xs text-muted-foreground">
@@ -230,7 +230,7 @@ export default function ClientProgress() {
                   width={48}
                 />
                 <Tooltip content={<ChartTooltip unit="kg lifted" />} cursor={{ fill: GRID }} />
-                <Bar dataKey="volume" fill={LIME} radius={[4, 4, 0, 0]} />
+                <Bar dataKey="volume" fill={PRIMARY} radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}

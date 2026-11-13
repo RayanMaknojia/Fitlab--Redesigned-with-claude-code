@@ -11,6 +11,8 @@ RUN npm run build
 FROM nginx:alpine
 
 COPY --from=build /app/dist /usr/share/nginx/html
+# Make static files world-readable regardless of the host umask (otherwise nginx returns 403)
+RUN chmod -R a+rX /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
